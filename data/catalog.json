@@ -1,0 +1,178 @@
+{
+  "forestId": "ai-intelligent-systems",
+  "name": "AI & Intelligent Systems",
+  "description": "Enterprise AI engineering: local and offline inference with Ollama, Azure OpenAI integration, prompt engineering for operations, model selection and cost control, retrieval-augmented generation over private data, agent frameworks, Model Context Protocol servers, and AI security and evaluation.",
+  "repository": "Enterprise-AI-and-Intelligent-Systems",
+  "treeCount": 5,
+  "branchCount": 8,
+  "expectedLeafCount": 20,
+  "levelCounts": {
+    "Advanced": 12,
+    "Beginner": 1,
+    "Enterprise": 2,
+    "Expert": 2,
+    "Intermediate": 3
+  },
+  "leaves": [
+    {
+      "id": "ai-ollama-local-inference",
+      "name": "Ollama and Local Model Serving",
+      "level": "Beginner",
+      "tree": "Running and Integrating Models",
+      "branch": "Local and Private Inference",
+      "path": "docs/ai-tree-model-platforms/ai-branch-local-inference/ai-ollama-local-inference.md"
+    },
+    {
+      "id": "ai-model-selection-cost",
+      "name": "Model Selection, Sizing and Cost Control",
+      "level": "Intermediate",
+      "tree": "Running and Integrating Models",
+      "branch": "Local and Private Inference",
+      "path": "docs/ai-tree-model-platforms/ai-branch-local-inference/ai-model-selection-cost.md"
+    },
+    {
+      "id": "ai-azure-openai-integration",
+      "name": "Azure OpenAI Enterprise Integration",
+      "level": "Advanced",
+      "tree": "Running and Integrating Models",
+      "branch": "Managed Model Services and Prompt Discipline",
+      "path": "docs/ai-tree-model-platforms/ai-branch-managed-model-services/ai-azure-openai-integration.md"
+    },
+    {
+      "id": "ai-prompt-engineering-ops",
+      "name": "Prompt Engineering for IT Operations",
+      "level": "Intermediate",
+      "tree": "Running and Integrating Models",
+      "branch": "Managed Model Services and Prompt Discipline",
+      "path": "docs/ai-tree-model-platforms/ai-branch-managed-model-services/ai-prompt-engineering-ops.md"
+    },
+    {
+      "id": "ai-rag-architecture",
+      "name": "RAG Architecture: Embeddings, Chunking and Vector Search",
+      "level": "Advanced",
+      "tree": "Applied AI Systems",
+      "branch": "RAG & Knowledge Systems",
+      "path": "docs/ai-applied-systems/ai-branch-rag-knowledge/ai-rag-architecture.md"
+    },
+    {
+      "id": "ai-private-enterprise-rag",
+      "name": "Grounding Enterprise Data Privately: Offline RAG and Access Control",
+      "level": "Enterprise",
+      "tree": "Applied AI Systems",
+      "branch": "RAG & Knowledge Systems",
+      "path": "docs/ai-applied-systems/ai-branch-rag-knowledge/ai-private-enterprise-rag.md"
+    },
+    {
+      "id": "ai-agents-orchestration",
+      "name": "AI Agents and Orchestration Patterns",
+      "level": "Advanced",
+      "tree": "Applied AI Systems",
+      "branch": "Agents & Enterprise Integration",
+      "path": "docs/ai-applied-systems/ai-branch-agents-integration/ai-agents-orchestration.md"
+    },
+    {
+      "id": "ai-mcp-security-evaluation",
+      "name": "MCP Servers, AI Security and Evaluation",
+      "level": "Expert",
+      "tree": "Applied AI Systems",
+      "branch": "Agents & Enterprise Integration",
+      "path": "docs/ai-applied-systems/ai-branch-agents-integration/ai-mcp-security-evaluation.md"
+    },
+    {
+      "id": "ai-llmops-deployment-lifecycle",
+      "name": "LLMOps: Deployment, Versioning and Drift Detection",
+      "level": "Intermediate",
+      "tree": "AI Operations & Governance",
+      "branch": "LLMOps and Production Observability",
+      "path": "docs/ai-tree-operations-governance/ai-branch-llmops-observability/ai-llmops-deployment-lifecycle.md"
+    },
+    {
+      "id": "ai-observability-performance-monitoring",
+      "name": "AI Observability and Production Performance Monitoring",
+      "level": "Advanced",
+      "tree": "AI Operations & Governance",
+      "branch": "LLMOps and Production Observability",
+      "path": "docs/ai-tree-operations-governance/ai-branch-llmops-observability/ai-observability-performance-monitoring.md"
+    },
+    {
+      "id": "ai-governance-compliance-framework",
+      "name": "AI Governance and Compliance: ISO 42001, EU AI Act and Data Residency",
+      "level": "Enterprise",
+      "tree": "AI Operations & Governance",
+      "branch": "Governance, Compliance and Enterprise Adoption",
+      "path": "docs/ai-tree-operations-governance/ai-branch-governance-adoption/ai-governance-compliance-framework.md"
+    },
+    {
+      "id": "ai-enterprise-adoption-patterns",
+      "name": "Enterprise AI Adoption Patterns and Use-Case Selection",
+      "level": "Expert",
+      "tree": "AI Operations & Governance",
+      "branch": "Governance, Compliance and Enterprise Adoption",
+      "path": "docs/ai-tree-operations-governance/ai-branch-governance-adoption/ai-enterprise-adoption-patterns.md"
+    },
+    {
+      "id": "ai-mlops-mlflow-registry",
+      "name": "MLOps with MLflow: Experiment Tracking, Model Registry and Promotion Gates",
+      "level": "Advanced",
+      "tree": "AI Platform Engineering",
+      "branch": "AI Platform Engineering",
+      "path": "docs/ai-tree-platform-engineering/ai-branch-platform-eng/ai-mlops-mlflow-registry.md"
+    },
+    {
+      "id": "ai-distributed-training-kubeflow-ray",
+      "name": "Distributed Training on Kubernetes with Kubeflow Pipelines and Ray",
+      "level": "Advanced",
+      "tree": "AI Platform Engineering",
+      "branch": "AI Platform Engineering",
+      "path": "docs/ai-tree-platform-engineering/ai-branch-platform-eng/ai-distributed-training-kubeflow-ray.md"
+    },
+    {
+      "id": "ai-quantisation-gpu-sharing",
+      "name": "Model Quantisation and GPU Sharing: Precision, MIG Partitioning and KV Cache Sizing",
+      "level": "Advanced",
+      "tree": "AI Platform Engineering",
+      "branch": "AI Platform Engineering",
+      "path": "docs/ai-tree-platform-engineering/ai-branch-platform-eng/ai-quantisation-gpu-sharing.md"
+    },
+    {
+      "id": "ai-feature-store-skew",
+      "name": "Feature Stores and Training-Serving Skew: Point-in-Time Correctness with Feast",
+      "level": "Advanced",
+      "tree": "AI Platform Engineering",
+      "branch": "AI Platform Engineering",
+      "path": "docs/ai-tree-platform-engineering/ai-branch-platform-eng/ai-feature-store-skew.md"
+    },
+    {
+      "id": "ai-vector-db-hybrid-retrieval",
+      "name": "Vector Database Selection and Hybrid Retrieval: pgvector, Qdrant, Milvus and Reranking",
+      "level": "Advanced",
+      "tree": "Production AI Systems",
+      "branch": "Production AI Systems",
+      "path": "docs/ai-tree-production-systems/ai-branch-production-systems/ai-vector-db-hybrid-retrieval.md"
+    },
+    {
+      "id": "ai-evaluation-harness-gates",
+      "name": "LLM Evaluation Harnesses and Regression Gates for Production AI",
+      "level": "Advanced",
+      "tree": "Production AI Systems",
+      "branch": "Production AI Systems",
+      "path": "docs/ai-tree-production-systems/ai-branch-production-systems/ai-evaluation-harness-gates.md"
+    },
+    {
+      "id": "ai-agent-orchestration-guardrails",
+      "name": "Agent Orchestration with LangGraph: State, Guardrails and Tool Authorisation",
+      "level": "Advanced",
+      "tree": "Production AI Systems",
+      "branch": "Production AI Systems",
+      "path": "docs/ai-tree-production-systems/ai-branch-production-systems/ai-agent-orchestration-guardrails.md"
+    },
+    {
+      "id": "ai-finops-build-vs-buy",
+      "name": "AI FinOps: Token Cost Attribution, GPU Utilisation and Build-versus-Buy Crossover",
+      "level": "Advanced",
+      "tree": "Production AI Systems",
+      "branch": "Production AI Systems",
+      "path": "docs/ai-tree-production-systems/ai-branch-production-systems/ai-finops-build-vs-buy.md"
+    }
+  ]
+}
