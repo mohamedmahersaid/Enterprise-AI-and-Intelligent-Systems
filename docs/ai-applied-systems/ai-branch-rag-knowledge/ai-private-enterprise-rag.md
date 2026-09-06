@@ -16,8 +16,6 @@ branch: 'RAG & Knowledge Systems'
 
 ## Explanation
 
-# Grounding Enterprise Data Privately: Offline RAG and Access Control
-
 A RAG system that answers from private documents is, architecturally, a data exfiltration path if built carelessly: it takes a query, searches a private corpus, and returns text derived from that corpus to whoever asked. Enterprise-grade private RAG requires two things a demo pipeline usually skips - genuinely offline operation, and retrieval-time access control that matches document sensitivity to the requesting user, not just to the RAG application's own service identity.
 
 **Offline and local-first pipelines.** For regulated or classified data, every stage - chunking, embedding, storage, and the LLM call itself - must run inside the boundary. Ollama serving both the embedding model (nomic-embed-text or similar) and the generation model (a quantised instruct model) on infrastructure with no outbound internet path satisfies this. The document ingestion pipeline itself needs the same discipline: no calling a hosted OCR or parsing API on a scanned classified document, use a local library (Tesseract, unstructured.io running locally) instead.
@@ -194,7 +192,7 @@ The ACL enforcement script exits 0 with the correctly configured index and exits
 
 ## Operational automation
 
-## Automating private RAG governance
+### Automating private RAG governance
 
 **ACL sync, not one-time tagging.** Group membership and document classification change continuously. Run a scheduled job that re-reads source system permissions (SharePoint permissions, file share ACLs, a document management system's classification field) and updates the corresponding chunk metadata in the vector index, so retrieval-time filtering reflects current reality, not the state at ingestion time.
 

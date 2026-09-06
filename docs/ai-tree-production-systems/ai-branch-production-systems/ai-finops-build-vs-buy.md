@@ -16,7 +16,7 @@ branch: 'Production AI Systems'
 
 ## Explanation
 
-## Two cost models that must not be blended
+### Two cost models that must not be blended
 
 External API models cost **per token** and scale with use - zero traffic costs nothing.
 Self-hosted models cost **per GPU-hour** and are fixed whether used or not. Reporting

@@ -16,7 +16,7 @@ branch: 'AI Platform Engineering'
 
 ## Explanation
 
-## The bug that makes a model look brilliant and perform badly
+### The bug that makes a model look brilliant and perform badly
 
 Two failures cause most of the gap between offline evaluation and production
 behaviour, and a feature store exists to prevent both.

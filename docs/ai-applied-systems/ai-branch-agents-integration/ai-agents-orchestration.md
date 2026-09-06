@@ -16,8 +16,6 @@ branch: 'Agents & Enterprise Integration'
 
 ## Explanation
 
-# AI Agents and Orchestration Patterns
-
 An agent, in the enterprise sense, is a loop: the model receives a goal and a set of tools, decides which tool to call, observes the result, and decides again - repeating until it produces a final answer or hits a limit. That loop is what separates an agent from a single-shot chatbot call, and it is also exactly why agents are harder to operate reliably: every additional step is another place for the system to go wrong, and errors compound multiplicatively across steps.
 
 **Tool calling** is the foundation. The model is given a set of function signatures with descriptions; instead of only producing text, it can produce a structured request to call one, receive the result, and continue reasoning with it. This is how a model reads a ticket, queries an inventory system, and drafts a response, all in one interaction. Reliability depends entirely on tool descriptions being precise and on the application validating and executing the actual call - the model never has direct system access, it only ever proposes a call.
@@ -196,7 +194,7 @@ The agent successfully completes the inventory-check-and-ticket scenario end to 
 
 ## Operational automation
 
-## Automating agent reliability and governance
+### Automating agent reliability and governance
 
 **Hard bounds are non-negotiable.** Every agent loop, regardless of framework, must have a maximum step count and a maximum wall-clock time, enforced in code, not left to the model to self-regulate. This is the single cheapest control against runaway cost and infinite loops.
 

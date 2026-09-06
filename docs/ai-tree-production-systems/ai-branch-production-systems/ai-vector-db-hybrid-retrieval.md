@@ -16,7 +16,7 @@ branch: 'Production AI Systems'
 
 ## Explanation
 
-## Start with the database you already run
+### Start with the database you already run
 
 For corpora up to roughly a million vectors, **pgvector** is usually the right answer
 and is routinely skipped in favour of something more specialised. Vectors sit beside

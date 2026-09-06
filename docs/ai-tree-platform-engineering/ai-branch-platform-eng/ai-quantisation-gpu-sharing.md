@@ -16,7 +16,7 @@ branch: 'AI Platform Engineering'
 
 ## Explanation
 
-## The arithmetic that decides what fits
+### The arithmetic that decides what fits
 
 Weight memory is parameters multiplied by bytes per parameter. A 70B model needs
 **140 GB at FP16, 70 GB at INT8, 35 GB at INT4**. That single calculation determines

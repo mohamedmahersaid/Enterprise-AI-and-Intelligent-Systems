@@ -16,8 +16,6 @@ branch: 'Local and Private Inference'
 
 ## Explanation
 
-# Model Selection, Sizing and Cost Control
-
 Model selection is a capacity-planning exercise, not a preference. The architect's job is to map each workload to the cheapest model that clears an explicit quality bar, then prove the mapping with data.
 
 Start by classifying workloads. **Extraction and classification** - pulling fields from a ticket, routing an alert, tagging a document - are solved well by small models in the 3-8 billion parameter range, often locally. **Summarisation and drafting** sit in the middle. **Multi-step reasoning, code generation and tool orchestration** genuinely need frontier models. Sending every request to the largest model is the single most common source of runaway AI spend, and it also costs latency.
@@ -274,7 +272,7 @@ model-comparison.json contains a complete row for each candidate with non-zero n
 
 ## Operational automation
 
-## Automating cost governance
+### Automating cost governance
 
 **Attribute every call.** Emit a structured log line per request carrying application id, workload class, model, input tokens, output tokens, cached tokens, latency and outcome. Without the application dimension you can see total spend but cannot allocate it, and unallocatable spend never gets optimised. In Azure this means diagnostic settings to Log Analytics plus your own application-level telemetry.
 

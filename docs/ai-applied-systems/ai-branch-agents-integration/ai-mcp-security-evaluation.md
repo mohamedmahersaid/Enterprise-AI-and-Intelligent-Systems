@@ -16,8 +16,6 @@ branch: 'Agents & Enterprise Integration'
 
 ## Explanation
 
-# MCP Servers, AI Security and Evaluation
-
 The Model Context Protocol (MCP) standardises how an AI application discovers and calls external tools, resources and prompts, replacing bespoke per-integration tool code with a common client-server protocol. An **MCP server** exposes a set of tools (callable functions), resources (readable data, like files or API responses) and prompts (reusable templates) over a defined transport - stdio for local processes, or HTTP/SSE for remote services. An **MCP client**, embedded in an agent framework or an application like an IDE assistant, connects to one or more servers, discovers their capabilities, and lets the model call them through a uniform interface. The architectural win is decoupling: a database MCP server, once built, works with any MCP-compatible agent, rather than being wired bespoke into each one.
 
 That same standardisation is a security surface. An MCP server is effectively a new trust boundary: whatever it exposes, the connecting model can attempt to call, and whatever data it returns becomes part of the model's context, which means it is subject to **prompt injection** - content the model processes that contains instructions the model then follows as though they came from the user. A malicious or compromised MCP server, or a legitimate one returning attacker-controlled data (a scraped web page, an email body, a file with embedded instructions), can attempt to hijack agent behaviour. Defence is layered: least-privilege scoping of what each MCP server's tools are allowed to do, explicit human approval for any destructive tool call, treating all tool results as untrusted data rather than instructions, and running MCP servers with the minimum filesystem/network access they actually need.
@@ -193,7 +191,7 @@ The MCP Inspector output lists the server's tools, resources and prompts before 
 
 ## Operational automation
 
-## Automating AI security and evaluation
+### Automating AI security and evaluation
 
 **Evaluation as a CI gate, always.** No prompt, model, tool, or MCP server change merges without the evaluation harness running against both the functional accuracy set and the adversarial injection-resistance set. This is the single most effective control against silent quality and safety regressions, and it costs a few minutes per pipeline run.
 

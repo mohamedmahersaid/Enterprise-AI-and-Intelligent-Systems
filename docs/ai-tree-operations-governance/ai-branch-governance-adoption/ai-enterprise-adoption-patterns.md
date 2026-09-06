@@ -16,8 +16,6 @@ branch: 'Governance, Compliance and Enterprise Adoption'
 
 ## Explanation
 
-# Enterprise AI Adoption Patterns and Use-Case Selection
-
 Most enterprise AI programs fail at the portfolio level, not the technical level: they pick the wrong use cases, in the wrong order, with no shared way to compare one candidate against another. Getting use-case selection right matters more than getting any single model choice right.
 
 A workable selection framework scores every candidate on three axes. **Value** - quantified business impact: hours saved, error rate reduced, revenue influenced, expressed in a comparable unit across very different use cases. **Feasibility** - data availability and quality, integration complexity with existing systems, and whether the task is within current model capability at an acceptable cost. **Risk** - regulatory exposure (does this fall into an EU AI Act high-risk category), reputational exposure if it fails publicly, and reversibility of a bad decision the system makes. Plotting candidates on a value-versus-feasibility grid, with risk as a gating filter, surfaces an honest priority order instead of whichever use case the loudest stakeholder championed.
@@ -195,7 +193,7 @@ use-case-portfolio.json contains a priority_score and graduation_status for ever
 
 ## Operational automation
 
-## Automating adoption governance at portfolio scale
+### Automating adoption governance at portfolio scale
 
 **Run the portfolio scorer as a living document, not a one-time exercise.** Schedule the scoring script to run monthly against an updated use_cases.json maintained by the business owners, so the priority ranking reflects current pilot data rather than the assumptions made at kickoff.
 

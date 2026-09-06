@@ -16,8 +16,6 @@ branch: 'Local and Private Inference'
 
 ## Explanation
 
-# Ollama and Local Model Serving
-
 Ollama is a self-contained runtime that downloads open-weight models, quantises them, and exposes them over a **local HTTP API on port 11434**. For enterprises it matters for one reason: the prompt never leaves the machine. That makes it the default answer for classified data, air-gapped labs, offline training environments, and any workload where a data-residency clause forbids sending text to a hosted endpoint.
 
 Under the hood Ollama wraps llama.cpp and uses **GGUF** model files. A GGUF file bundles the weights plus the quantisation scheme. Quantisation is the single biggest lever an architect controls: an 8-billion-parameter model at FP16 needs roughly 16 GB of memory, the same model at Q4_K_M needs roughly 4.7 GB and loses only a few percent of benchmark quality. That difference decides whether the model runs on a laptop GPU, a shared VM, or not at all.
@@ -246,7 +244,7 @@ ollama list shows both models with distinct digests and the derived corp-assista
 
 ## Operational automation
 
-## Automating local model estate management
+### Automating local model estate management
 
 **Golden image, not manual installs.** Bake Ollama plus the approved model blobs into a VM template or container image. The blobs live under ~/.ollama/models and are content-addressed, so they layer cleanly and deduplicate across images.
 

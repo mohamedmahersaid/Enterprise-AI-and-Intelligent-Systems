@@ -16,7 +16,7 @@ branch: 'Production AI Systems'
 
 ## Explanation
 
-## Prompt changes are not local
+### Prompt changes are not local
 
 Changing a prompt to fix one behaviour routinely breaks another, with no warning and no
 error. The same is true of changing the model, the chunking strategy or the index.

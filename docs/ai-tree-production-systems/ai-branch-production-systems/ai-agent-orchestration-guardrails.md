@@ -16,7 +16,7 @@ branch: 'Production AI Systems'
 
 ## Explanation
 
-## What separates a production agent from a demo
+### What separates a production agent from a demo
 
 A demo agent calls a tool and returns an answer. A production agent needs **bounded
 state, explicit termination, scoped authorisation and a full trace** - because an

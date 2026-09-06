@@ -16,8 +16,6 @@ branch: 'Governance, Compliance and Enterprise Adoption'
 
 ## Explanation
 
-# AI Governance and Compliance
-
 AI governance turns "we use AI responsibly" from a slogan into an auditable management system. Three frameworks dominate enterprise conversations today and they are complementary rather than competing.
 
 **ISO/IEC 42001** is a certifiable AI management system standard, structured like ISO 27001: it requires a documented AI policy, defined roles and responsibilities, a risk assessment process specific to AI systems, an inventory of AI systems in use, lifecycle controls from design through decommissioning, and a continual-improvement cycle audited by an accredited body. Its value is procedural rigor - it does not dictate specific technical controls, it dictates that you have a disciplined, evidenced process for deciding and enforcing them.
@@ -216,7 +214,7 @@ ai-compliance-report.json lists all entries with correct PASS/FAIL status matchi
 
 ## Operational automation
 
-## Automating AI governance operations
+### Automating AI governance operations
 
 **Make the register the source of truth, not a document.** Store the AI system register as structured data (JSON, or rows in a governance database) alongside infrastructure-as-code, so a new AI resource cannot be provisioned without a corresponding register entry - enforce this with a pull-request template checklist or a policy-as-code check in the deployment pipeline.
 

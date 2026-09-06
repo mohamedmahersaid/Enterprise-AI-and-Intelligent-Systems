@@ -16,7 +16,7 @@ branch: 'AI Platform Engineering'
 
 ## Explanation
 
-## Why GPU clusters deadlock without gang scheduling
+### Why GPU clusters deadlock without gang scheduling
 
 Distributed training needs **all** its workers running simultaneously. The default
 Kubernetes scheduler places pods independently, so two eight-GPU jobs submitted to a

@@ -16,8 +16,6 @@ branch: 'LLMOps and Production Observability'
 
 ## Explanation
 
-# LLMOps: Deployment, Versioning and Drift Detection
-
 LLMOps applies the discipline of MLOps and classic release engineering to systems built around a language model, but the unit of change is wider than a model file: a prompt template, a retrieval index, a tool schema and the model itself can each independently break behaviour. Treating only the model as a version means the other three drift silently.
 
 The practical answer is to version everything that participates in a response. Pin the model by an explicit version string, never a floating alias like "latest" - providers rotate the underlying weights behind unpinned tags without notice. Store prompt templates in the same repository as application code, reviewed through the normal pull-request process, because a system prompt is production configuration, not prose. Tag retrieval indexes with a build id so a regression can be bisected to a specific corpus snapshot rather than "the RAG got worse sometime last month".
@@ -236,7 +234,7 @@ drift.json contains non-zero scores for both deployments on a clean run with pas
 
 ## Operational automation
 
-## Automating the LLMOps lifecycle
+### Automating the LLMOps lifecycle
 
 **Version everything as one unit.** Store prompts, tool schemas, and the pinned model/version string together in the application repository, and cut a release only when all three are tagged together. A retrieval index build id belongs in the same release manifest so a regression can be bisected to an exact combination rather than guessed at.
 
