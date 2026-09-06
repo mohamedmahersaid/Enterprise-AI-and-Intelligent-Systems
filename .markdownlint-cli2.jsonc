@@ -1,0 +1,22 @@
+{
+  // Rules are tuned to the conventions this curriculum already follows.
+  // Anything disabled here is a deliberate house style, not an unfixed defect.
+  "config": {
+    "default": true,
+
+    // Prose is written as long single-line paragraphs throughout, so a column
+    // limit would flag essentially every body line without improving anything.
+    "MD013": false,
+
+    // Troubleshooting scenarios end in a full stop and interview questions end
+    // in a question mark, both by design.
+    "MD026": false,
+
+    // Every leaf carries a YAML `title` in frontmatter as well as its `#`
+    // heading. Without this, markdownlint counts the frontmatter title as the
+    // document title and reports the real heading as a second H1.
+    "MD025": { "front_matter_title": "" }
+  },
+  "globs": ["**/*.md"],
+  "ignores": ["node_modules/**"]
+}

@@ -16,8 +16,6 @@ branch: 'Managed Model Services and Prompt Discipline'
 
 ## Explanation
 
-# Azure OpenAI Enterprise Integration
-
 Azure OpenAI is the same model family as the public API wrapped in Azure's control plane, and that wrapper is the entire point for an enterprise. It brings **Entra ID authentication**, **private networking**, **customer-managed keys**, **regional data residency**, **diagnostic logging** and **Azure Policy** to a capability that would otherwise be an unmanaged internet dependency.
 
 The resource model has three levels. An **account** is the Azure resource carrying networking, identity and encryption settings. A **deployment** is a named instance of a specific model at a specific version with an allocated capacity. Applications call the deployment name, not the model name, which gives you an indirection layer for version upgrades and rollbacks.
@@ -291,11 +289,16 @@ exit ([int]($failCount -gt 0))
 
 ### Validation
 
-A call from the public internet to the account endpoint fails with a network or forbidden error.,A call from inside the VNet using managed identity succeeds and returns a completion.,nslookup of the account hostname from inside the VNet resolves to a private IP in the private endpoint subnet.,An API-key call fails after local authentication is disabled.,The RequestResponse table in Log Analytics contains the test request with the calling identity recorded.,The posture audit script exits with code 0 and every control reports PASS in aoai-posture.csv.
+- A call from the public internet to the account endpoint fails with a network or forbidden error.
+- A call from inside the VNet using managed identity succeeds and returns a completion.
+- nslookup of the account hostname from inside the VNet resolves to a private IP in the private endpoint subnet.
+- An API-key call fails after local authentication is disabled.
+- The RequestResponse table in Log Analytics contains the test request with the calling identity recorded.
+- The posture audit script exits with code 0 and every control reports PASS in aoai-posture.csv.
 
 ## Operational automation
 
-## Automating governed model endpoints
+### Automating governed model endpoints
 
 **Infrastructure as code, always.** Express the account, private endpoint, private DNS zone link, deployments, role assignments and diagnostic settings in Bicep or Terraform. Manual portal creation reliably misses the private DNS zone link, which produces the classic failure where the hostname still resolves publicly and the private endpoint appears not to work.
 
@@ -319,7 +322,7 @@ A call from the public internet to the account endpoint fails with a network or 
 
 **Likely cause:** The wrong scope or role was assigned, the token was requested for the wrong audience, or role assignment propagation has not completed.
 
-**Resolution:** Confirm the role is Cognitive Services OpenAI User assigned at the account scope - Contributor grants control-plane rights but not data-plane inference. Ensure the token audience is https://cognitiveservices.azure.com. Allow several minutes for propagation and restart the application so it does not serve a cached negative token.
+**Resolution:** Confirm the role is Cognitive Services OpenAI User assigned at the account scope - Contributor grants control-plane rights but not data-plane inference. Ensure the token audience is `https://cognitiveservices.azure.com`. Allow several minutes for propagation and restart the application so it does not serve a cached negative token.
 
 ### Scenario 3: Requests intermittently return 429 despite provisioned capacity that looks sufficient.
 

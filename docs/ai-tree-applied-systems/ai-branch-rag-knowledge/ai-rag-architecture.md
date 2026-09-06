@@ -16,8 +16,6 @@ branch: 'RAG & Knowledge Systems'
 
 ## Explanation
 
-# RAG Architecture: Embeddings, Chunking and Vector Search
-
 Retrieval-augmented generation solves the problem a model cannot solve on its own: it has no knowledge of your data and cannot be retrained fast enough to keep up. RAG instead retrieves relevant passages at query time and places them in the prompt, so the model reasons over facts it was never trained on. The architecture has four stages that each fail independently, and diagnosing a bad answer means knowing which stage broke.
 
 **Ingestion and chunking** splits source documents into passages small enough to embed meaningfully and large enough to retain context. Fixed-size chunking (e.g. 512 tokens with 10-15% overlap) is simple and predictable. Semantic chunking splits at natural boundaries - headings, paragraphs - and produces higher-quality retrieval at the cost of variable chunk size. Overlap prevents a fact from being severed exactly at a chunk boundary. Chunk size is a direct trade-off: too large dilutes the embedding with irrelevant text and wastes context window; too small loses the surrounding context needed to interpret the fact correctly.
@@ -218,11 +216,15 @@ if __name__ == "__main__":
 
 ### Validation
 
-The evaluation script reports a recall@5 percentage for at least three chunk-size configurations.,The configuration with the highest recall@5 is identified explicitly, not assumed from defaults.,Hybrid search recall is measured and compared against vector-only search on the same query set.,vector-index.json exists and contains an embedding vector array for every chunk.,Azure AI Search index returns results for a test query with semantic ranking scores present in the response.
+- The evaluation script reports a recall@5 percentage for at least three chunk-size configurations.
+- The configuration with the highest recall@5 is identified explicitly, not assumed from defaults.
+- Hybrid search recall is measured and compared against vector-only search on the same query set.
+- vector-index.json exists and contains an embedding vector array for every chunk.
+- Azure AI Search index returns results for a test query with semantic ranking scores present in the response.
 
 ## Operational automation
 
-## Automating RAG pipeline maintenance
+### Automating RAG pipeline maintenance
 
 **Incremental ingestion, not full rebuilds.** Watch the source document store (SharePoint, file share, Git repo) for changes via webhook or scheduled diff, and re-chunk and re-embed only changed documents. Full re-embedding of a large corpus on every change is slow and expensive at scale, and a stale index is a silent RAG failure mode - the answer looks grounded but cites an outdated policy.
 

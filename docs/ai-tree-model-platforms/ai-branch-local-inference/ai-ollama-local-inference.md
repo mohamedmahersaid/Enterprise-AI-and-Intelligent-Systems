@@ -16,8 +16,6 @@ branch: 'Local and Private Inference'
 
 ## Explanation
 
-# Ollama and Local Model Serving
-
 Ollama is a self-contained runtime that downloads open-weight models, quantises them, and exposes them over a **local HTTP API on port 11434**. For enterprises it matters for one reason: the prompt never leaves the machine. That makes it the default answer for classified data, air-gapped labs, offline training environments, and any workload where a data-residency clause forbids sending text to a hosted endpoint.
 
 Under the hood Ollama wraps llama.cpp and uses **GGUF** model files. A GGUF file bundles the weights plus the quantisation scheme. Quantisation is the single biggest lever an architect controls: an 8-billion-parameter model at FP16 needs roughly 16 GB of memory, the same model at Q4_K_M needs roughly 4.7 GB and loses only a few percent of benchmark quality. That difference decides whether the model runs on a laptop GPU, a shared VM, or not at all.
@@ -242,11 +240,15 @@ if __name__ == "__main__":
 
 ### Validation
 
-ollama list shows both models with distinct digests and the derived corp-assistant model.,A chat completion returns correct content while the network adapter is disabled.,Packet capture during inference shows only loopback traffic and zero egress to any public address.,ollama show corp-assistant --modelfile prints the SYSTEM prompt and temperature 0.2 exactly as authored.,ollama-host-report.json lists tokens_per_second above zero for every approved model and an empty unapproved array.
+- ollama list shows both models with distinct digests and the derived corp-assistant model.
+- A chat completion returns correct content while the network adapter is disabled.
+- Packet capture during inference shows only loopback traffic and zero egress to any public address.
+- ollama show corp-assistant --modelfile prints the SYSTEM prompt and temperature 0.2 exactly as authored.
+- ollama-host-report.json lists tokens_per_second above zero for every approved model and an empty unapproved array.
 
 ## Operational automation
 
-## Automating local model estate management
+### Automating local model estate management
 
 **Golden image, not manual installs.** Bake Ollama plus the approved model blobs into a VM template or container image. The blobs live under ~/.ollama/models and are content-addressed, so they layer cleanly and deduplicate across images.
 
@@ -288,7 +290,7 @@ ollama list shows both models with distinct digests and the derived corp-assista
 
 **Likely cause:** The floating tag was re-pointed upstream between pulls, so the hosts hold different weights, or one host has a derived Modelfile applied.
 
-**Resolution:** Compare digests with ollama list on both hosts and pin the immutable digest in your provisioning. Compare ollama show <model> --modelfile to detect a divergent system prompt or sampling parameter.
+**Resolution:** Compare digests with ollama list on both hosts and pin the immutable digest in your provisioning. Compare `ollama show <model> --modelfile` to detect a divergent system prompt or sampling parameter.
 
 ## Interview questions
 

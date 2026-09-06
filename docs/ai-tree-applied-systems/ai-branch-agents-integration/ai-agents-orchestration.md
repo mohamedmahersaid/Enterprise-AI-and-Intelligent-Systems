@@ -16,8 +16,6 @@ branch: 'Agents & Enterprise Integration'
 
 ## Explanation
 
-# AI Agents and Orchestration Patterns
-
 An agent, in the enterprise sense, is a loop: the model receives a goal and a set of tools, decides which tool to call, observes the result, and decides again - repeating until it produces a final answer or hits a limit. That loop is what separates an agent from a single-shot chatbot call, and it is also exactly why agents are harder to operate reliably: every additional step is another place for the system to go wrong, and errors compound multiplicatively across steps.
 
 **Tool calling** is the foundation. The model is given a set of function signatures with descriptions; instead of only producing text, it can produce a structured request to call one, receive the result, and continue reasoning with it. This is how a model reads a ticket, queries an inventory system, and drafts a response, all in one interaction. Reliability depends entirely on tool descriptions being precise and on the application validating and executing the actual call - the model never has direct system access, it only ever proposes a call.
@@ -192,11 +190,15 @@ if __name__ == "__main__":
 
 ### Validation
 
-The agent successfully completes the inventory-check-and-ticket scenario end to end against a real model.,An invalid tool argument produces a logged error entry in the trajectory rather than an unhandled exception.,A loop-inducing goal is halted at exactly MAX_STEPS and returns status escalate, not an infinite run.,The LangGraph version enforces the human-in-the-loop checkpoint before create_ticket executes, confirmed by the graph pausing for approval.,Application Insights shows a distinct trace span per agent step for at least one full run.
+- The agent successfully completes the inventory-check-and-ticket scenario end to end against a real model.
+- An invalid tool argument produces a logged error entry in the trajectory rather than an unhandled exception.
+- A loop-inducing goal is halted at exactly MAX_STEPS and returns status escalate, not an infinite run.
+- The LangGraph version enforces the human-in-the-loop checkpoint before create_ticket executes, confirmed by the graph pausing for approval.
+- Application Insights shows a distinct trace span per agent step for at least one full run.
 
 ## Operational automation
 
-## Automating agent reliability and governance
+### Automating agent reliability and governance
 
 **Hard bounds are non-negotiable.** Every agent loop, regardless of framework, must have a maximum step count and a maximum wall-clock time, enforced in code, not left to the model to self-regulate. This is the single cheapest control against runaway cost and infinite loops.
 

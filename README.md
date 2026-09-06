@@ -23,12 +23,12 @@ Enterprise AI engineering: local and offline inference with Ollama, Azure OpenAI
 | Tree | Branches | Leaves |
 | --- | ---: | ---: |
 | [Running and Integrating Models](docs/ai-tree-model-platforms/README.md) | 2 | 4 |
-| [Applied AI Systems](docs/ai-applied-systems/README.md) | 2 | 4 |
+| [Applied AI Systems](docs/ai-tree-applied-systems/README.md) | 2 | 4 |
 | [AI Operations & Governance](docs/ai-tree-operations-governance/README.md) | 2 | 4 |
-| [AI Platform Engineering](docs/ai-tree-platform-engineering/README.md) | 1 | 4 |
-| [Production AI Systems](docs/ai-tree-production-systems/README.md) | 1 | 4 |
+| [AI Platform Engineering](docs/ai-tree-platform-engineering/README.md) | 2 | 4 |
+| [Production AI Systems](docs/ai-tree-production-systems/README.md) | 2 | 4 |
 
-**Total:** 5 trees · 8 branches · 20 leaves
+**Total:** 5 trees · 10 branches · 20 leaves
 
 **Level distribution:** Advanced: 12 · Beginner: 1 · Enterprise: 2 · Expert: 2 · Intermediate: 3
 

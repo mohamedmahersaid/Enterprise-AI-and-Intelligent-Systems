@@ -16,8 +16,6 @@ branch: 'LLMOps and Production Observability'
 
 ## Explanation
 
-# AI Observability and Production Performance Monitoring
-
 Observability for an AI system covers a wider surface than a conventional service, because failure is often silent: the system returns HTTP 200 with a confident, fluent, wrong answer. Standard infrastructure metrics (CPU, memory, request latency) tell you the pipes are open; they say nothing about whether the answers flowing through them are good.
 
 A mature monitoring stack layers three kinds of signal. **Infrastructure and traffic** - request rate, error rate, latency percentiles per model deployment, GPU/queue utilisation for self-hosted inference - is the baseline every service needs. **Model-specific quality proxies** are the layer unique to AI systems: token-level metrics (input/output token counts, cache-hit ratio), structural validity rate (does the output parse against the required schema), tool-call error rate for agents, refusal rate, and empty or truncated response rate. **Sampled quality evaluation** runs an LLM-judge or rule-based scorer against a rolling sample of real production traffic, because synthetic golden sets alone miss the actual distribution of what users ask.
@@ -239,11 +237,15 @@ if __name__ == "__main__":
 
 ### Validation
 
-quality-monitor-report.json is produced with a non-zero sample_size and populated rate fields.,The deliberate refusal-inducing change produces a report with refusal_rate above 0.15 and a non-zero exit code.,Infra-level latency and error-rate metrics remain within normal bounds during the refusal-rate regression, demonstrating the two signal classes are independent.,The Log Analytics scheduled query alert fires specifically on the tool-error scenario.,The combined dashboard panel visibly shows quality degrading while infra metrics stay flat.
+- quality-monitor-report.json is produced with a non-zero sample_size and populated rate fields.
+- The deliberate refusal-inducing change produces a report with refusal_rate above 0.15 and a non-zero exit code.
+- Infra-level latency and error-rate metrics remain within normal bounds during the refusal-rate regression, demonstrating the two signal classes are independent.
+- The Log Analytics scheduled query alert fires specifically on the tool-error scenario.
+- The combined dashboard panel visibly shows quality degrading while infra metrics stay flat.
 
 ## Operational automation
 
-## Automating AI observability at scale
+### Automating AI observability at scale
 
 **Instrument once, at the platform layer.** Build trajectory logging (model calls, tool calls, correlation ids) into a shared client library or gateway every application uses, rather than leaving each team to add it inconsistently. This is the single highest-leverage investment - it turns every future incident investigation from an archaeology exercise into a query.
 

@@ -22,13 +22,13 @@ Building production AI systems on top of foundation models: retrieval-augmented 
 
 ### RAG & Knowledge Systems
 
-- **Advanced:** [RAG Architecture: Embeddings, Chunking and Vector Search](docs/ai-applied-systems/ai-branch-rag-knowledge/ai-rag-architecture.md)
-- **Enterprise:** [Grounding Enterprise Data Privately: Offline RAG and Access Control](docs/ai-applied-systems/ai-branch-rag-knowledge/ai-private-enterprise-rag.md)
+- **Advanced:** [RAG Architecture: Embeddings, Chunking and Vector Search](docs/ai-tree-applied-systems/ai-branch-rag-knowledge/ai-rag-architecture.md)
+- **Enterprise:** [Grounding Enterprise Data Privately: Offline RAG and Access Control](docs/ai-tree-applied-systems/ai-branch-rag-knowledge/ai-private-enterprise-rag.md)
 
 ### Agents & Enterprise Integration
 
-- **Advanced:** [AI Agents and Orchestration Patterns](docs/ai-applied-systems/ai-branch-agents-integration/ai-agents-orchestration.md)
-- **Expert:** [MCP Servers, AI Security and Evaluation](docs/ai-applied-systems/ai-branch-agents-integration/ai-mcp-security-evaluation.md)
+- **Advanced:** [AI Agents and Orchestration Patterns](docs/ai-tree-applied-systems/ai-branch-agents-integration/ai-agents-orchestration.md)
+- **Expert:** [MCP Servers, AI Security and Evaluation](docs/ai-tree-applied-systems/ai-branch-agents-integration/ai-mcp-security-evaluation.md)
 
 ## AI Operations & Governance
 
@@ -48,20 +48,26 @@ Running AI systems as production software - deployment pipelines, drift detectio
 
 Building the platform beneath the models: MLOps registries and promotion gates, distributed training on Kubernetes, GPU economics through quantisation and partitioning, and feature stores.
 
-### AI Platform Engineering
+### Model and Feature Lifecycle
 
-- **Advanced:** [MLOps with MLflow: Experiment Tracking, Model Registry and Promotion Gates](docs/ai-tree-platform-engineering/ai-branch-platform-eng/ai-mlops-mlflow-registry.md)
-- **Advanced:** [Distributed Training on Kubernetes with Kubeflow Pipelines and Ray](docs/ai-tree-platform-engineering/ai-branch-platform-eng/ai-distributed-training-kubeflow-ray.md)
-- **Advanced:** [Model Quantisation and GPU Sharing: Precision, MIG Partitioning and KV Cache Sizing](docs/ai-tree-platform-engineering/ai-branch-platform-eng/ai-quantisation-gpu-sharing.md)
-- **Advanced:** [Feature Stores and Training-Serving Skew: Point-in-Time Correctness with Feast](docs/ai-tree-platform-engineering/ai-branch-platform-eng/ai-feature-store-skew.md)
+- **Advanced:** [MLOps with MLflow: Experiment Tracking, Model Registry and Promotion Gates](docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/ai-mlops-mlflow-registry.md)
+- **Advanced:** [Feature Stores and Training-Serving Skew: Point-in-Time Correctness with Feast](docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/ai-feature-store-skew.md)
+
+### Training and GPU Infrastructure
+
+- **Advanced:** [Distributed Training on Kubernetes with Kubeflow Pipelines and Ray](docs/ai-tree-platform-engineering/ai-branch-training-gpu-infrastructure/ai-distributed-training-kubeflow-ray.md)
+- **Advanced:** [Model Quantisation and GPU Sharing: Precision, MIG Partitioning and KV Cache Sizing](docs/ai-tree-platform-engineering/ai-branch-training-gpu-infrastructure/ai-quantisation-gpu-sharing.md)
 
 ## Production AI Systems
 
 Running AI systems in production: vector store selection and retrieval quality, evaluation harnesses that gate every change, agent orchestration with real guardrails, and the cost model that decides build versus buy.
 
-### Production AI Systems
+### Retrieval and Evaluation
 
-- **Advanced:** [Vector Database Selection and Hybrid Retrieval: pgvector, Qdrant, Milvus and Reranking](docs/ai-tree-production-systems/ai-branch-production-systems/ai-vector-db-hybrid-retrieval.md)
-- **Advanced:** [LLM Evaluation Harnesses and Regression Gates for Production AI](docs/ai-tree-production-systems/ai-branch-production-systems/ai-evaluation-harness-gates.md)
-- **Advanced:** [Agent Orchestration with LangGraph: State, Guardrails and Tool Authorisation](docs/ai-tree-production-systems/ai-branch-production-systems/ai-agent-orchestration-guardrails.md)
-- **Advanced:** [AI FinOps: Token Cost Attribution, GPU Utilisation and Build-versus-Buy Crossover](docs/ai-tree-production-systems/ai-branch-production-systems/ai-finops-build-vs-buy.md)
+- **Advanced:** [Vector Database Selection and Hybrid Retrieval: pgvector, Qdrant, Milvus and Reranking](docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/ai-vector-db-hybrid-retrieval.md)
+- **Advanced:** [LLM Evaluation Harnesses and Regression Gates for Production AI](docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/ai-evaluation-harness-gates.md)
+
+### Agent Runtime and Cost Control
+
+- **Advanced:** [Agent Orchestration with LangGraph: State, Guardrails and Tool Authorisation](docs/ai-tree-production-systems/ai-branch-agent-runtime-cost/ai-agent-orchestration-guardrails.md)
+- **Advanced:** [AI FinOps: Token Cost Attribution, GPU Utilisation and Build-versus-Buy Crossover](docs/ai-tree-production-systems/ai-branch-agent-runtime-cost/ai-finops-build-vs-buy.md)

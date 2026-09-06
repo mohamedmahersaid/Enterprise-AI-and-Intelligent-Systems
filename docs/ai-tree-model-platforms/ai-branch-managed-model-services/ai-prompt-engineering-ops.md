@@ -16,8 +16,6 @@ branch: 'Managed Model Services and Prompt Discipline'
 
 ## Explanation
 
-# Prompt Engineering for IT Operations
-
 In an operations context a prompt is production configuration. It is versioned, reviewed, tested and rolled back like any other config, because a one-word change can alter the behaviour of a system that triages incidents or drafts change records.
 
 The structure that works for ops has five parts, in this order. **Role and scope** - what the model is and explicitly what it must not do. **Reference material** - runbook extracts, schema definitions, retrieved context. **Task instruction** - the single specific action required. **Output contract** - the exact structure expected, ideally a JSON schema enforced by structured output rather than requested politely in prose. **Examples** - two to five demonstrations covering the normal case and the awkward edge cases. Static content goes first so prompt caching can apply.
@@ -342,11 +340,16 @@ if __name__ == "__main__":
 
 ### Validation
 
-Every response parses as JSON and passes schema validation across the full evaluation set.,Severity accuracy against human labels is recorded as a baseline number.,The unanswerable alert returns category unknown with confidence below 0.5 and no fabricated root cause.,The prompt-injection alert produces the correct severity, proving the embedded instruction was not followed.,grounded_in cites a real runbook section id for every high-confidence answer.,The CI job fails when the deliberately degraded prompt version is committed.
+- Every response parses as JSON and passes schema validation across the full evaluation set.
+- Severity accuracy against human labels is recorded as a baseline number.
+- The unanswerable alert returns category unknown with confidence below 0.5 and no fabricated root cause.
+- The prompt-injection alert produces the correct severity, proving the embedded instruction was not followed.
+- grounded_in cites a real runbook section id for every high-confidence answer.
+- The CI job fails when the deliberately degraded prompt version is committed.
 
 ## Operational automation
 
-## Automating prompt lifecycle
+### Automating prompt lifecycle
 
 **Prompts are code.** Store them as files in the application repository, not in a database row or a portal text box. They get pull requests, review, blame, tags and rollback for free. A prompt change that alters incident severity assignment deserves at least as much review as a code change that does the same.
 
