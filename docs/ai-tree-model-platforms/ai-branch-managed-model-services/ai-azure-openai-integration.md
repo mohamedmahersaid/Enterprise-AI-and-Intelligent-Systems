@@ -322,7 +322,7 @@ exit ([int]($failCount -gt 0))
 
 **Likely cause:** The wrong scope or role was assigned, the token was requested for the wrong audience, or role assignment propagation has not completed.
 
-**Resolution:** Confirm the role is Cognitive Services OpenAI User assigned at the account scope - Contributor grants control-plane rights but not data-plane inference. Ensure the token audience is https://cognitiveservices.azure.com. Allow several minutes for propagation and restart the application so it does not serve a cached negative token.
+**Resolution:** Confirm the role is Cognitive Services OpenAI User assigned at the account scope - Contributor grants control-plane rights but not data-plane inference. Ensure the token audience is `https://cognitiveservices.azure.com`. Allow several minutes for propagation and restart the application so it does not serve a cached negative token.
 
 ### Scenario 3: Requests intermittently return 429 despite provisioned capacity that looks sufficient.
 

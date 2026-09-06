@@ -194,6 +194,64 @@ if (fs.existsSync('CATALOG.md')) {
   }
 }
 
+// --- README derived figures --------------------------------------------------
+
+/**
+ * Every number in README.md that restates the catalog is asserted here, so a
+ * leaf added or moved without updating the badges fails CI instead of leaving
+ * the front page quietly wrong.
+ */
+function checkReadme() {
+  if (!fs.existsSync('README.md')) return;
+  const readme = fs.readFileSync('README.md', 'utf8');
+  const leafCount = catalog.leaves.length;
+  const present = catalog.leaves.filter((l) => fs.existsSync(l.path)).length;
+  const coverage = Math.round((present / catalog.expectedLeafCount) * 100);
+
+  const expect = (label, re, want) => {
+    const m = readme.match(re);
+    if (!m) errors.push(`README.md: could not find ${label} to verify against the catalog.`);
+    else if (m[1] !== String(want)) {
+      errors.push(`README.md: ${label} is '${m[1]}' but the catalog gives '${want}'.`);
+    }
+  };
+
+  expect('the leaves badge', /badge\/leaves-(\d+)-/, leafCount);
+  expect('the coverage badge', /badge\/catalog%20coverage-(\d+)%25-/, coverage);
+  expect('the coverage statement percentage', /Catalog coverage is (\d+)%/, coverage);
+  expect('the coverage statement leaf count', /all (\d+) authoritative leaves/, leafCount);
+  expect('the total tree count', /\*\*Total:\*\* (\d+) trees/, catalog.treeCount);
+  expect('the total branch count', /\*\*Total:\*\* \d+ trees · (\d+) branches/, catalog.branchCount);
+  expect('the total leaf count', /\*\*Total:\*\* \d+ trees · \d+ branches · (\d+) leaves/, leafCount);
+
+  const levels = Object.keys(catalog.levelCounts).sort()
+    .map((k) => `${k}: ${catalog.levelCounts[k]}`).join(' · ');
+  expect('the level distribution', /\*\*Level distribution:\*\* (.+)/, levels);
+
+  // curriculum map: one row per tree, with its branch and leaf counts
+  const perTree = new Map();
+  for (const leaf of catalog.leaves) {
+    if (!perTree.has(leaf.tree)) perTree.set(leaf.tree, { branches: new Set(), leaves: 0 });
+    const t = perTree.get(leaf.tree);
+    t.branches.add(leaf.branch);
+    t.leaves += 1;
+  }
+  for (const [tree, t] of perTree) {
+    const row = readme.match(
+      new RegExp(`^\\| \\[${tree.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\]\\([^)]+\\) \\| (\\d+) \\| (\\d+) \\|$`, 'm')
+    );
+    if (!row) errors.push(`README.md: curriculum map has no row for tree '${tree}'.`);
+    else if (row[1] !== String(t.branches.size) || row[2] !== String(t.leaves)) {
+      errors.push(
+        `README.md: curriculum map row '${tree}' says ${row[1]} branches / ${row[2]} leaves ` +
+          `but the catalog gives ${t.branches.size} / ${t.leaves}.`
+      );
+    }
+  }
+}
+
+checkReadme();
+
 if (errors.length) {
   console.error(errors.join('\n'));
   console.error(`\n${errors.length} validation error(s).`);
@@ -204,5 +262,6 @@ console.log(
   `Validated ${catalog.leaves.length} leaves across ${catalog.treeCount} trees and ${catalog.branchCount} branches.`
 );
 console.log(
-  'Checks: catalog counts, frontmatter/catalog agreement, heading hierarchy, required sections, mermaid diagrams, relative links, CATALOG.md coverage.'
+  'Checks: catalog counts, frontmatter/catalog agreement, heading hierarchy, required sections,\n'+
+  '        mermaid fences, relative links, CATALOG.md coverage, README badges and curriculum map.'
 );

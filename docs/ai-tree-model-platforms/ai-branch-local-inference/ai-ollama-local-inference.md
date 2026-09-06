@@ -290,7 +290,7 @@ if __name__ == "__main__":
 
 **Likely cause:** The floating tag was re-pointed upstream between pulls, so the hosts hold different weights, or one host has a derived Modelfile applied.
 
-**Resolution:** Compare digests with ollama list on both hosts and pin the immutable digest in your provisioning. Compare ollama show <model> --modelfile to detect a divergent system prompt or sampling parameter.
+**Resolution:** Compare digests with ollama list on both hosts and pin the immutable digest in your provisioning. Compare `ollama show <model> --modelfile` to detect a divergent system prompt or sampling parameter.
 
 ## Interview questions
 

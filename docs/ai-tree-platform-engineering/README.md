@@ -8,4 +8,3 @@ Building the platform beneath the models: MLOps registries and promotion gates, 
 
 - [Model and Feature Lifecycle](ai-branch-model-feature-lifecycle/README.md) — 2 leaves
 - [Training and GPU Infrastructure](ai-branch-training-gpu-infrastructure/README.md) — 2 leaves
-

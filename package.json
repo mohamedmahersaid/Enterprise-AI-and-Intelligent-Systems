@@ -1,0 +1,19 @@
+{
+  "name": "enterprise-ai-and-intelligent-systems",
+  "version": "1.0.0",
+  "description": "Validation tooling for the AI & Intelligent Systems curriculum.",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "validate": "npm run validate:content && npm run validate:mermaid && npm run lint:md",
+    "validate:content": "node scripts/validate-content.mjs",
+    "validate:mermaid": "node scripts/validate-mermaid.mjs",
+    "lint:md": "markdownlint-cli2 \"**/*.md\""
+  },
+  "devDependencies": {
+    "jsdom": "30.0.1",
+    "markdownlint-cli2": "0.23.2",
+    "mermaid": "11.17.2"
+  }
+}
