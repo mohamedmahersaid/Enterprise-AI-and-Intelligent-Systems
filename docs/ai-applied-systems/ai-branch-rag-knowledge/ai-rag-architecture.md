@@ -216,7 +216,11 @@ if __name__ == "__main__":
 
 ### Validation
 
-The evaluation script reports a recall@5 percentage for at least three chunk-size configurations.,The configuration with the highest recall@5 is identified explicitly, not assumed from defaults.,Hybrid search recall is measured and compared against vector-only search on the same query set.,vector-index.json exists and contains an embedding vector array for every chunk.,Azure AI Search index returns results for a test query with semantic ranking scores present in the response.
+- The evaluation script reports a recall@5 percentage for at least three chunk-size configurations.
+- The configuration with the highest recall@5 is identified explicitly, not assumed from defaults.
+- Hybrid search recall is measured and compared against vector-only search on the same query set.
+- vector-index.json exists and contains an embedding vector array for every chunk.
+- Azure AI Search index returns results for a test query with semantic ranking scores present in the response.
 
 ## Operational automation
 

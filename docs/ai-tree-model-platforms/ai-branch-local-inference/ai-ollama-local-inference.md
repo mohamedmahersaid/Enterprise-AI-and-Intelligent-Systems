@@ -240,7 +240,11 @@ if __name__ == "__main__":
 
 ### Validation
 
-ollama list shows both models with distinct digests and the derived corp-assistant model.,A chat completion returns correct content while the network adapter is disabled.,Packet capture during inference shows only loopback traffic and zero egress to any public address.,ollama show corp-assistant --modelfile prints the SYSTEM prompt and temperature 0.2 exactly as authored.,ollama-host-report.json lists tokens_per_second above zero for every approved model and an empty unapproved array.
+- ollama list shows both models with distinct digests and the derived corp-assistant model.
+- A chat completion returns correct content while the network adapter is disabled.
+- Packet capture during inference shows only loopback traffic and zero egress to any public address.
+- ollama show corp-assistant --modelfile prints the SYSTEM prompt and temperature 0.2 exactly as authored.
+- ollama-host-report.json lists tokens_per_second above zero for every approved model and an empty unapproved array.
 
 ## Operational automation
 

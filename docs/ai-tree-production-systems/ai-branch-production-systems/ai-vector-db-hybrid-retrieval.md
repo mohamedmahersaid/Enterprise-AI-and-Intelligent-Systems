@@ -114,6 +114,14 @@ Find rows that were never embedded - a silent retrieval gap after a failed backf
 SELECT count(*) FROM docs WHERE embedding IS NULL;
 ```
 
+### Command 6
+
+Count rows present in the table but absent from the vector index - the silent backfill failure
+
+```text
+psql -c "SELECT count(*) FROM documents WHERE embedding IS NULL;"
+```
+
 ## Automation scripts
 
 ### retrieval_quality_eval.py
@@ -220,73 +228,101 @@ sys.exit(0)
 
 ### Validation
 
-Hybrid measurably beats dense on identifier queries,Reranking improves MRR more than a larger generation model at equal cost,Post-filter collapse is reproduced and then eliminated,An ef_search operating point is chosen from measured data rather than a default
+- Hybrid measurably beats dense on identifier queries.
+- Reranking improves MRR more than a larger generation model at equal cost.
+- Post-filter collapse is reproduced and then eliminated.
+- An ef_search operating point is chosen from measured data rather than a default.
+- Identifier-style queries are represented in the evaluation set and measurably improve under hybrid retrieval.
 
 ## Operational automation
 
 ### Automating retrieval quality
 
 - **Run the retrieval evaluation in CI** on every change to chunking, embedding model,
-  index parameters or filter logic. Retrieval quality regresses silently otherwise.
+  index parameters or filter logic. Retrieval quality regresses silently otherwise -
+  there is no error, only worse answers, and nobody attributes those to a config change
+  made three weeks earlier.
 - **Alert on short result sets for filtered queries.** It is the signature of post-filter
-  collapse and produces no errors, so nothing else will surface it.
-- **Re-embed on a schedule when the embedding model changes**, and treat model version as
-  part of the index identity. Mixing embeddings from two model versions in one index
-  produces quietly meaningless similarity scores.
-- **Monitor for unembedded rows.** A failed backfill leaves documents invisible to
-  retrieval while the application reports healthy.
-- **Track ef_search against p95 latency** so the recall/latency trade-off is a tuned
-  parameter rather than a default nobody revisits.
+  collapse, it produces no error of its own, and it worsens as tenants are added because
+  each tenant owns a smaller share of any global top-k.
+- **Treat embedding model version as part of index identity** and re-embed the whole
+  corpus on change, swapping indexes atomically. Vectors from two model versions in one
+  index produce quietly meaningless similarity scores rather than a visible failure.
+- **Monitor for unembedded rows** against the source of truth rather than trusting the
+  ingestion job's exit status. A partially failed backfill leaves documents unreachable
+  through retrieval while every application health check reports normal.
+- **Track ef_search against p95 latency** so the recall/latency trade-off stays a tuned
+  parameter with a recorded measurement, rather than a default set once on a small
+  evaluation corpus and never revisited as the corpus grew.
+- **Keep the sparse path in the evaluation set explicitly**, with identifier-style
+  queries represented. Hybrid retrieval is easy to disable during a refactor, and the
+  regression only shows on the exact-match queries a conceptual test set does not contain.
 
 ## Troubleshooting
 
-### Scenario 1: Users report the assistant cannot find documents they know exist, but only for some queries
+### Scenario 1: Users report the assistant cannot find documents they know exist, but only for some queries.
 
-**Likely cause:** Dense-only retrieval failing on exact identifiers - error codes, SKUs and ticket numbers are not semantically distinctive
+**Likely cause:** Dense-only retrieval failing on exact identifiers - error codes, SKUs and ticket numbers are not semantically distinctive.
 
-**Resolution:** Add BM25 sparse retrieval and fuse with reciprocal rank fusion. Dense embeddings represent meaning, and an error code carries almost no meaning to embed - keyword search finds it immediately.
+**Resolution:** Add BM25 sparse retrieval and fuse the ranked lists with reciprocal rank fusion. Dense embeddings represent meaning, and an identifier carries almost none to embed, so unrelated codes in similar boilerplate cluster together. Confirm the diagnosis first by checking whether the failing queries contain literal identifiers while the working ones are conceptual - that split is the signature, and it prevents a retrieval problem being misdiagnosed as a generation problem.
 
-### Scenario 2: Filtered searches return fewer results than requested with no error
+### Scenario 2: Filtered searches return fewer results than requested with no error.
 
-**Likely cause:** Post-filtering - the metadata filter is applied after the top-k vector search rather than during traversal
+**Likely cause:** Post-filtering - the metadata filter is applied after the top-k vector search rather than during index traversal.
 
-**Resolution:** Move the filter into the query so it is evaluated during graph traversal. In pgvector use a WHERE clause with a supporting index; in Qdrant use the filter clause. Post-filtering is the most common silent RAG defect in multi-tenant systems.
+**Resolution:** Move the filter into the query so it is evaluated during graph traversal: a WHERE clause with a supporting index in pgvector, the filter clause in Qdrant. This is the most common silent defect in multi-tenant RAG, and it worsens as tenants are added because each tenant owns a smaller share of any global top-k. Add an alert on filtered queries returning short result sets, since the failure produces no error of its own.
 
-### Scenario 3: Similarity scores became meaningless after a model upgrade
+### Scenario 3: Similarity scores became meaningless after a model upgrade.
 
-**Likely cause:** The index contains embeddings from two different models; vectors from different models are not comparable
+**Likely cause:** The index contains embeddings produced by two different models, and vectors from different models occupy different spaces and are not comparable.
 
-**Resolution:** Re-embed the entire corpus with the new model and swap indexes atomically. Treat embedding model version as part of index identity so a partial migration cannot occur.
+**Resolution:** Re-embed the entire corpus with the new model and swap indexes atomically rather than migrating in place. Treat embedding model version as part of index identity so a partially migrated index cannot be queried at all - a hard failure here is greatly preferable to quietly meaningless scores, which degrade answers without any signal.
+
+### Scenario 4: Recall is good in evaluation but p95 latency is unacceptable in production.
+
+**Likely cause:** HNSW search parameters tuned for recall on a small evaluation set, with ef_search left high as the corpus grew.
+
+**Resolution:** Treat ef_search as an explicit trade-off rather than a default: sweep it against both recall@k and p95 latency on the production-sized corpus and pick the smallest value that clears the recall bar. Check index build parameters too, since an under-built graph forces a larger ef_search to reach the same recall. Record the chosen value and the measurement, because this parameter is routinely set once and never revisited.
+
+### Scenario 5: Some documents are never returned even though ingestion reported success.
+
+**Likely cause:** A partially failed embedding backfill left rows present in the database with a null or zero vector, which is invisible to the application.
+
+**Resolution:** Add a monitored count of unembedded rows and alert when it is non-zero, rather than trusting the ingestion job's exit status. A failed backfill makes documents unreachable through retrieval while every application health check reports normal, so the gap has to be measured directly against the source of truth for what should be indexed.
 
 ## Interview questions
 
 ### 1. When would you choose pgvector over a dedicated vector database?
 
-For most enterprise corpora - up to roughly a million vectors. Vectors live beside the relational data so ACL filters and joins are ordinary SQL, and there is one database to operate, secure, back up and staff. Dedicated stores earn their operational cost at much larger scale or when filtered search is central, but teams routinely adopt one before they have the problem it solves.
+For most enterprise corpora, which in my experience means up to roughly a million vectors. The decisive argument is not latency, it is operational surface. With pgvector the vectors live in the database the team already runs, so ACL filters and joins against business data are ordinary SQL rather than an application-layer merge between two systems, and there is one thing to back up, patch, secure, monitor and staff on call. A dedicated store adds a second consistency boundary: documents can exist in Postgres and not in the vector index, and reconciling that drift becomes someone's ongoing job. Dedicated stores earn their operational cost genuinely - Qdrant when per-tenant metadata filtering is central, Milvus at distributed billion-scale, Weaviate when the built-in hybrid and module ecosystem is wanted - but the common failure is adopting one before having the problem it solves, on the strength of a benchmark measured at a corpus size the organisation does not have. I would rather start on pgvector, measure recall and p95 latency against the real corpus, and migrate on evidence than inherit a second datastore by default.
 
 ### 2. What is post-filter recall collapse?
 
-When a metadata filter is applied after the top-k vector search instead of during it. The search returns k candidates by similarity, the filter removes most of them, and the caller receives two results instead of ten - with no error. It is severe in multi-tenant or ACL-filtered systems because users see thin answers while retrieval metrics look normal. The fix is filtering evaluated inside the index traversal.
+It is what happens when a metadata filter is applied after the top-k vector search instead of during index traversal. The engine retrieves k candidates ranked by similarity, then the filter removes the ones the caller is not entitled to see or did not ask for, and the caller receives two results where ten were requested - silently, with no error and no warning. It is severe specifically in multi-tenant and ACL-filtered systems, because there the filter is highly selective by design: the more tenants you have, the smaller the fraction of any global top-k that belongs to the requesting tenant, so recall degrades as the system grows. What makes it dangerous is that it is invisible from the outside. Users see thin or missing answers and describe the assistant as unreliable, while retrieval dashboards show normal latency and no error rate. The fix is filtering evaluated inside the traversal - a WHERE clause with a supporting index in pgvector, the filter clause in Qdrant - and the detection is an alert on filtered queries returning fewer results than requested, because nothing else will surface it.
 
 ### 3. Why is hybrid retrieval necessary in enterprise corpora?
 
-Because dense embeddings encode meaning, and exact identifiers carry almost none. Error codes, SKUs, ticket numbers and configuration keys are semantically empty but are exactly what people search for in enterprise documents. BM25 finds them trivially. Running both and fusing the ranked lists covers both query types.
+Because dense embeddings encode meaning and enterprise documents are full of tokens that carry almost none. An error code, a SKU, a ticket number, a configuration key or a part number is semantically nearly empty - two unrelated codes surrounded by similar boilerplate embed close together, so the correct match is buried under near-identical neighbours. Those strings are also precisely what people type into an internal assistant, because they are searching from a support ticket or a log line. BM25 finds them trivially, since it matches the literal token. The two methods fail in complementary directions: dense search handles paraphrase and concept where keyword search misses synonyms entirely, sparse search handles exact tokens where dense search dissolves them. Running both and fusing the ranked lists with reciprocal rank fusion covers both query shapes without having to classify the query in advance, which is the part teams usually get wrong when they try to route between the two. I treat hybrid as the enterprise default and would only drop the sparse path for a purely conversational corpus with no identifiers in it, verified against the evaluation set rather than assumed.
 
 ### 4. You can either add reranking or upgrade to a larger generation model. Which first?
 
-Reranking, in almost every case. A cross-encoder scores query and document together rather than embedding them separately, so it judges actual relevance far more accurately. Feeding better context to the existing model typically improves answers more than feeding the same mediocre context to a bigger one, and it costs far less.
+Reranking, in almost every case, and the reasoning is about where the error actually is. A bi-encoder embeds the query and each document independently and compares the resulting vectors, so the two never interact and the similarity score is an approximation of relevance. A cross-encoder takes the query and a candidate together as a single input and scores them jointly, which is markedly more accurate but far too slow to run across a whole corpus. The workable pattern is to over-fetch cheaply - retrieve around fifty candidates with the bi-encoder - and rerank only those down to the five that enter the prompt. If the right passage was never retrieved, a larger generation model cannot recover it; it will simply produce a more fluent answer from the wrong context, which is worse because it is more convincing. Fixing the context is therefore strictly upstream of fixing the generator, and it costs a fraction of a model upgrade. I would spend on the bigger model only after the evaluation set shows retrieval is already returning the right passages and the remaining errors are in reasoning over them.
 
 ## Certification alignment
 
-- Azure AI Engineer Associate (AI-102) - Azure AI Search, vector and hybrid retrieval
-- AWS Certified Machine Learning - Specialty: retrieval and embedding architectures
+- AI-102 Azure AI Engineer Associate - implement knowledge mining with Azure AI Search, vector and hybrid retrieval
+- AI-102 Azure AI Engineer Associate - implement generative AI solutions using retrieval-augmented generation
+- AWS Certified Machine Learning - Specialty - retrieval, embedding architectures and semantic search design
 - Google Professional Machine Learning Engineer - Vertex AI Search and vector store design
+- Vendor-neutral - information retrieval fundamentals: BM25, rank fusion and cross-encoder reranking
 
 ## References
 
-- pgvector documentation: HNSW indexing, distance operators and filtered queries
-- Qdrant documentation: filterable HNSW and payload indexing
-- Reciprocal Rank Fusion (Cormack et al.) - the standard fusion method for hybrid search
+- pgvector documentation - HNSW and IVFFlat indexing, distance operators and filtered queries
+- Qdrant documentation - filterable HNSW, payload indexing and multi-tenant collections
+- Milvus documentation - distributed architecture and index selection at billion scale
+- Reciprocal Rank Fusion (Cormack et al.) - the standard fusion method for hybrid retrieval
+- Hugging Face - sentence-transformers bi-encoder and cross-encoder reranking models
 
 ## Suggested video search
 

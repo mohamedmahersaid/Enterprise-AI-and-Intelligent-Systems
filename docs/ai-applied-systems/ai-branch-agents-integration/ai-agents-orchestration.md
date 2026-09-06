@@ -190,7 +190,11 @@ if __name__ == "__main__":
 
 ### Validation
 
-The agent successfully completes the inventory-check-and-ticket scenario end to end against a real model.,An invalid tool argument produces a logged error entry in the trajectory rather than an unhandled exception.,A loop-inducing goal is halted at exactly MAX_STEPS and returns status escalate, not an infinite run.,The LangGraph version enforces the human-in-the-loop checkpoint before create_ticket executes, confirmed by the graph pausing for approval.,Application Insights shows a distinct trace span per agent step for at least one full run.
+- The agent successfully completes the inventory-check-and-ticket scenario end to end against a real model.
+- An invalid tool argument produces a logged error entry in the trajectory rather than an unhandled exception.
+- A loop-inducing goal is halted at exactly MAX_STEPS and returns status escalate, not an infinite run.
+- The LangGraph version enforces the human-in-the-loop checkpoint before create_ticket executes, confirmed by the graph pausing for approval.
+- Application Insights shows a distinct trace span per agent step for at least one full run.
 
 ## Operational automation
 

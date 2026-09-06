@@ -237,7 +237,11 @@ if __name__ == "__main__":
 
 ### Validation
 
-quality-monitor-report.json is produced with a non-zero sample_size and populated rate fields.,The deliberate refusal-inducing change produces a report with refusal_rate above 0.15 and a non-zero exit code.,Infra-level latency and error-rate metrics remain within normal bounds during the refusal-rate regression, demonstrating the two signal classes are independent.,The Log Analytics scheduled query alert fires specifically on the tool-error scenario.,The combined dashboard panel visibly shows quality degrading while infra metrics stay flat.
+- quality-monitor-report.json is produced with a non-zero sample_size and populated rate fields.
+- The deliberate refusal-inducing change produces a report with refusal_rate above 0.15 and a non-zero exit code.
+- Infra-level latency and error-rate metrics remain within normal bounds during the refusal-rate regression, demonstrating the two signal classes are independent.
+- The Log Analytics scheduled query alert fires specifically on the tool-error scenario.
+- The combined dashboard panel visibly shows quality degrading while infra metrics stay flat.
 
 ## Operational automation
 

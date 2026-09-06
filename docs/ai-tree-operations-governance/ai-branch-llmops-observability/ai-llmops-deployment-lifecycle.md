@@ -230,7 +230,11 @@ if __name__ == "__main__":
 
 ### Validation
 
-drift.json contains non-zero scores for both deployments on a clean run with pass true.,After the deliberate system-prompt regression, drift.json shows pass false and the CI job exits 1.,The CI pipeline blocks a merge that regresses the golden-set score beyond MAX_DRIFT_PCT.,The nightly scheduled run produces a dated drift.json artifact usable to plot a trend over weeks.,The Azure Monitor alert fires within the configured evaluation window when a failing drift.json is produced.
+- drift.json contains non-zero scores for both deployments on a clean run with pass true.
+- After the deliberate system-prompt regression, drift.json shows pass false and the CI job exits 1.
+- The CI pipeline blocks a merge that regresses the golden-set score beyond MAX_DRIFT_PCT.
+- The nightly scheduled run produces a dated drift.json artifact usable to plot a trend over weeks.
+- The Azure Monitor alert fires within the configured evaluation window when a failing drift.json is produced.
 
 ## Operational automation
 

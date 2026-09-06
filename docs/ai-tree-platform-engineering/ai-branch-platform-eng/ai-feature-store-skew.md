@@ -107,6 +107,14 @@ Registered feature views with their sources and TTLs - the freshness contract pe
 feast feature-views list
 ```
 
+### Command 6
+
+List features whose materialisation is lagging their configured TTL - staleness that a failure-based alert never surfaces
+
+```text
+feast materialize-incremental $(date -u +%Y-%m-%dT%H:%M:%S) && feast feature-views list
+```
+
 ## Automation scripts
 
 ### detect_training_serving_skew.py
@@ -209,72 +217,100 @@ sys.exit(0)
 
 ### Validation
 
-The leaky model scores far higher offline than on a future holdout while the point-in-time model scores consistently,The skew detector identifies a deliberately introduced one-sided change and returns clean after the fix
+- The leaky model scores far higher offline than on a future holdout while the point-in-time model scores consistently.
+- The skew detector identifies a deliberately introduced one-sided change and returns clean after the fix.
+- The offline-versus-future-holdout gap is quantified for the leaky model, not merely observed.
+- Features are declared once and materialised to both stores, with online and offline values matching for the same entity and timestamp.
+- Per-feature TTL is configured from business meaning and a stale-value alert fires when a value is served beyond its window.
 
 ## Operational automation
 
 ### Automating feature store operations
 
-- **Schedule incremental materialisation** and alert when it lags. A stale online store
-  is skew that grows with time, and it is silent.
-- **Run skew detection continuously**, not once at launch. Skew appears gradually after
-  a change made on one side by someone who did not know about the other.
-- **Fail CI on any feature computed outside the store.** A feature calculated in
-  application code has, by definition, no offline counterpart and guarantees skew.
-- **Version feature definitions with the models that consume them.** A model trained on
-  version 3 of a feature must not silently receive version 4 at serving time.
-- **Set TTL per feature** from its business meaning, and alert on values served beyond
-  their freshness window rather than only on pipeline failure.
+- **Schedule incremental materialisation** and alert on lag rather than only on job
+  failure. A job that succeeds but runs less often than a feature's freshness requires
+  produces steadily growing staleness that no failure-based alert will ever surface.
+- **Run skew detection continuously**, not once at launch. Skew appears gradually after a
+  change made on one side by someone who had no reason to know the other existed, so a
+  one-time validation at go-live proves nothing about the following month.
+- **Fail CI on any model input that does not resolve to a registered feature.** A feature
+  computed in application code has no offline counterpart by construction, so it does not
+  merely risk skew - it guarantees it.
+- **Version feature definitions with the models that consume them.** A model trained
+  against version 3 of a feature must not silently begin receiving version 4 at serving
+  time; adopting a new definition should require retraining and re-promotion.
+- **Set TTL per feature** from its business meaning, and alert when a value is served
+  beyond its own freshness window. One store-wide TTL either wastes compute refreshing
+  stable features or serves dangerously stale values for volatile ones.
+- **Make point-in-time correctness the default path** by generating training sets only
+  through the historical-features API. Leakage is introduced by an ordinary join that
+  looks entirely reasonable in review, so the defence has to be structural.
 
 ## Troubleshooting
 
-### Scenario 1: Model performs far worse in production than offline evaluation predicted
+### Scenario 1: Model performs far worse in production than offline evaluation predicted.
 
-**Likely cause:** Either label leakage in the training join or training-serving skew in feature computation
+**Likely cause:** Either label leakage in the training join or training-serving skew in feature computation.
 
-**Resolution:** Check for leakage first by evaluating on a strictly future holdout period - a large gap confirms it. If the model holds up on future data, run skew detection to compare offline and online feature values for the same entities.
+**Resolution:** Test for leakage first, because it is the more damaging of the two: evaluate on a strictly future holdout period, and a large drop confirms it. If the model holds up on future data, run skew detection instead - compare offline and online feature values for the same entities at the same timestamps and look for systematic differences rather than noise. Diagnosing in that order avoids rebuilding a serving pipeline that was never the problem.
 
-### Scenario 2: Predictions degrade gradually over hours and recover after a pipeline run
+### Scenario 2: Predictions degrade gradually over hours and recover after a pipeline run.
 
-**Likely cause:** Online store materialisation is lagging, so inference reads stale feature values
+**Likely cause:** Online store materialisation is lagging, so inference reads increasingly stale feature values between runs.
 
-**Resolution:** Alert on materialisation lag rather than only on job failure, and reduce the interval for volatile features. A job that succeeds but runs too infrequently produces exactly this sawtooth pattern.
+**Resolution:** Alert on materialisation lag rather than only on job failure, and shorten the interval for volatile features specifically. The sawtooth recovery pattern is diagnostic of a job that succeeds but runs too infrequently for the freshness its features require, which no failure-based alert will ever catch.
 
-### Scenario 3: A model scores near-perfectly during development
+### Scenario 3: A model scores near-perfectly during development.
 
-**Likely cause:** Almost always label leakage - a feature encodes information only available after the label event
+**Likely cause:** Almost always label leakage - some feature encodes information that only becomes available after the label event.
 
-**Resolution:** Use point-in-time correct joins so each training row sees only values known at its label timestamp. Treat implausibly high offline scores as a defect signal rather than a success; genuine models rarely score near-perfectly.
+**Resolution:** Use point-in-time correct joins so each training row sees only values known at its own label timestamp, and re-evaluate. Trace the highest-importance features back to when they are actually populated in the source system relative to the label. Treat implausible offline performance as a defect signal rather than a result, because genuine models on genuine problems rarely score near-perfectly.
+
+### Scenario 4: Offline and online feature values disagree for the same entity at the same timestamp.
+
+**Likely cause:** A feature is being computed in application code on the serving path rather than read from the online store, so it has no shared definition with the offline side.
+
+**Resolution:** Move the computation into a declared feature definition materialised to both stores, and fail CI on any model input that does not resolve to a registered feature. A feature computed in application code has no offline counterpart by construction, so it does not merely risk skew - it guarantees it, and no amount of monitoring will converge the two implementations.
+
+### Scenario 5: A model degrades immediately after a feature definition change that was reviewed and approved.
+
+**Likely cause:** Feature definitions are not versioned with the models that consume them, so a model trained against version 3 silently began receiving version 4 at serving time.
+
+**Resolution:** Version feature definitions and pin each model to the versions it was trained on, so a definition change creates a new version rather than mutating the one in use. Require retraining and re-promotion to adopt it. This makes a feature change an explicit model lifecycle event instead of an invisible change to a deployed model's inputs.
 
 ## Interview questions
 
 ### 1. What is training-serving skew and why does a feature store prevent it?
 
-It is when a feature is computed differently for training than for inference - typically SQL over a warehouse versus application code at serving time. The implementations drift, so the model sees inputs that differ from what it learned on. A feature store fixes it structurally by having the transformation declared once and materialised to both the offline and online stores, so there is only one implementation to drift.
+It is the situation where a feature is computed one way for training and a different way at inference - typically a SQL expression over a warehouse for training, and application code in the serving path for inference. The two implementations are written to match and they do match on the day they are written. Then they drift, because someone changes a rounding rule, a null-handling default, a time-zone assumption or a unit on one side without knowing the other exists. The model then receives inputs at serving time that differ subtly from those it was fitted on, and performance degrades in a way no monitoring metric explains, because every individual system is healthy. A feature store prevents it structurally rather than procedurally: the transformation is declared once and materialised to both the offline store used for training and the online store used for serving, so there is a single implementation and nothing to drift against. Code review is not an adequate substitute, because the change that introduces skew is usually small, plausible, and made by someone who had no reason to think a model depended on it.
 
 ### 2. What is point-in-time correctness?
 
-A training row labelled at time T must use only feature values known at T. Joining the latest value to a historical label leaks future information, so the model appears to perform extraordinarily well offline and then fails in production where that information does not exist. It is easy to introduce with an ordinary SQL join, which is why the feature store provides a dedicated historical-features API.
+It is the requirement that a training row labelled at time T must be constructed using only feature values that were actually known at time T. The violation is easy to write and hard to see: an ordinary SQL join between a labels table and a features table matches on entity id and picks up the current feature value, which for a label from six months ago means joining information from the future onto a historical example. The model is then trained on inputs that partly encode the outcome, so it scores extraordinarily well offline - it is effectively being shown the answer - and fails in production where that information does not yet exist. This is the most expensive bug in applied machine learning, because it is not caught by any of the usual defences: the code runs, the metrics are excellent, and the review looks fine. The feature store's historical-features API exists specifically to make the correct join the default one, matching each label to the feature values as of its own timestamp rather than as of now.
 
 ### 3. Your model scores 0.99 AUC in development. What is your reaction?
 
-Suspicion, not celebration. Scores that high almost always indicate label leakage - some feature encodes information only available after the labelled event. The check is to evaluate on a strictly future holdout period; a large drop confirms leakage. Treating an implausibly good result as a defect signal is the discipline that catches this before production does.
+Suspicion, and an investigation before anyone is told the good news. Genuine models on genuine business problems rarely score near-perfectly, so an implausibly high score is far more likely to be a defect signal than a breakthrough - and the defect is almost always label leakage, where some feature encodes information that only exists after the labelled event. The classic examples are innocuous-looking: a status field updated when the case closed, an aggregate recomputed nightly over all history, a timestamp that only gets populated once the outcome is known. The check I run first is evaluation on a strictly future holdout period, entirely after the training window, because leakage collapses under it while genuine signal survives; a large gap between the two confirms it. I would then trace the highest-importance features back to when their values are actually populated in the source system relative to the label event. Treating an unbelievable result as a bug rather than a success is the discipline that catches this in development instead of in production.
 
 ### 4. Why set TTL per feature rather than per store?
 
-Because freshness requirements come from business meaning. A fraud velocity signal stale by an hour is worthless; a customer-tenure feature stale by a day is entirely fine. A single store-wide TTL either burns compute refreshing stable features or serves dangerously stale values for volatile ones. Per-feature TTL prices freshness where it matters.
+Because freshness is a property of what the feature means, not of the infrastructure holding it. A fraud velocity signal that is an hour stale is worthless and actively dangerous, since it will report normal behaviour during exactly the burst it exists to detect. A customer-tenure feature that is a day stale is entirely fine, because it changes by one day per day. Setting one TTL across the whole store forces a single compromise on both: tight enough for the volatile features and you burn compute continuously refreshing values that have not changed, loose enough for the stable ones and you serve dangerously stale values where it matters most. Per-feature TTL prices freshness where it is actually needed. It also gives you a meaningful alert: rather than only alerting when a materialisation job fails, you can alert when a value is served beyond its own freshness window, which catches the more common failure of a job that succeeds but does not run often enough for the feature it feeds.
 
 ## Certification alignment
 
-- AWS Certified Machine Learning - Specialty: feature engineering and data pipelines
-- Databricks Certified Machine Learning Professional - feature store workflows
-- Google Professional Machine Learning Engineer - ML pipeline design and data validation
+- DP-100 Designing and Implementing a Data Science Solution on Azure - feature engineering and data preparation
+- AWS Certified Machine Learning - Specialty - feature engineering, data pipelines and SageMaker Feature Store
+- Databricks Certified Machine Learning Professional - feature store workflows and point-in-time lookups
+- Google Professional Machine Learning Engineer - ML pipeline design, data validation and skew detection
+- Vendor-neutral - data engineering fundamentals: temporal joins, slowly changing dimensions and lineage
 
 ## References
 
-- Feast documentation: point-in-time joins, materialisation and feature views
-- Google: Rules of Machine Learning - training-serving skew guidance
-- Uber Michelangelo and Airbnb Zipline - the origin case studies for feature stores
+- Feast documentation - feature views, point-in-time joins and materialisation
+- Google - Rules of Machine Learning, training-serving skew guidance
+- TensorFlow Data Validation - schema and skew detection between training and serving
+- Uber Michelangelo - the origin case study for production feature stores
+- Airbnb Zipline - point-in-time correct feature generation at scale
 
 ## Suggested video search
 

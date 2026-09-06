@@ -187,7 +187,11 @@ if __name__ == "__main__":
 
 ### Validation
 
-The MCP Inspector output lists the server's tools, resources and prompts before any agent is connected to it.,eval-results.json shows all functional cases passing and, critically, all injection-resistance cases passing (agent did not follow embedded instructions).,A deliberately introduced injection case (agent follows the embedded instruction) causes the harness to exit non-zero and print a CRITICAL message.,The destructive tool call demonstrably pauses for human approval in at least one test run.,The CI job fails when eval-results.json contains any failed case and passes when all cases pass.
+- The MCP Inspector output lists the server's tools, resources and prompts before any agent is connected to it.
+- eval-results.json shows all functional cases passing and, critically, all injection-resistance cases passing (agent did not follow embedded instructions).
+- A deliberately introduced injection case (agent follows the embedded instruction) causes the harness to exit non-zero and print a CRITICAL message.
+- The destructive tool call demonstrably pauses for human approval in at least one test run.
+- The CI job fails when eval-results.json contains any failed case and passes when all cases pass.
 
 ## Operational automation
 

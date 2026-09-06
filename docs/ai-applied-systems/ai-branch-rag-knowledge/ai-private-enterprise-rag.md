@@ -188,7 +188,11 @@ if __name__ == "__main__":
 
 ### Validation
 
-The ACL enforcement script exits 0 with the correctly configured index and exits 1 with the deliberately misconfigured index.,Packet capture during a full query cycle shows zero egress traffic beyond the loopback interface.,Each test user's retrieval results contain only chunks whose aclGroups intersect that user's groups.,Ingestion, embedding and indexing all complete successfully with the network adapter disabled.,Documentation names the specific security trimming pattern used and cites the passing enforcement test as evidence.
+- The ACL enforcement script exits 0 with the correctly configured index and exits 1 with the deliberately misconfigured index.
+- Packet capture during a full query cycle shows zero egress traffic beyond the loopback interface.
+- Each test user's retrieval results contain only chunks whose aclGroups intersect that user's groups.
+- Ingestion, embedding and indexing all complete successfully with the network adapter disabled.
+- Documentation names the specific security trimming pattern used and cites the passing enforcement test as evidence.
 
 ## Operational automation
 

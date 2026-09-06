@@ -117,6 +117,14 @@ Retrieve a full run trace for debugging a wrong answer step by step
 curl -s localhost:8000/traces/<run_id> | jq ".steps[] | {node, tool, tokens}"
 ```
 
+### Command 6
+
+Retrieve the full step trace for a single agent run by run id - the primary debugging interface
+
+```text
+curl -s localhost:8000/runs/$RUN_ID/trace | jq ".steps[] | {node, tool, tokens}"
+```
+
 ## Automation scripts
 
 ### guarded_agent.py
@@ -242,74 +250,104 @@ app = graph.compile()
 
 ### Validation
 
-Unguarded agent demonstrably loops and burns budget,Guarded version aborts cleanly,Prompt injection succeeds against the service-account model and is denied under user-scoped authorisation,Irreversible actions halt for approval,A killed run resumes from persisted state
+- Unguarded agent demonstrably loops and burns budget.
+- Guarded version aborts cleanly.
+- Prompt injection succeeds against the service-account model and is denied under user-scoped authorisation.
+- Irreversible actions halt for approval.
+- A killed run resumes from persisted state.
 
 ## Operational automation
 
 ### Automating agent operations
 
-- **Enforce guardrails on the transition edge, not inside nodes.** A check inside one
-  node is bypassed by any path that does not traverse it; a check on the edge cannot be.
-- **Emit step count and token usage as metrics** and alert on aborts. A rising abort rate
-  means the agent is being asked to do something it cannot, which is a design signal.
-- **Derive tool scopes from the invoking user identity** at request time. Never let the
-  agent hold a static privileged credential.
-- **Persist state to a durable store** so long-running agents survive restarts and can
-  be resumed rather than restarted.
+- **Enforce guardrails on the transition edge, not inside nodes.** A check inside one node
+  is bypassed by any path that does not traverse it, silently, and the number of such
+  paths grows as the graph does. On the edge it is an invariant a reviewer can verify by
+  reading one piece of logic.
+- **Emit step count and token usage as metrics** and alert on abort rate rather than
+  treating aborts as routine. A rising rate means the agent is repeatedly being asked to
+  do something it cannot, which is a design signal rather than a capacity one.
+- **Derive tool scopes from the invoking user identity** at request time and never let the
+  agent hold a static privileged credential. A successful prompt injection should be
+  bounded by what that user could already have done themselves.
+- **Scope the human approval node to genuinely irreversible actions** - deleting data,
+  spending money, external communication. An over-broad gate produces approval fatigue and
+  converts the control into a rubber stamp, which is weaker than a narrow gate people read.
+- **Persist state to a durable store** at each transition so long-running agents survive
+  restarts and resume rather than restart, and record tool-call completion in that state so
+  a resume cannot re-execute a side effect that already happened.
 - **Ship traces to the observability stack** with the run id correlatable to the user
-  request. Debugging a fifteen-step agent without a trace is guesswork.
-- **Treat prompt injection tests as a regression suite** - add every successful injection
-  to it permanently.
+  request. Multi-step agents are frequently not reproducible, so the trace of the original
+  run may be the only record that will ever exist.
+- **Treat prompt injection tests as a permanent regression suite** and add every successful
+  injection to it. Injection resistance degrades with each new tool and retrieved content
+  source, so it needs continuous re-testing rather than a single review at launch.
 
 ## Troubleshooting
 
-### Scenario 1: Agent token spend spikes unpredictably and some requests never return
+### Scenario 1: Agent token spend spikes unpredictably and some requests never return.
 
-**Likely cause:** Unbounded retry loop, or two agents delegating to each other in a cycle
+**Likely cause:** An unbounded retry loop, or two agents delegating to each other in a cycle.
 
-**Resolution:** Add a hard step ceiling and a per-run token budget enforced on the transition edge. Return partial results on abort rather than failing silently, and alert on the abort rate so the underlying design problem is visible.
+**Resolution:** Add a hard step ceiling and a per-run token budget enforced on the transition edge, not inside a node that some paths can route around. Return partial results on abort rather than failing silently, so the caller gets something useful and the abort is visible. Alert on abort rate rather than treating aborts as routine - a rising rate means the agent is repeatedly being asked to do something it cannot, which is a design signal, not a capacity one.
 
-### Scenario 2: Agent performed an action the requesting user is not authorised to perform
+### Scenario 2: Agent performed an action the requesting user is not authorised to perform.
 
-**Likely cause:** Confused deputy - the agent used its own privileged service account rather than the invoking user identity
+**Likely cause:** Confused deputy - the agent used its own privileged service account rather than the invoking user's identity.
 
-**Resolution:** Scope every tool call to the invoking user permissions and require explicit confirmation for irreversible actions. Prompt injection in retrieved content is a realistic delivery mechanism, so the authorisation boundary cannot rely on the agent behaving well.
+**Resolution:** Derive tool scopes from the invoking user at request time and require explicit confirmation for irreversible actions. Treat prompt injection in retrieved content as the expected delivery mechanism rather than an edge case, which means the authorisation boundary cannot depend on the agent behaving well or on instructions telling it to refuse. Audit what the service account can reach in the interim, since the exposure is its full permission set, not the single observed action.
 
-### Scenario 3: A wrong answer cannot be diagnosed because the reasoning path is opaque
+### Scenario 3: A wrong answer cannot be diagnosed because the reasoning path is opaque.
 
-**Likely cause:** No trace of prompts, tool calls, results and routing decisions
+**Likely cause:** No trace of prompts, tool calls, results and routing decisions.
 
-**Resolution:** Log every step with a correlatable run id and expose a trace endpoint. Without it, debugging a multi-step agent is guesswork, and the number of steps makes reproduction unreliable.
+**Resolution:** Log every step with a correlatable run id and expose a trace view. Add this before the next incident rather than after, because multi-step agents are frequently not reproducible - nondeterministic generation means the same request can take a different path on replay, so the trace of the original run may be the only record that will ever exist.
+
+### Scenario 4: The agent halts for approval so often that operators approve without reading.
+
+**Likely cause:** The approval node is triggered by a category that is too broad, so routine reversible actions are queued alongside genuinely irreversible ones.
+
+**Resolution:** Scope the human-in-the-loop node to actions that are actually irreversible or high-value - deleting data, spending money, sending external communication - and let reversible actions proceed under ordinary authorisation. Approval fatigue converts a control into a rubber stamp, so an over-broad gate is not a conservative choice; it is a weaker one than a narrow gate that operators still read.
+
+### Scenario 5: A restarted agent repeats work it had already completed.
+
+**Likely cause:** State held in process memory rather than persisted, so a restart loses the checkpoint and the run begins again from the start.
+
+**Resolution:** Persist state to a durable store at each transition and resume from the last checkpoint rather than restarting. Make tool calls idempotent, or record their completion in the persisted state, so that resuming cannot re-execute a side effect that already happened - repeated work is wasteful, but a repeated irreversible action is an incident.
 
 ## Interview questions
 
 ### 1. Why choose LangGraph over a conversational agent framework for production?
 
-Explicit state. Modelling the agent as a state graph with defined nodes and conditional edges means the run can be persisted and resumed, a failure can be replayed, human approval can be inserted as a node, and a hard step ceiling is trivial to enforce on the transition. Conversational frameworks are faster to prototype but give much less control over the transition graph, which is exactly what production operability depends on.
+Explicit state, and everything operational that follows from it. Modelling the agent as a state graph - nodes that perform work, conditional edges that decide transitions, and state as a first-class object - buys four properties that production depends on and that implicit conversation loops do not provide. The run can be persisted and resumed, so a long-running agent survives a pod restart instead of starting over. A failed run can be replayed from its recorded state, which is the difference between diagnosing an incident and speculating about it. Human approval becomes a node in the graph rather than a special case bolted onto the loop, so an irreversible action can halt cleanly and resume after sign-off. And a hard step ceiling is trivial to enforce on the transition, because there is a single place where every transition passes. CrewAI expresses role-based crews quickly and AutoGen suits exploratory multi-agent dialogue, and both are good at what they are for - but neither gives the same control over the transition graph, and that control is exactly what a production review asks about. I would prototype in whatever is fastest and rebuild on an explicit graph before anything is exposed to real users or real credentials.
 
 ### 2. What is the confused deputy problem in agent systems?
 
-The agent holds a privileged service account and acts on behalf of users. Anyone who can influence its instructions - through prompt injection in a retrieved document, for example - inherits those permissions. The fix is that tools execute with the authority of the invoking user, not a shared identity, so a successful injection is bounded by what that user could already do.
+It is the situation where a privileged component acts on instructions from a less privileged source, and the classic AI instance is an agent holding a broad service account while acting on behalf of individual users. The agent can do everything the service account can do, so anyone who can influence its instructions inherits that authority. The realistic delivery mechanism is not a user typing something malicious - it is prompt injection arriving inside content the agent retrieves, a document, a ticket, a web page, which the agent reads as instruction rather than data. Once that happens the blast radius is the service account's permissions, not the requesting user's. The fix is architectural rather than behavioural: tools execute with the authority of the invoking user, derived from their identity at request time, so a successful injection is bounded by what that user could already have done themselves. Irreversible actions additionally require explicit confirmation. This is the first question a security review asks about an agent, and failing to have an answer is the most common reason such projects stall.
 
 ### 3. Why must guardrails sit on the transition rather than inside a node?
 
-Because a check inside a node only runs when that node executes. Any path that routes around it bypasses the check entirely. Enforcing the step ceiling and token budget on the conditional edge means every transition is checked regardless of path, which is what makes the bound actually hold.
+Because a check placed inside a node only runs when that node executes, and any path through the graph that routes around it bypasses the check entirely - silently, since nothing reports that a guardrail was skipped. As a graph grows and conditional edges multiply, the number of paths that avoid any particular node grows with it, so a guard that was effective when the graph had four nodes quietly stops being effective at fifteen. Enforcing the step ceiling and the per-run token budget on the conditional edge instead means every transition passes through the check by construction, regardless of which path the agent takes, which is what makes the bound an actual invariant rather than a convention. It also makes the guarantee reviewable: someone auditing the system can read the edge logic and know the ceiling holds, instead of tracing every possible route to confirm the checking node is unavoidable. The same reasoning applies to authorisation checks - anything that must always happen belongs where everything always passes.
 
 ### 4. How do you debug an agent that gave a wrong answer?
 
-From the trace: every prompt, tool call, tool result and routing decision for that run, correlatable by run id. Without it you are guessing which of many steps went wrong, and multi-step agents are often not reliably reproducible. The trace is not optional instrumentation - it is the primary debugging interface.
+From the trace, which has to exist before the incident. I want every prompt, every tool call with its arguments, every tool result, and every routing decision for that run, all correlatable by a run id that also appears in the user-facing request. Without it, debugging a fifteen-step agent means guessing which step went wrong, and the guess is rarely recoverable because multi-step agents are often not reliably reproducible - nondeterministic generation means re-running the same request can take a different path entirely. That non-reproducibility is precisely why the trace is the primary debugging interface rather than optional instrumentation: it is frequently the only record of what actually happened, and there may be no way to obtain another one. In practice the trace also answers the attribution question quickly, because a wrong answer usually resolves to one of a few causes - a tool returned bad data, a routing decision took the wrong branch, or the model misread a correct tool result - and those look completely different in a trace while looking identical from the outside.
 
 ## Certification alignment
 
-- Azure AI Engineer Associate (AI-102) - agent and orchestration patterns
-- OWASP Top 10 for LLM Applications - prompt injection and excessive agency
-- CISSP Domain 3 - authorisation models and the confused deputy problem
+- AI-102 Azure AI Engineer Associate - implement agent and orchestration patterns for generative AI solutions
+- AI-102 Azure AI Engineer Associate - apply responsible AI and content safety controls to agent workflows
+- OWASP Top 10 for LLM Applications - LLM01 prompt injection and LLM08 excessive agency
+- CISSP Domain 3 Security Architecture and Engineering - authorisation models and the confused deputy problem
+- Vendor-neutral - NIST AI RMF MANAGE function: bounding autonomy and documenting human oversight points
 
 ## References
 
-- LangGraph documentation: state graphs, checkpointing and human-in-the-loop patterns
-- OWASP Top 10 for LLM Applications: LLM01 prompt injection, LLM08 excessive agency
-- Model Context Protocol specification: tool exposure and authorisation boundaries
+- LangGraph documentation - state graphs, checkpointing, persistence and human-in-the-loop patterns
+- OWASP Top 10 for LLM Applications - LLM01 prompt injection, LLM08 excessive agency
+- Model Context Protocol specification - tool exposure and authorisation boundaries
+- Microsoft Learn - Azure AI Agent Service, tool calling and identity-scoped access
+- NIST AI Risk Management Framework - MANAGE function guidance on autonomy and oversight
 
 ## Suggested video search
 

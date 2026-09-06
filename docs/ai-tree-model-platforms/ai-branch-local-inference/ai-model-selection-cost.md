@@ -268,7 +268,11 @@ if __name__ == "__main__":
 
 ### Validation
 
-model-comparison.json contains a complete row for each candidate with non-zero n.,The cheapest model that clears the agreed quality bar is identified explicitly and differs from the most capable model.,A KQL query in Log Analytics returns token counts grouped by application, proving per-app attribution works.,The prompt-caching test shows a measurable reduction in billed input tokens on the second identical call.,The routing policy names a specific model per workload class and a numeric escalation threshold.
+- model-comparison.json contains a complete row for each candidate with non-zero n.
+- The cheapest model that clears the agreed quality bar is identified explicitly and differs from the most capable model.
+- A KQL query in Log Analytics returns token counts grouped by application, proving per-app attribution works.
+- The prompt-caching test shows a measurable reduction in billed input tokens on the second identical call.
+- The routing policy names a specific model per workload class and a numeric escalation threshold.
 
 ## Operational automation
 

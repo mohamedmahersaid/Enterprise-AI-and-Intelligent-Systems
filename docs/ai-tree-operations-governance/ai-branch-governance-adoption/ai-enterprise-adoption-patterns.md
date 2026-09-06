@@ -189,7 +189,11 @@ if __name__ == "__main__":
 
 ### Validation
 
-use-case-portfolio.json contains a priority_score and graduation_status for every entry, correctly ranked.,At least one augmentation-stage entry is correctly flagged as not ready with a specific, correct reason (insufficient sample or high override rate).,After adjusting sample_size and override_rate, the same entry's graduation_status changes to READY on re-run.,The employment-screening entry's graduation_status requires manual sign-off specifically because of its high risk_tier, independent of its sample_size or override_rate values.,The written justifications name a concrete, plausible business metric for each use case's value_score.
+- use-case-portfolio.json contains a priority_score and graduation_status for every entry, correctly ranked.
+- At least one augmentation-stage entry is correctly flagged as not ready with a specific, correct reason (insufficient sample or high override rate).
+- After adjusting sample_size and override_rate, the same entry's graduation_status changes to READY on re-run.
+- The employment-screening entry's graduation_status requires manual sign-off specifically because of its high risk_tier, independent of its sample_size or override_rate values.
+- The written justifications name a concrete, plausible business metric for each use case's value_score.
 
 ## Operational automation
 

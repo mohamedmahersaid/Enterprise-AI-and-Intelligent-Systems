@@ -289,7 +289,12 @@ exit ([int]($failCount -gt 0))
 
 ### Validation
 
-A call from the public internet to the account endpoint fails with a network or forbidden error.,A call from inside the VNet using managed identity succeeds and returns a completion.,nslookup of the account hostname from inside the VNet resolves to a private IP in the private endpoint subnet.,An API-key call fails after local authentication is disabled.,The RequestResponse table in Log Analytics contains the test request with the calling identity recorded.,The posture audit script exits with code 0 and every control reports PASS in aoai-posture.csv.
+- A call from the public internet to the account endpoint fails with a network or forbidden error.
+- A call from inside the VNet using managed identity succeeds and returns a completion.
+- nslookup of the account hostname from inside the VNet resolves to a private IP in the private endpoint subnet.
+- An API-key call fails after local authentication is disabled.
+- The RequestResponse table in Log Analytics contains the test request with the calling identity recorded.
+- The posture audit script exits with code 0 and every control reports PASS in aoai-posture.csv.
 
 ## Operational automation
 

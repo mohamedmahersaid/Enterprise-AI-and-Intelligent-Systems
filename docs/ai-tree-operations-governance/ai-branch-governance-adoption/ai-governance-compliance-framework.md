@@ -210,7 +210,11 @@ if __name__ == "__main__":
 
 ### Validation
 
-ai-compliance-report.json lists all entries with correct PASS/FAIL status matching the deliberate misconfigurations.,The unacceptable-risk entry produces a CRITICAL finding and the script exits non-zero.,The non-approved log_region entry is flagged specifically as a residency finding.,Adding conformity_assessment to the high-risk entry clears its missing-evidence finding on re-run.,The one-page policy document names a specific ISO 42001 clause for each of the five fictional use cases.
+- ai-compliance-report.json lists all entries with correct PASS/FAIL status matching the deliberate misconfigurations.
+- The unacceptable-risk entry produces a CRITICAL finding and the script exits non-zero.
+- The non-approved log_region entry is flagged specifically as a residency finding.
+- Adding conformity_assessment to the high-risk entry clears its missing-evidence finding on re-run.
+- The one-page policy document names a specific ISO 42001 clause for each of the five fictional use cases.
 
 ## Operational automation
 

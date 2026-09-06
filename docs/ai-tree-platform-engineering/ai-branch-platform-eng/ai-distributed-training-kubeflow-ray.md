@@ -202,72 +202,100 @@ exit "${RC}"
 
 ### Validation
 
-Deadlock is reproduced and then eliminated by gang scheduling,Jobs queue as units rather than partially placing,Training resumes from checkpoint after worker loss,The cost of checkpoint interval is measured rather than assumed
+- Deadlock is reproduced and then eliminated by gang scheduling.
+- Jobs queue as units rather than partially placing.
+- Training resumes from checkpoint after worker loss.
+- The cost of checkpoint interval is measured rather than assumed.
+- Resume from checkpoint is proven by deliberately killing a worker, not assumed from the checkpoint files existing.
 
 ## Operational automation
 
 ### Automating distributed training
 
-- **Kueue or Volcano is not optional** on a shared GPU cluster. Configure quotas per
-  team so GPU allocation is governed rather than first-come.
+- **Kueue or Volcano is not optional** on a shared GPU cluster. Configure per-team quotas
+  so allocation is governed rather than first-come, and so a single large job cannot
+  starve every other team by arriving first.
 - **Kubeflow Pipelines as code**, compiled and version-controlled, so the training
-  workflow is reviewable and reproducible rather than assembled in a UI.
-- **Checkpoint to shared storage always**, with the interval derived from measured spot
-  eviction rates. A checkpoint written to node-local disk on an evicted node is lost.
-- **Enable early stopping in Katib or Ray Tune.** Running every hyperparameter trial to
-  completion wastes most of the search budget on configurations that were losing early.
+  workflow is reviewable and reproducible rather than assembled by hand in a UI where
+  the current state is the only record of what it does.
+- **Checkpoint to shared storage always**, with the interval derived from the measured
+  spot eviction rate for the instance type and region rather than a default. A checkpoint
+  written to node-local disk on the node that gets evicted is not a checkpoint.
+- **Exercise the resume path deliberately** by killing a worker on a schedule, in the way
+  a database restore is tested. A checkpoint that has never been restored from is an
+  untested backup, and eviction is the wrong time to discover that.
+- **Enable early stopping in Katib or Ray Tune** and cap total trial budget. Running
+  every hyperparameter trial to completion spends most of the search budget on
+  configurations that were clearly losing after a tenth of training.
 - **Alert on allocated-but-idle GPUs.** It is the most expensive silent failure in the
-  cluster and appears healthy on every standard Kubernetes dashboard.
+  cluster: it appears healthy on every standard Kubernetes dashboard, and it reads as a
+  full cluster to capacity planning, which turns a deadlock into a hardware purchase.
 
 ## Troubleshooting
 
-### Scenario 1: Cluster shows all GPUs allocated but nvidia-smi reports near-zero utilisation and no job is progressing
+### Scenario 1: Cluster shows all GPUs allocated but nvidia-smi reports near-zero utilisation and no job is progressing.
 
-**Likely cause:** Partial placement of distributed jobs without gang scheduling - each job holds some workers and waits for the rest
+**Likely cause:** Partial placement of distributed jobs without gang scheduling - each job holds some workers and waits indefinitely for the rest.
 
-**Resolution:** Install Kueue or Volcano and resubmit. Gang scheduling places all workers or none, so jobs queue as units instead of deadlocking. Delete the stuck jobs first; they will not recover on their own.
+**Resolution:** Install Kueue or Volcano and resubmit so jobs are admitted as units. Delete the stuck jobs first, because they will not recover on their own and they are holding the GPUs the queue needs. Treat the allocated-but-idle signature as diagnostic: it looks like a full cluster to capacity planning, so the reflex is to buy hardware, which does not resolve a deadlock.
 
-### Scenario 2: Training restarts from zero after a spot instance eviction
+### Scenario 2: Training restarts from zero after a spot instance eviction.
 
-**Likely cause:** Checkpoints were written to node-local storage, or not written at all
+**Likely cause:** Checkpoints were written to node-local storage, or were never written at all.
 
-**Resolution:** Checkpoint to shared storage (object store or a shared volume) and verify resume actually works by killing a worker deliberately. A checkpoint that has never been restored from is an untested backup.
+**Resolution:** Checkpoint to shared storage - an object store or shared volume - and verify resume works by deliberately killing a worker mid-run. A checkpoint that has never been restored from is an untested backup. Set the interval from the measured eviction rate for the instance type and region rather than a default, since expected lost work is roughly half the interval.
 
-### Scenario 3: GPU utilisation stays low during training while data loading pegs the CPU
+### Scenario 3: GPU utilisation stays low during training while data loading pegs the CPU.
 
-**Likely cause:** Input pipeline is the bottleneck - the GPU is waiting for batches
+**Likely cause:** The input pipeline is the bottleneck and the GPU is waiting for batches.
 
-**Resolution:** Increase data loader workers, enable prefetch, and move preprocessing off the critical path. Buying more GPUs will not help a job that is data-loading bound, and the utilisation graph is what distinguishes the two cases.
+**Resolution:** Increase data loader workers, enable prefetch so the next batch is prepared during the current step, and move heavy preprocessing off the critical path into a precomputed dataset. Read CPU and GPU utilisation together to confirm before acting - adding GPUs to a data-bound job raises cost without raising throughput, and the two situations are indistinguishable from a cost dashboard alone.
+
+### Scenario 4: A multi-node job runs far slower than the equivalent single-node job per GPU.
+
+**Likely cause:** Gradient synchronisation is dominating - the interconnect cannot sustain all-reduce traffic at the model's gradient size each step.
+
+**Resolution:** Check the network fabric actually in use and whether RDMA or GPUDirect is available and enabled, since scheduling can silently place workers across a slower path. Increase per-worker batch size to raise the compute-to-communication ratio, and consider gradient accumulation so synchronisation happens less often. Measure scaling efficiency explicitly against the single-node baseline rather than assuming more workers means faster.
+
+### Scenario 5: Hyperparameter search consumes the whole GPU budget and returns little.
+
+**Likely cause:** Every trial runs to completion, so most of the budget is spent on configurations that were clearly losing early.
+
+**Resolution:** Enable early stopping in Katib or Ray Tune so unpromising trials are terminated on their intermediate metric, which typically reduces search cost by a large multiple for equivalent result quality. Set the search space from prior runs rather than a wide uniform grid, and cap total trial budget explicitly so an exploratory search cannot consume capacity that production retraining needs.
 
 ## Interview questions
 
 ### 1. Why does a shared GPU cluster need gang scheduling?
 
-Because distributed training needs all its workers at once. The default scheduler places pods independently, so two jobs can each get partial placement and wait indefinitely for workers that will never arrive. The cluster then reports fully allocated with almost no utilisation. Gang scheduling places all workers or none, which turns the failure into a queue rather than a deadlock.
+Because a distributed training job is an all-or-nothing unit and the default Kubernetes scheduler does not know that. It places pods independently, one at a time, as resources free up. So two eight-GPU jobs submitted to a twelve-GPU cluster can each be granted partial placement - one gets five workers, the other gets seven - and both then wait forever for workers that can never be scheduled, because the GPUs they need are held by the other job. Neither job makes progress and neither releases what it holds. The cluster reports one hundred percent allocated at close to zero percent utilisation, which is the worst possible state: it looks full to capacity planning and to every standard dashboard, so the instinctive response is to buy more GPUs, which does not fix a deadlock. Gang scheduling through Kueue, Volcano or the coscheduling plugin admits all workers of a job or none of them, so contention becomes a queue instead of a deadlock. On any cluster shared by more than one team I treat it as mandatory infrastructure rather than an optimisation, and I pair it with per-team quotas so GPU allocation is governed rather than first-come.
 
 ### 2. How do Kubeflow Pipelines and Ray relate?
 
-They operate at different levels and compose. Kubeflow Pipelines orchestrates a DAG of containerised steps - data preparation, training, evaluation, registration - where each step is a pod. Ray distributes computation within a step across workers sharing an object store. A pipeline step typically launches a Ray job.
+They operate at different levels and compose rather than compete, which is worth being explicit about because teams often evaluate them as alternatives. Kubeflow Pipelines orchestrates a DAG of containerised steps - prepare data, train, evaluate, register - where each step is a pod with declared inputs and outputs. Its value is workflow structure: the pipeline is compiled from code, version-controlled, reviewable, and reproducible, and the lineage between steps is recorded. Ray works inside a single step, distributing computation across workers that share an object store, which is what avoids serialising large tensors through an external medium every time work moves between tasks. The natural composition is a pipeline step that launches a Ray job: Kubeflow owns the reproducible outer workflow and the handoffs between stages, Ray owns parallelism within the stage that needs it. Choosing only one usually means either hand-rolling orchestration around Ray or forcing intra-step parallelism into an awkward fan-out of pods that then have to exchange tensors through storage.
 
 ### 3. How do you choose a checkpoint interval?
 
-From the measured eviction rate, not a default. On spot capacity, the expected work lost per eviction is roughly half the checkpoint interval, so frequent checkpoints reduce lost work but add I/O that slows training. Measure both and pick the interval that minimises total expected time. And always write to shared storage - a checkpoint on an evicted node is not a checkpoint.
+From the measured eviction rate on the capacity you are actually using, not from a default. The trade-off is explicit and quantifiable. On spot or preemptible GPUs the expected work lost to an eviction is roughly half the checkpoint interval, so lengthening it increases expected lost work linearly. Shortening it adds I/O that competes with training and slows every run whether or not an eviction ever occurs, and for large models writing optimiser state as well as weights that cost is not marginal. The right interval minimises total expected time - lost work plus checkpoint overhead - which requires knowing how often eviction actually happens in your region and instance type, a number most teams have never measured despite it being available from the cloud provider's history. Two rules hold regardless of the arithmetic: always write to shared storage, because a checkpoint on the node that just got evicted is not a checkpoint, and verify resume by deliberately killing a worker, because a checkpoint that has never been restored from is an untested backup rather than a recovery capability.
 
 ### 4. GPU utilisation is 20 percent during training. What do you check?
 
-Whether the job is data-loading bound rather than compute bound. If CPU is saturated while GPU idles, the input pipeline is the constraint - increase loader workers, enable prefetching, move preprocessing off the critical path. Adding GPUs to a data-bound job increases cost without improving throughput.
+First whether the job is data-loading bound rather than compute bound, because that is the common cause and it looks identical to "we need more GPUs" from a cost dashboard. The diagnostic is to read CPU and GPU together: if CPU is saturated while the GPU idles in a sawtooth pattern, the input pipeline is the constraint and the GPU is waiting for batches. The fixes are ordinary pipeline engineering - increase data loader worker count, enable prefetching so the next batch is prepared during the current step, and move heavy preprocessing off the critical path into a precomputed dataset. Adding GPUs to a data-bound job increases cost without improving throughput at all, and can make things worse by adding contention for the same storage. If the input pipeline is clearly not the bottleneck I would look next at small batch size leaving the device underfilled, at synchronisation overhead from gradient all-reduce on a slow interconnect, and at whether the job is actually running rather than partially placed and waiting, which presents as low utilisation on allocated hardware.
 
 ## Certification alignment
 
-- CKA / CKAD - the underlying Kubernetes scheduling and workload model
-- NVIDIA Certified Associate: AI Infrastructure and Operations
-- AWS Certified Machine Learning - Specialty: distributed training and spot strategy
+- CKA Certified Kubernetes Administrator - scheduling, resource management and cluster operations
+- CKAD Certified Kubernetes Application Developer - workload definition, jobs and resource requests
+- NVIDIA Certified Associate: AI Infrastructure and Operations - GPU cluster operations and monitoring
+- AWS Certified Machine Learning - Specialty - distributed training strategy and spot capacity management
+- Vendor-neutral - distributed systems fundamentals: gang scheduling, checkpoint-restart and collective communication
 
 ## References
 
-- Kubeflow documentation: Pipelines and training operators
-- Ray documentation: Ray Train, Ray Tune and cluster architecture
-- Kueue and Volcano documentation: gang scheduling and quota management
+- Kubeflow documentation - Pipelines, training operators and Katib hyperparameter tuning
+- Ray documentation - Ray Train, Ray Tune, and cluster and object store architecture
+- Kueue documentation - job queueing, quotas and gang admission on Kubernetes
+- Volcano documentation - batch scheduling and gang scheduling for AI workloads
+- NVIDIA documentation - NCCL collective communication, GPUDirect RDMA and multi-node topology
 
 ## Suggested video search
 
