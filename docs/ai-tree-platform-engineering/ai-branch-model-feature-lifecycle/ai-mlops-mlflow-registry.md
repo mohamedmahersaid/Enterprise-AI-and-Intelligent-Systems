@@ -4,14 +4,14 @@ title: 'MLOps with MLflow: Experiment Tracking, Model Registry and Promotion Gat
 level: 'Advanced'
 forest: 'AI & Intelligent Systems'
 tree: 'AI Platform Engineering'
-branch: 'AI Platform Engineering'
+branch: 'Model and Feature Lifecycle'
 ---
 
 # MLOps with MLflow: Experiment Tracking, Model Registry and Promotion Gates
 
 **Level:** Advanced
 **Tree:** [AI Platform Engineering](../README.md)
-**Branch:** [AI Platform Engineering](README.md)
+**Branch:** [Model and Feature Lifecycle](README.md)
 **Forest:** [AI & Intelligent Systems](../../../README.md)
 
 ## Explanation

@@ -4,14 +4,14 @@ title: 'Model Quantisation and GPU Sharing: Precision, MIG Partitioning and KV C
 level: 'Advanced'
 forest: 'AI & Intelligent Systems'
 tree: 'AI Platform Engineering'
-branch: 'AI Platform Engineering'
+branch: 'Training and GPU Infrastructure'
 ---
 
 # Model Quantisation and GPU Sharing: Precision, MIG Partitioning and KV Cache Sizing
 
 **Level:** Advanced
 **Tree:** [AI Platform Engineering](../README.md)
-**Branch:** [AI Platform Engineering](README.md)
+**Branch:** [Training and GPU Infrastructure](README.md)
 **Forest:** [AI & Intelligent Systems](../../../README.md)
 
 ## Explanation

@@ -6,4 +6,6 @@ Building the platform beneath the models: MLOps registries and promotion gates, 
 
 ## Branches
 
-- [AI Platform Engineering](ai-branch-platform-eng/README.md) — 4 leaves
+- [Model and Feature Lifecycle](ai-branch-model-feature-lifecycle/README.md) — 2 leaves
+- [Training and GPU Infrastructure](ai-branch-training-gpu-infrastructure/README.md) — 2 leaves
+

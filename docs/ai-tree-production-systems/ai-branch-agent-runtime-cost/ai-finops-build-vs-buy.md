@@ -4,14 +4,14 @@ title: 'AI FinOps: Token Cost Attribution, GPU Utilisation and Build-versus-Buy 
 level: 'Advanced'
 forest: 'AI & Intelligent Systems'
 tree: 'Production AI Systems'
-branch: 'Production AI Systems'
+branch: 'Agent Runtime and Cost Control'
 ---
 
 # AI FinOps: Token Cost Attribution, GPU Utilisation and Build-versus-Buy Crossover
 
 **Level:** Advanced
 **Tree:** [Production AI Systems](../README.md)
-**Branch:** [Production AI Systems](README.md)
+**Branch:** [Agent Runtime and Cost Control](README.md)
 **Forest:** [AI & Intelligent Systems](../../../README.md)
 
 ## Explanation

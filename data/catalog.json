@@ -4,7 +4,7 @@
   "description": "Enterprise AI engineering: local and offline inference with Ollama, Azure OpenAI integration, prompt engineering for operations, model selection and cost control, retrieval-augmented generation over private data, agent frameworks, Model Context Protocol servers, and AI security and evaluation.",
   "repository": "Enterprise-AI-and-Intelligent-Systems",
   "treeCount": 5,
-  "branchCount": 8,
+  "branchCount": 10,
   "expectedLeafCount": 20,
   "levelCounts": {
     "Advanced": 12,
@@ -52,7 +52,7 @@
       "level": "Advanced",
       "tree": "Applied AI Systems",
       "branch": "RAG & Knowledge Systems",
-      "path": "docs/ai-applied-systems/ai-branch-rag-knowledge/ai-rag-architecture.md"
+      "path": "docs/ai-tree-applied-systems/ai-branch-rag-knowledge/ai-rag-architecture.md"
     },
     {
       "id": "ai-private-enterprise-rag",
@@ -60,7 +60,7 @@
       "level": "Enterprise",
       "tree": "Applied AI Systems",
       "branch": "RAG & Knowledge Systems",
-      "path": "docs/ai-applied-systems/ai-branch-rag-knowledge/ai-private-enterprise-rag.md"
+      "path": "docs/ai-tree-applied-systems/ai-branch-rag-knowledge/ai-private-enterprise-rag.md"
     },
     {
       "id": "ai-agents-orchestration",
@@ -68,7 +68,7 @@
       "level": "Advanced",
       "tree": "Applied AI Systems",
       "branch": "Agents & Enterprise Integration",
-      "path": "docs/ai-applied-systems/ai-branch-agents-integration/ai-agents-orchestration.md"
+      "path": "docs/ai-tree-applied-systems/ai-branch-agents-integration/ai-agents-orchestration.md"
     },
     {
       "id": "ai-mcp-security-evaluation",
@@ -76,7 +76,7 @@
       "level": "Expert",
       "tree": "Applied AI Systems",
       "branch": "Agents & Enterprise Integration",
-      "path": "docs/ai-applied-systems/ai-branch-agents-integration/ai-mcp-security-evaluation.md"
+      "path": "docs/ai-tree-applied-systems/ai-branch-agents-integration/ai-mcp-security-evaluation.md"
     },
     {
       "id": "ai-llmops-deployment-lifecycle",
@@ -115,64 +115,64 @@
       "name": "MLOps with MLflow: Experiment Tracking, Model Registry and Promotion Gates",
       "level": "Advanced",
       "tree": "AI Platform Engineering",
-      "branch": "AI Platform Engineering",
-      "path": "docs/ai-tree-platform-engineering/ai-branch-platform-eng/ai-mlops-mlflow-registry.md"
+      "branch": "Model and Feature Lifecycle",
+      "path": "docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/ai-mlops-mlflow-registry.md"
     },
     {
       "id": "ai-distributed-training-kubeflow-ray",
       "name": "Distributed Training on Kubernetes with Kubeflow Pipelines and Ray",
       "level": "Advanced",
       "tree": "AI Platform Engineering",
-      "branch": "AI Platform Engineering",
-      "path": "docs/ai-tree-platform-engineering/ai-branch-platform-eng/ai-distributed-training-kubeflow-ray.md"
+      "branch": "Training and GPU Infrastructure",
+      "path": "docs/ai-tree-platform-engineering/ai-branch-training-gpu-infrastructure/ai-distributed-training-kubeflow-ray.md"
     },
     {
       "id": "ai-quantisation-gpu-sharing",
       "name": "Model Quantisation and GPU Sharing: Precision, MIG Partitioning and KV Cache Sizing",
       "level": "Advanced",
       "tree": "AI Platform Engineering",
-      "branch": "AI Platform Engineering",
-      "path": "docs/ai-tree-platform-engineering/ai-branch-platform-eng/ai-quantisation-gpu-sharing.md"
+      "branch": "Training and GPU Infrastructure",
+      "path": "docs/ai-tree-platform-engineering/ai-branch-training-gpu-infrastructure/ai-quantisation-gpu-sharing.md"
     },
     {
       "id": "ai-feature-store-skew",
       "name": "Feature Stores and Training-Serving Skew: Point-in-Time Correctness with Feast",
       "level": "Advanced",
       "tree": "AI Platform Engineering",
-      "branch": "AI Platform Engineering",
-      "path": "docs/ai-tree-platform-engineering/ai-branch-platform-eng/ai-feature-store-skew.md"
+      "branch": "Model and Feature Lifecycle",
+      "path": "docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/ai-feature-store-skew.md"
     },
     {
       "id": "ai-vector-db-hybrid-retrieval",
       "name": "Vector Database Selection and Hybrid Retrieval: pgvector, Qdrant, Milvus and Reranking",
       "level": "Advanced",
       "tree": "Production AI Systems",
-      "branch": "Production AI Systems",
-      "path": "docs/ai-tree-production-systems/ai-branch-production-systems/ai-vector-db-hybrid-retrieval.md"
+      "branch": "Retrieval and Evaluation",
+      "path": "docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/ai-vector-db-hybrid-retrieval.md"
     },
     {
       "id": "ai-evaluation-harness-gates",
       "name": "LLM Evaluation Harnesses and Regression Gates for Production AI",
       "level": "Advanced",
       "tree": "Production AI Systems",
-      "branch": "Production AI Systems",
-      "path": "docs/ai-tree-production-systems/ai-branch-production-systems/ai-evaluation-harness-gates.md"
+      "branch": "Retrieval and Evaluation",
+      "path": "docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/ai-evaluation-harness-gates.md"
     },
     {
       "id": "ai-agent-orchestration-guardrails",
       "name": "Agent Orchestration with LangGraph: State, Guardrails and Tool Authorisation",
       "level": "Advanced",
       "tree": "Production AI Systems",
-      "branch": "Production AI Systems",
-      "path": "docs/ai-tree-production-systems/ai-branch-production-systems/ai-agent-orchestration-guardrails.md"
+      "branch": "Agent Runtime and Cost Control",
+      "path": "docs/ai-tree-production-systems/ai-branch-agent-runtime-cost/ai-agent-orchestration-guardrails.md"
     },
     {
       "id": "ai-finops-build-vs-buy",
       "name": "AI FinOps: Token Cost Attribution, GPU Utilisation and Build-versus-Buy Crossover",
       "level": "Advanced",
       "tree": "Production AI Systems",
-      "branch": "Production AI Systems",
-      "path": "docs/ai-tree-production-systems/ai-branch-production-systems/ai-finops-build-vs-buy.md"
+      "branch": "Agent Runtime and Cost Control",
+      "path": "docs/ai-tree-production-systems/ai-branch-agent-runtime-cost/ai-finops-build-vs-buy.md"
     }
   ]
 }

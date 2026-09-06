@@ -4,14 +4,14 @@ title: 'Feature Stores and Training-Serving Skew: Point-in-Time Correctness with
 level: 'Advanced'
 forest: 'AI & Intelligent Systems'
 tree: 'AI Platform Engineering'
-branch: 'AI Platform Engineering'
+branch: 'Model and Feature Lifecycle'
 ---
 
 # Feature Stores and Training-Serving Skew: Point-in-Time Correctness with Feast
 
 **Level:** Advanced
 **Tree:** [AI Platform Engineering](../README.md)
-**Branch:** [AI Platform Engineering](README.md)
+**Branch:** [Model and Feature Lifecycle](README.md)
 **Forest:** [AI & Intelligent Systems](../../../README.md)
 
 ## Explanation
