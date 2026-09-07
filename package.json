@@ -9,7 +9,9 @@
     "validate": "npm run validate:content && npm run validate:mermaid && npm run lint:md",
     "validate:content": "node scripts/validate-content.mjs",
     "validate:mermaid": "node scripts/validate-mermaid.mjs",
-    "lint:md": "markdownlint-cli2 \"**/*.md\""
+    "lint:md": "markdownlint-cli2 \"**/*.md\"",
+    "new-leaf": "node scripts/new-leaf.mjs",
+    "regen": "node scripts/regenerate.mjs"
   },
   "devDependencies": {
     "jsdom": "30.0.1",
