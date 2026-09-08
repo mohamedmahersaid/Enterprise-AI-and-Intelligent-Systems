@@ -164,6 +164,11 @@ for (const leaf of catalog.leaves) {
     if (!h2.has(section)) errors.push(`${leaf.path} is missing required section: ## ${section}`);
   }
 
+  const todos = lines.filter((l) => l.text.includes('TODO:')).length;
+  if (todos) {
+    errors.push(`${leaf.path}: ${todos} unresolved TODO marker(s) from the scaffold - replace them before merging.`);
+  }
+
   if (!content.includes('```mermaid')) {
     errors.push(`${leaf.path} is missing a mermaid diagram.`);
   }
@@ -263,5 +268,6 @@ console.log(
 );
 console.log(
   'Checks: catalog counts, frontmatter/catalog agreement, heading hierarchy, required sections,\n'+
-  '        mermaid fences, relative links, CATALOG.md coverage, README badges and curriculum map.'
+  '        mermaid fences, unresolved scaffold TODOs, relative links, CATALOG.md coverage,\n'+
+  '        README badges and curriculum map.'
 );
