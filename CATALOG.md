@@ -52,6 +52,7 @@ Building the platform beneath the models: MLOps registries and promotion gates, 
 
 - **Advanced:** [MLOps with MLflow: Experiment Tracking, Model Registry and Promotion Gates](docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/ai-mlops-mlflow-registry.md)
 - **Advanced:** [Feature Stores and Training-Serving Skew: Point-in-Time Correctness with Feast](docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/ai-feature-store-skew.md)
+- **Intermediate:** [Fine-Tuning and PEFT: When to Tune, LoRA Adapters and Evaluation](docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/ai-fine-tuning-peft.md)
 
 ### Training and GPU Infrastructure
 

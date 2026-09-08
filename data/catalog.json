@@ -5,13 +5,13 @@
   "repository": "Enterprise-AI-and-Intelligent-Systems",
   "treeCount": 5,
   "branchCount": 10,
-  "expectedLeafCount": 20,
+  "expectedLeafCount": 21,
   "levelCounts": {
     "Advanced": 12,
     "Beginner": 1,
     "Enterprise": 2,
     "Expert": 2,
-    "Intermediate": 3
+    "Intermediate": 4
   },
   "leaves": [
     {
@@ -141,6 +141,14 @@
       "tree": "AI Platform Engineering",
       "branch": "Model and Feature Lifecycle",
       "path": "docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/ai-feature-store-skew.md"
+    },
+    {
+      "id": "ai-fine-tuning-peft",
+      "name": "Fine-Tuning and PEFT: When to Tune, LoRA Adapters and Evaluation",
+      "level": "Intermediate",
+      "tree": "AI Platform Engineering",
+      "branch": "Model and Feature Lifecycle",
+      "path": "docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/ai-fine-tuning-peft.md"
     },
     {
       "id": "ai-vector-db-hybrid-retrieval",
