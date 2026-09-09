@@ -2,7 +2,7 @@
 
 Enterprise AI engineering: local and offline inference with Ollama, Azure OpenAI integration, prompt engineering for operations, model selection and cost control, retrieval-augmented generation over private data, agent frameworks, Model Context Protocol servers, and AI security and evaluation.
 
-![Leaves](https://img.shields.io/badge/leaves-21-1f6feb) ![Coverage](https://img.shields.io/badge/catalog%20coverage-100%25-2ea44f) ![License](https://img.shields.io/badge/license-MIT-blue)
+![Leaves](https://img.shields.io/badge/leaves-22-1f6feb) ![Coverage](https://img.shields.io/badge/catalog%20coverage-100%25-2ea44f) ![License](https://img.shields.io/badge/license-MIT-blue)
 
 > [!CAUTION]
 > Commands, scripts, labs, and architecture patterns must be validated against current vendor documentation, product versions, licensing, permissions, security policy, and rollback requirements before production use.
@@ -26,11 +26,11 @@ Enterprise AI engineering: local and offline inference with Ollama, Azure OpenAI
 | [Applied AI Systems](docs/ai-tree-applied-systems/README.md) | 2 | 4 |
 | [AI Operations & Governance](docs/ai-tree-operations-governance/README.md) | 2 | 4 |
 | [AI Platform Engineering](docs/ai-tree-platform-engineering/README.md) | 2 | 5 |
-| [Production AI Systems](docs/ai-tree-production-systems/README.md) | 2 | 4 |
+| [Production AI Systems](docs/ai-tree-production-systems/README.md) | 2 | 5 |
 
-**Total:** 5 trees · 10 branches · 21 leaves
+**Total:** 5 trees · 10 branches · 22 leaves
 
-**Level distribution:** Advanced: 12 · Beginner: 1 · Enterprise: 2 · Expert: 2 · Intermediate: 4
+**Level distribution:** Advanced: 12 · Beginner: 2 · Enterprise: 2 · Expert: 2 · Intermediate: 4
 
 Browse the complete [leaf catalog](CATALOG.md) or start with the first tree above.
 
@@ -44,7 +44,7 @@ Browse the complete [leaf catalog](CATALOG.md) or start with the first tree abov
 
 ## Coverage statement
 
-Catalog coverage is 100%: all 21 authoritative leaves are present. Coverage indicates documentation completeness, not universal production validation. Product behavior changes across releases and environments.
+Catalog coverage is 100%: all 22 authoritative leaves are present. Coverage indicates documentation completeness, not universal production validation. Product behavior changes across releases and environments.
 
 ## Contributing and security
 
