@@ -7,3 +7,4 @@
 | --- | --- |
 | Advanced | [AI Agents and Orchestration Patterns](ai-agents-orchestration.md) |
 | Expert | [MCP Servers, AI Security and Evaluation](ai-mcp-security-evaluation.md) |
+| Intermediate | [Content Safety and Guardrails: Input Filtering, Output Classification and Refusal Design](ai-content-safety-guardrails.md) |

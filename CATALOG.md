@@ -29,6 +29,7 @@ Building production AI systems on top of foundation models: retrieval-augmented 
 
 - **Advanced:** [AI Agents and Orchestration Patterns](docs/ai-tree-applied-systems/ai-branch-agents-integration/ai-agents-orchestration.md)
 - **Expert:** [MCP Servers, AI Security and Evaluation](docs/ai-tree-applied-systems/ai-branch-agents-integration/ai-mcp-security-evaluation.md)
+- **Intermediate:** [Content Safety and Guardrails: Input Filtering, Output Classification and Refusal Design](docs/ai-tree-applied-systems/ai-branch-agents-integration/ai-content-safety-guardrails.md)
 
 ## AI Operations & Governance
 

@@ -1,1 +1,6 @@
 * text=auto eol=lf
+
+# Batch files must reach Windows with CRLF endings: cmd.exe is line oriented
+# and an LF-only .bat can misparse labels and multi-line blocks.
+*.bat text eol=crlf
+*.cmd text eol=crlf

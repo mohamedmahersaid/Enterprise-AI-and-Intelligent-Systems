@@ -54,3 +54,22 @@ run `npm run regen` to rewrite the derived files, rather than editing them.
 | `npm run validate:mermaid` | Every mermaid diagram parses |
 | `npm run lint:md` | Markdown style |
 | `npm run validate` | All three, in order |
+
+## On Windows
+
+`run.bat` in the repository root wraps the same npm scripts. Double-click it for
+a menu, or name a target from a shell:
+
+```bat
+run.bat validate
+run.bat new-leaf
+```
+
+It checks that Node is present and recent enough, installs dependencies from the
+lockfile on first use, and walks you through scaffolding a leaf by picking the
+tree and branch from the catalog rather than typing them. It runs the same
+checks in the same order as CI and exits non-zero on the first failure, so it
+also works unattended — `run.bat help` prints the `schtasks` line.
+
+The npm scripts remain the source of truth; `run.bat` is a convenience over
+them, not a second implementation.
