@@ -93,9 +93,11 @@ to keep in step. Page bodies are the leaf markdown rendered to HTML, with links 
 `.md` files rewritten to their generated pages.
 
 `site/` is not committed. CI builds it on every pull request, so a structural break
-fails the build, and publishes it to GitHub Pages on merge to `main`. The publish
-workflow enables Pages itself on first run, so no repository setting has to be changed
-by hand.
+fails the build, and publishes it to GitHub Pages on merge to `main`.
+
+Publishing requires Pages to be enabled once, under Settings → Pages → Source:
+**GitHub Actions**. The workflow cannot do this for you: the token it runs with may
+deploy to an enabled Pages site but not create one.
 
 Do not hand-edit anything under `site/` — the next build overwrites it. To change how
 the site looks, edit `scripts/lib/site-assets.mjs`; to change what it contains, edit
