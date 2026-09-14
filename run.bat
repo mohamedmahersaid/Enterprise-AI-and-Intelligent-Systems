@@ -12,6 +12,7 @@ rem      run.bat regen           rewrite derived files from data\catalog.json
 rem      run.bat new-leaf        guided scaffold for a new leaf
 rem      run.bat install         reinstall dependencies from the lockfile
 rem      run.bat status          branch, working tree and catalog totals
+rem      run.bat words           word-count distribution across the leaves
 rem      run.bat help            usage, including unattended scheduling
 rem
 rem  The exit code is 0 only when every step passed, so this is safe to use
@@ -35,6 +36,11 @@ call :check_toolchain
 if errorlevel 1 goto :fail
 
 if defined INTERACTIVE goto :menu
+
+rem :dispatch receives one argument, so a target that takes a flag cannot read
+rem it from inside. Capture it here, where the caller's arguments are visible.
+set "EXTRA="
+if not "%~2"=="" set "EXTRA=%~2"
 
 call :dispatch "%~1"
 goto :done
@@ -93,6 +99,7 @@ if /i "!WHAT!"=="new-leaf"  goto :t_new_leaf
 if /i "!WHAT!"=="newleaf"   goto :t_new_leaf
 if /i "!WHAT!"=="install"   goto :t_install
 if /i "!WHAT!"=="status"    goto :t_status
+if /i "!WHAT!"=="words"     goto :t_words
 if /i "!WHAT!"=="site"      goto :t_site
 if /i "!WHAT!"=="web"       goto :t_site
 if /i "!WHAT!"=="help"      goto :t_help
@@ -131,6 +138,21 @@ exit /b !ERRORLEVEL!
 call :ensure_deps
 if errorlevel 1 exit /b 1
 call :run_step "Linting markdown" lint:md
+exit /b !ERRORLEVEL!
+
+rem ---------------------------------------------------------------------------
+rem A report rather than a check: it prints numbers for a person to read, so it
+rem calls npm directly instead of going through :run_step, which is built around
+rem a step that either passes or fails. Pass --all to list every leaf.
+:t_words
+call :ensure_deps
+if errorlevel 1 exit /b 1
+echo.
+if defined EXTRA (
+    call npm run words --silent -- !EXTRA!
+) else (
+    call npm run words --silent
+)
 exit /b !ERRORLEVEL!
 
 :t_regen
@@ -326,6 +348,7 @@ echo     regen       rewrite derived files from data\catalog.json
 echo     new-leaf    guided scaffold for a new leaf
 echo     install     reinstall dependencies from the lockfile
 echo     status      branch, working tree and catalog totals
+echo     words       word-count distribution by level; add --all to list leaves
 echo     site        build the website and open it in your browser
 echo     help        this text
 echo.
