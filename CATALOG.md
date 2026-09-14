@@ -15,6 +15,7 @@ How enterprises actually host, call, tune and pay for large language models - fr
 
 - **Advanced:** [Azure OpenAI Enterprise Integration](docs/ai-tree-model-platforms/ai-branch-managed-model-services/ai-azure-openai-integration.md)
 - **Intermediate:** [Prompt Engineering for IT Operations](docs/ai-tree-model-platforms/ai-branch-managed-model-services/ai-prompt-engineering-ops.md)
+- **Intermediate:** [When the Provider Fails: Fallback Tiers, Graceful Degradation and Model Deprecation](docs/ai-tree-model-platforms/ai-branch-managed-model-services/ai-provider-failover.md)
 
 ## Applied AI Systems
 

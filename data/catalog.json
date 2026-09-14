@@ -5,13 +5,13 @@
   "repository": "Enterprise-AI-and-Intelligent-Systems",
   "treeCount": 5,
   "branchCount": 10,
-  "expectedLeafCount": 27,
+  "expectedLeafCount": 28,
   "levelCounts": {
     "Advanced": 13,
     "Beginner": 5,
     "Enterprise": 2,
     "Expert": 2,
-    "Intermediate": 5
+    "Intermediate": 6
   },
   "leaves": [
     {
@@ -45,6 +45,14 @@
       "tree": "Running and Integrating Models",
       "branch": "Managed Model Services and Prompt Discipline",
       "path": "docs/ai-tree-model-platforms/ai-branch-managed-model-services/ai-prompt-engineering-ops.md"
+    },
+    {
+      "id": "ai-provider-failover",
+      "name": "When the Provider Fails: Fallback Tiers, Graceful Degradation and Model Deprecation",
+      "level": "Intermediate",
+      "tree": "Running and Integrating Models",
+      "branch": "Managed Model Services and Prompt Discipline",
+      "path": "docs/ai-tree-model-platforms/ai-branch-managed-model-services/ai-provider-failover.md"
     },
     {
       "id": "ai-rag-architecture",
