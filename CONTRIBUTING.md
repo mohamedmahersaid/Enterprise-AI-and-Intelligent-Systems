@@ -63,6 +63,7 @@ a menu, or name a target from a shell:
 ```bat
 run.bat validate
 run.bat new-leaf
+run.bat site
 ```
 
 It checks that Node is present and recent enough, installs dependencies from the
@@ -73,3 +74,27 @@ also works unattended — `run.bat help` prints the `schtasks` line.
 
 The npm scripts remain the source of truth; `run.bat` is a convenience over
 them, not a second implementation.
+
+## The website
+
+The site is generated, not authored. `npm run build:site` reads `data/catalog.json`
+and the markdown it points at, and writes static HTML to `site/`:
+
+```bash
+npm run build:site   # write site/
+npm run serve:site   # serve it at http://localhost:4173
+```
+
+On Windows, `run.bat site` does both and opens your browser.
+
+Navigation, breadcrumbs, level badges and the search index are all derived from the
+catalog, so the site cannot disagree with it — there is no second copy of the taxonomy
+to keep in step. Page bodies are the leaf markdown rendered to HTML, with links to
+`.md` files rewritten to their generated pages.
+
+`site/` is not committed. CI builds it on every pull request, so a structural break
+fails the build, and publishes it to GitHub Pages on merge to `main`.
+
+Do not hand-edit anything under `site/` — the next build overwrites it. To change how
+the site looks, edit `scripts/lib/site-assets.mjs`; to change what it contains, edit
+`scripts/build-site.mjs`.

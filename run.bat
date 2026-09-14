@@ -55,6 +55,7 @@ echo   [5] Regenerate derived files
 echo   [6] Create a new leaf, guided
 echo   [7] Reinstall dependencies
 echo   [8] Repository status
+echo   [S] Build the website and open it in your browser
 echo   [9] Help
 echo   [0] Exit
 echo.
@@ -70,6 +71,7 @@ if "!CHOICE!"=="5" ( call :dispatch regen    & goto :menu_pause )
 if "!CHOICE!"=="6" ( call :dispatch new-leaf & goto :menu_pause )
 if "!CHOICE!"=="7" ( call :dispatch install  & goto :menu_pause )
 if "!CHOICE!"=="8" ( call :dispatch status   & goto :menu_pause )
+if /i "!CHOICE!"=="s" ( call :dispatch site  & goto :menu_pause )
 if "!CHOICE!"=="9" ( call :dispatch help     & goto :menu_pause )
 echo.
 echo   Not a valid choice.
@@ -91,6 +93,8 @@ if /i "!WHAT!"=="new-leaf"  goto :t_new_leaf
 if /i "!WHAT!"=="newleaf"   goto :t_new_leaf
 if /i "!WHAT!"=="install"   goto :t_install
 if /i "!WHAT!"=="status"    goto :t_status
+if /i "!WHAT!"=="site"      goto :t_site
+if /i "!WHAT!"=="web"       goto :t_site
 if /i "!WHAT!"=="help"      goto :t_help
 if /i "!WHAT!"=="-h"        goto :t_help
 if /i "!WHAT!"=="--help"    goto :t_help
@@ -285,6 +289,30 @@ echo [OK] Leaf scaffolded. Replace every TODO marker, then run "run.bat validate
 exit /b 0
 
 rem ---------------------------------------------------------------------------
+:t_site
+call :ensure_deps
+if errorlevel 1 exit /b 1
+echo.
+echo Building the site from data\catalog.json.
+echo.
+call npm run build:site
+if errorlevel 1 (
+    echo.
+    echo [ERROR] The site build failed. Nothing was started.
+    exit /b 1
+)
+echo.
+echo Starting a local server in a new window, then opening your browser.
+echo Close that window to stop the server.
+echo.
+start "Curriculum site" cmd /k npm run serve:site
+rem No sleep in batch: ping loopback three times is roughly two seconds, and
+rem gives the server time to bind before the browser asks for the page.
+ping -n 3 127.0.0.1 >nul 2>&1
+start "" http://localhost:4173/
+echo [OK] Serving at http://localhost:4173/
+exit /b 0
+
 :t_help
 echo.
 echo   run.bat [target]
@@ -298,6 +326,7 @@ echo     regen       rewrite derived files from data\catalog.json
 echo     new-leaf    guided scaffold for a new leaf
 echo     install     reinstall dependencies from the lockfile
 echo     status      branch, working tree and catalog totals
+echo     site        build the website and open it in your browser
 echo     help        this text
 echo.
 echo   Run with no target for an interactive menu.

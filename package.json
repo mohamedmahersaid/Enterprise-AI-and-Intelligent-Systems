@@ -11,11 +11,14 @@
     "validate:mermaid": "node scripts/validate-mermaid.mjs",
     "lint:md": "markdownlint-cli2 \"**/*.md\"",
     "new-leaf": "node scripts/new-leaf.mjs",
-    "regen": "node scripts/regenerate.mjs"
+    "regen": "node scripts/regenerate.mjs",
+    "build:site": "node scripts/build-site.mjs",
+    "serve:site": "node scripts/serve-site.mjs"
   },
   "devDependencies": {
     "jsdom": "30.0.1",
     "markdownlint-cli2": "0.23.2",
+    "marked": "18.0.13",
     "mermaid": "11.17.2"
   }
 }
