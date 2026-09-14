@@ -32,3 +32,8 @@ jobs:
 
       - name: Lint markdown
         run: npm run lint:md
+
+      # The site generator reads the catalog and every leaf, so a build failure
+      # here catches a structural break that the other checks would not.
+      - name: Build the site
+        run: npm run build:site

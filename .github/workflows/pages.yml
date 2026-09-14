@@ -1,0 +1,62 @@
+name: Publish site
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Pages needs these; nothing else in this workflow writes to the repository.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deployment at a time. Queued rather than cancelled, so a push that lands
+# during a deploy still publishes rather than being silently dropped.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # Actions are pinned to a commit SHA rather than a tag: a tag can be moved
+      # to point at different code, a SHA cannot. The trailing comment records
+      # which release each SHA corresponds to so it can be reviewed and bumped.
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # The site is derived from the catalog, so publishing content that fails
+      # validation would put known-broken pages in front of readers.
+      - name: Validate before publishing
+        run: npm run validate
+
+      - name: Build the site
+        run: npm run build:site
+
+      # NOT SHA-pinned, unlike the actions above and in validate.yml. The SHAs
+      # for these three could not be resolved from the authoring environment,
+      # and a guessed SHA fails the job in a way that looks like a Pages
+      # misconfiguration. Resolve and pin them before relying on this workflow:
+      #   gh api repos/actions/configure-pages/git/refs/tags
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4 # see the pinning note in the build job

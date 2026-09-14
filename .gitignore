@@ -2,3 +2,6 @@ node_modules/
 .DS_Store
 Thumbs.db
 *.log
+
+# Generated site. Built by CI and served by Pages; never committed.
+site/
