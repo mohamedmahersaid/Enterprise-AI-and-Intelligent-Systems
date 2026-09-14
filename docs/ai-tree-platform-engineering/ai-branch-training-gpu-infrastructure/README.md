@@ -7,3 +7,4 @@
 | --- | --- |
 | Advanced | [Distributed Training on Kubernetes with Kubeflow Pipelines and Ray](ai-distributed-training-kubeflow-ray.md) |
 | Advanced | [Model Quantisation and GPU Sharing: Precision, MIG Partitioning and KV Cache Sizing](ai-quantisation-gpu-sharing.md) |
+| Beginner | [Your First GPU Job: What You Are Renting, Why It Queues and How Not to Waste It](ai-first-gpu-job.md) |

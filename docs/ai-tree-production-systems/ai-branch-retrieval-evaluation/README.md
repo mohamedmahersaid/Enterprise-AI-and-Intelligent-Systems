@@ -7,3 +7,4 @@
 | --- | --- |
 | Advanced | [Vector Database Selection and Hybrid Retrieval: pgvector, Qdrant, Milvus and Reranking](ai-vector-db-hybrid-retrieval.md) |
 | Advanced | [LLM Evaluation Harnesses and Regression Gates for Production AI](ai-evaluation-harness-gates.md) |
+| Beginner | [How Retrieval Finds Things: Keywords, Meaning and Why Each One Misses](ai-how-retrieval-finds-things.md) |
