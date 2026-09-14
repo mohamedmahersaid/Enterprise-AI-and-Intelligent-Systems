@@ -7,4 +7,4 @@ Running AI systems as production software - deployment pipelines, drift detectio
 ## Branches
 
 - [LLMOps and Production Observability](ai-branch-llmops-observability/README.md) — 3 leaves
-- [Governance, Compliance and Enterprise Adoption](ai-branch-governance-adoption/README.md) — 2 leaves
+- [Governance, Compliance and Enterprise Adoption](ai-branch-governance-adoption/README.md) — 3 leaves
