@@ -39,6 +39,7 @@ Running AI systems as production software - deployment pipelines, drift detectio
 
 - **Intermediate:** [LLMOps: Deployment, Versioning and Drift Detection](docs/ai-tree-operations-governance/ai-branch-llmops-observability/ai-llmops-deployment-lifecycle.md)
 - **Advanced:** [AI Observability and Production Performance Monitoring](docs/ai-tree-operations-governance/ai-branch-llmops-observability/ai-observability-performance-monitoring.md)
+- **Advanced:** [AI Incident Response: Detection, Containment and Postmortems for Non-Deterministic Systems](docs/ai-tree-operations-governance/ai-branch-llmops-observability/ai-incident-response.md)
 
 ### Governance, Compliance and Enterprise Adoption
 
