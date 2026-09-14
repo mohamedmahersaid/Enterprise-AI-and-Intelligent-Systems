@@ -5,10 +5,10 @@
   "repository": "Enterprise-AI-and-Intelligent-Systems",
   "treeCount": 5,
   "branchCount": 10,
-  "expectedLeafCount": 25,
+  "expectedLeafCount": 26,
   "levelCounts": {
     "Advanced": 13,
-    "Beginner": 3,
+    "Beginner": 4,
     "Enterprise": 2,
     "Expert": 2,
     "Intermediate": 5
@@ -61,6 +61,14 @@
       "tree": "Applied AI Systems",
       "branch": "RAG & Knowledge Systems",
       "path": "docs/ai-tree-applied-systems/ai-branch-rag-knowledge/ai-private-enterprise-rag.md"
+    },
+    {
+      "id": "ai-do-you-need-rag",
+      "name": "Do You Need RAG? Context Windows, Grounding and the Cheapest Thing That Works",
+      "level": "Beginner",
+      "tree": "Applied AI Systems",
+      "branch": "RAG & Knowledge Systems",
+      "path": "docs/ai-tree-applied-systems/ai-branch-rag-knowledge/ai-do-you-need-rag.md"
     },
     {
       "id": "ai-agents-orchestration",
