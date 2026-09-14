@@ -5,10 +5,10 @@
   "repository": "Enterprise-AI-and-Intelligent-Systems",
   "treeCount": 5,
   "branchCount": 10,
-  "expectedLeafCount": 28,
+  "expectedLeafCount": 30,
   "levelCounts": {
     "Advanced": 13,
-    "Beginner": 5,
+    "Beginner": 7,
     "Enterprise": 2,
     "Expert": 2,
     "Intermediate": 6
@@ -175,6 +175,14 @@
       "path": "docs/ai-tree-platform-engineering/ai-branch-training-gpu-infrastructure/ai-quantisation-gpu-sharing.md"
     },
     {
+      "id": "ai-first-gpu-job",
+      "name": "Your First GPU Job: What You Are Renting, Why It Queues and How Not to Waste It",
+      "level": "Beginner",
+      "tree": "AI Platform Engineering",
+      "branch": "Training and GPU Infrastructure",
+      "path": "docs/ai-tree-platform-engineering/ai-branch-training-gpu-infrastructure/ai-first-gpu-job.md"
+    },
+    {
       "id": "ai-feature-store-skew",
       "name": "Feature Stores and Training-Serving Skew: Point-in-Time Correctness with Feast",
       "level": "Advanced",
@@ -213,6 +221,14 @@
       "tree": "Production AI Systems",
       "branch": "Retrieval and Evaluation",
       "path": "docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/ai-evaluation-harness-gates.md"
+    },
+    {
+      "id": "ai-how-retrieval-finds-things",
+      "name": "How Retrieval Finds Things: Keywords, Meaning and Why Each One Misses",
+      "level": "Beginner",
+      "tree": "Production AI Systems",
+      "branch": "Retrieval and Evaluation",
+      "path": "docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/ai-how-retrieval-finds-things.md"
     },
     {
       "id": "ai-agent-orchestration-guardrails",

@@ -64,6 +64,7 @@ Building the platform beneath the models: MLOps registries and promotion gates, 
 
 - **Advanced:** [Distributed Training on Kubernetes with Kubeflow Pipelines and Ray](docs/ai-tree-platform-engineering/ai-branch-training-gpu-infrastructure/ai-distributed-training-kubeflow-ray.md)
 - **Advanced:** [Model Quantisation and GPU Sharing: Precision, MIG Partitioning and KV Cache Sizing](docs/ai-tree-platform-engineering/ai-branch-training-gpu-infrastructure/ai-quantisation-gpu-sharing.md)
+- **Beginner:** [Your First GPU Job: What You Are Renting, Why It Queues and How Not to Waste It](docs/ai-tree-platform-engineering/ai-branch-training-gpu-infrastructure/ai-first-gpu-job.md)
 
 ## Production AI Systems
 
@@ -73,6 +74,7 @@ Running AI systems in production: vector store selection and retrieval quality, 
 
 - **Advanced:** [Vector Database Selection and Hybrid Retrieval: pgvector, Qdrant, Milvus and Reranking](docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/ai-vector-db-hybrid-retrieval.md)
 - **Advanced:** [LLM Evaluation Harnesses and Regression Gates for Production AI](docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/ai-evaluation-harness-gates.md)
+- **Beginner:** [How Retrieval Finds Things: Keywords, Meaning and Why Each One Misses](docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/ai-how-retrieval-finds-things.md)
 
 ### Agent Runtime and Cost Control
 
