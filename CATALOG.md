@@ -46,6 +46,7 @@ Running AI systems as production software - deployment pipelines, drift detectio
 
 - **Enterprise:** [AI Governance and Compliance: ISO 42001, EU AI Act and Data Residency](docs/ai-tree-operations-governance/ai-branch-governance-adoption/ai-governance-compliance-framework.md)
 - **Expert:** [Enterprise AI Adoption Patterns and Use-Case Selection](docs/ai-tree-operations-governance/ai-branch-governance-adoption/ai-enterprise-adoption-patterns.md)
+- **Beginner:** [Before the Framework: AI Inventory, Acceptable Use and Who Decides](docs/ai-tree-operations-governance/ai-branch-governance-adoption/ai-inventory-acceptable-use.md)
 
 ## AI Platform Engineering
 
