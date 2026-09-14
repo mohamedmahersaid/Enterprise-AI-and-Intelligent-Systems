@@ -6,5 +6,5 @@ Building production AI systems on top of foundation models: retrieval-augmented 
 
 ## Branches
 
-- [RAG & Knowledge Systems](ai-branch-rag-knowledge/README.md) — 2 leaves
+- [RAG & Knowledge Systems](ai-branch-rag-knowledge/README.md) — 3 leaves
 - [Agents & Enterprise Integration](ai-branch-agents-integration/README.md) — 3 leaves

@@ -24,6 +24,7 @@ Building production AI systems on top of foundation models: retrieval-augmented 
 
 - **Advanced:** [RAG Architecture: Embeddings, Chunking and Vector Search](docs/ai-tree-applied-systems/ai-branch-rag-knowledge/ai-rag-architecture.md)
 - **Enterprise:** [Grounding Enterprise Data Privately: Offline RAG and Access Control](docs/ai-tree-applied-systems/ai-branch-rag-knowledge/ai-private-enterprise-rag.md)
+- **Beginner:** [Do You Need RAG? Context Windows, Grounding and the Cheapest Thing That Works](docs/ai-tree-applied-systems/ai-branch-rag-knowledge/ai-do-you-need-rag.md)
 
 ### Agents & Enterprise Integration
 
