@@ -46,14 +46,14 @@ jobs:
       # and a guessed SHA fails the job in a way that looks like a Pages
       # misconfiguration. Resolve and pin them before relying on this workflow:
       #   gh api repos/actions/configure-pages/git/refs/tags
+      # Pages must be enabled once by hand: Settings -> Pages -> Source:
+      # GitHub Actions. The action's enablement: true option does not avoid
+      # this - it was tried in run 34823591352 and failed with "Create Pages
+      # site failed. Error: Resource not accessible by integration", because
+      # pages: write permits deploying to an enabled site but not creating
+      # one. Creating it needs a token with repository administration rights,
+      # which the default GITHUB_TOKEN is not.
       - uses: actions/configure-pages@v5
-        with:
-          # Turn Pages on for the repository if it is not already enabled,
-          # rather than failing the run - which is what happened on the first
-          # publish. This makes the site publicly readable the first time the
-          # workflow succeeds; the repository itself is already public.
-          # Uses the pages: write permission granted above.
-          enablement: true
       - uses: actions/upload-pages-artifact@v4
         with:
           path: site
