@@ -8,3 +8,4 @@
 | Advanced | [MLOps with MLflow: Experiment Tracking, Model Registry and Promotion Gates](ai-mlops-mlflow-registry.md) |
 | Advanced | [Feature Stores and Training-Serving Skew: Point-in-Time Correctness with Feast](ai-feature-store-skew.md) |
 | Intermediate | [Fine-Tuning and PEFT: When to Tune, LoRA Adapters and Evaluation](ai-fine-tuning-peft.md) |
+| Beginner | [From Notebook to a Reproducible Training Run: Environments, Seeds, Data Versions and Artifacts](ai-reproducible-training-runs.md) |

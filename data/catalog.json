@@ -5,10 +5,10 @@
   "repository": "Enterprise-AI-and-Intelligent-Systems",
   "treeCount": 5,
   "branchCount": 10,
-  "expectedLeafCount": 24,
+  "expectedLeafCount": 25,
   "levelCounts": {
     "Advanced": 13,
-    "Beginner": 2,
+    "Beginner": 3,
     "Enterprise": 2,
     "Expert": 2,
     "Intermediate": 5
@@ -165,6 +165,14 @@
       "tree": "AI Platform Engineering",
       "branch": "Model and Feature Lifecycle",
       "path": "docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/ai-fine-tuning-peft.md"
+    },
+    {
+      "id": "ai-reproducible-training-runs",
+      "name": "From Notebook to a Reproducible Training Run: Environments, Seeds, Data Versions and Artifacts",
+      "level": "Beginner",
+      "tree": "AI Platform Engineering",
+      "branch": "Model and Feature Lifecycle",
+      "path": "docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/ai-reproducible-training-runs.md"
     },
     {
       "id": "ai-vector-db-hybrid-retrieval",
