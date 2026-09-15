@@ -5,9 +5,9 @@
   "repository": "Enterprise-AI-and-Intelligent-Systems",
   "treeCount": 5,
   "branchCount": 10,
-  "expectedLeafCount": 30,
+  "expectedLeafCount": 31,
   "levelCounts": {
-    "Advanced": 13,
+    "Advanced": 14,
     "Beginner": 7,
     "Enterprise": 2,
     "Expert": 2,
@@ -30,6 +30,14 @@
       "tree": "Running and Integrating Models",
       "branch": "Local and Private Inference",
       "path": "docs/ai-tree-model-platforms/ai-branch-local-inference/ai-model-selection-cost.md"
+    },
+    {
+      "id": "ai-local-inference-at-scale",
+      "name": "Local Inference at Production Scale: Batching, KV Cache and the Point It Stops Being Cheaper",
+      "level": "Advanced",
+      "tree": "Running and Integrating Models",
+      "branch": "Local and Private Inference",
+      "path": "docs/ai-tree-model-platforms/ai-branch-local-inference/ai-local-inference-at-scale.md"
     },
     {
       "id": "ai-azure-openai-integration",
@@ -414,6 +422,10 @@
         {
           "leaf": "ai-model-selection-cost",
           "why": "Size and capability against the actual task. The largest model that fits the budget is rarely the right answer."
+        },
+        {
+          "leaf": "ai-local-inference-at-scale",
+          "why": "Before comparing local against managed, find out what local actually delivers under concurrency. The single-stream benchmark that makes self-hosting look cheap is measuring a condition production never has."
         },
         {
           "leaf": "ai-azure-openai-integration",

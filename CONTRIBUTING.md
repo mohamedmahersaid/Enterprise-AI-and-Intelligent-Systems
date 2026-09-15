@@ -52,8 +52,8 @@ exactly that padding. `npm run words` prints the current distribution, and
 `npm run words -- --all` lists every leaf, so the band above can be re-derived
 rather than trusted.
 
-The Beginner leaves are the longest, not the shortest — median 3,283 words
-against 2,826 for Advanced. A reader without the vocabulary needs it built
+The Beginner leaves are the longest, not the shortest — around 3,300 words
+against roughly 2,900 for Advanced. A reader without the vocabulary needs it built
 before a point can land; an Advanced reader already has it and wants the
 trade-off. Write to the level, and expect an introductory leaf to cost more
 words than an expert one, not fewer.
