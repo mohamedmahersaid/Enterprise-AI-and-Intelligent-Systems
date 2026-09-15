@@ -62,6 +62,8 @@ nav.side ul { list-style: none; margin: 0 0 4px; padding: 0; }
 nav.side li { margin: 3px 0; }
 nav.side a { color: var(--fg); display: block; padding: 2px 0; }
 nav.side a.current { color: var(--accent); font-weight: 600; }
+nav.side ul.sidebar-top { margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
+nav.side ul.sidebar-top a { font-weight: 600; }
 main { flex: 1 1 auto; min-width: 0; padding: 24px 0 80px; }
 main h1 { font-size: 30px; line-height: 1.25; margin: 0 0 6px; letter-spacing: -.01em; }
 main h2 { font-size: 22px; margin: 32px 0 10px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
