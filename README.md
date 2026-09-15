@@ -32,7 +32,10 @@ Enterprise AI engineering: local and offline inference with Ollama, Azure OpenAI
 
 **Level distribution:** Advanced: 13 · Beginner: 7 · Enterprise: 2 · Expert: 2 · Intermediate: 6
 
-Browse the complete [leaf catalog](CATALOG.md) or start with the first tree above.
+Browse the complete [leaf catalog](CATALOG.md), or follow a [learning path](PATHS.md)
+if you would rather be told what to read in what order. The catalog lists every leaf
+by tree and branch; the paths list them in the order a particular reader needs them,
+and every leaf appears in at least one path.
 
 ## How to use this repository
 

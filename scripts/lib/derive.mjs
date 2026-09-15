@@ -10,6 +10,20 @@ import path from 'node:path';
 
 export const CATALOG_PATH = 'data/catalog.json';
 
+/**
+ * GitHub's heading-anchor slug: lowercase, drop punctuation other than hyphen
+ * and underscore, spaces to hyphens. Exported because the site generator has
+ * to produce the exact same id on its headings - otherwise an in-page link
+ * that works on GitHub is dead on the published site, or the reverse.
+ */
+export function slug(text) {
+  return text
+    .toLowerCase()
+    .replace(/[^\w\- ]+/g, '')
+    .trim()
+    .replace(/ +/g, '-');
+}
+
 export function readCatalog() {
   return JSON.parse(fs.readFileSync(CATALOG_PATH, 'utf8'));
 }
@@ -35,6 +49,7 @@ export function recount(catalog) {
   catalog.expectedLeafCount = catalog.leaves.length;
   catalog.treeCount = new Set(catalog.leaves.map((l) => l.tree)).size;
   catalog.branchCount = new Set(catalog.leaves.map((l) => `${l.tree}/${l.branch}`)).size;
+  catalog.pathCount = (catalog.paths ?? []).length;
   const levels = {};
   for (const leaf of catalog.leaves) levels[leaf.level] = (levels[leaf.level] ?? 0) + 1;
   catalog.levelCounts = Object.fromEntries(Object.keys(levels).sort().map((k) => [k, levels[k]]));
@@ -96,6 +111,50 @@ function writeCatalogMd(catalog, trees) {
   fs.writeFileSync('CATALOG.md', `${out.join('\n')}\n`);
 }
 
+/**
+ * PATHS.md: the reading orders through the curriculum, generated from
+ * catalog.paths. The ordering and the reason for each step are editorial
+ * judgement and live in the catalog; every name, level and link here is
+ * looked up from the leaf record, so a renamed or moved leaf cannot leave a
+ * path pointing at the wrong thing.
+ */
+function writePathsMd(catalog) {
+  const byId = new Map(catalog.leaves.map((l) => [l.id, l]));
+  const out = [
+    '# Learning paths',
+    '',
+    'The catalog lists every leaf by tree and branch. This file lists them in the',
+    'order a particular reader should meet them.',
+    '',
+    'Paths overlap on purpose - a leaf that matters to three audiences appears in',
+    'three paths - and every leaf in the curriculum appears in at least one path,',
+    'which is enforced by `npm run validate`. Nothing here is a prerequisite chain:',
+    'a step you already know is a step you skip.',
+    '',
+    '| Path | Steps | For |',
+    '| --- | ---: | --- |',
+  ];
+
+  for (const p of catalog.paths) {
+    out.push(`| [${p.name}](#${slug(p.name)}) | ${p.steps.length} | ${p.audience} |`);
+  }
+
+  for (const p of catalog.paths) {
+    out.push('', `## ${p.name}`, '',
+      `**For:** ${p.audience}`, '', p.summary, '');
+    p.steps.forEach((step, i) => {
+      const leaf = byId.get(step.leaf);
+      if (!leaf) {
+        throw new Error(`catalog path '${p.id}' step ${i + 1} references unknown leaf '${step.leaf}'.`);
+      }
+      out.push(`${i + 1}. **[${leaf.name}](${leaf.path})** &middot; ${leaf.level}`);
+      out.push(`   ${step.why}`);
+    });
+  }
+
+  fs.writeFileSync('PATHS.md', `${out.join('\n')}\n`);
+}
+
 function writeReadme(catalog, trees) {
   let readme = fs.readFileSync('README.md', 'utf8');
   const leafCount = catalog.leaves.length;
@@ -128,5 +187,6 @@ export function regenerate(catalog) {
   writeBranchReadmes(trees);
   writeTreeReadmes(trees);
   writeCatalogMd(catalog, trees);
+  writePathsMd(catalog);
   writeReadme(catalog, trees);
 }

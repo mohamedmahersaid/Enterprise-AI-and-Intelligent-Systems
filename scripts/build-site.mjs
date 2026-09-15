@@ -13,7 +13,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, wri
 import { dirname, join, relative, sep } from 'node:path';
 import { marked } from 'marked';
 
-import { readCatalog, group } from './lib/derive.mjs';
+import { readCatalog, group, slug } from './lib/derive.mjs';
 import { STYLE, SCRIPT } from './lib/site-assets.mjs';
 
 const OUT = 'site';
@@ -26,6 +26,15 @@ const renderer = new marked.Renderer();
 
 // Mermaid blocks must reach the browser as <pre class="mermaid">, not as a
 // highlighted code block, or the client-side renderer never sees them.
+// marked emits no heading ids of its own, so an in-page link that works on
+// GitHub would be dead here. Using the same slug function as the markdown
+// generators keeps a single definition of what a heading anchor is.
+renderer.heading = function ({ tokens, depth }) {
+  const text = this.parser.parseInline(tokens);
+  const id = slug(this.parser.parseInline(tokens, this.parser.textRenderer));
+  return `<h${depth} id="${escapeHtml(id)}">${text}</h${depth}>\n`;
+};
+
 renderer.code = function ({ text, lang }) {
   if (lang === 'mermaid') return `<pre class="mermaid">${escapeHtml(text)}</pre>\n`;
   const cls = lang ? ` class="language-${escapeHtml(lang)}"` : '';
@@ -113,7 +122,17 @@ ${body}
 
 function buildSidebar(grouped) {
   return (base, current) => {
-    const parts = [];
+    // The catalog and the learning paths are the two ways in. They sit above
+    // the tree listing because a reader who does not yet know which tree they
+    // want is exactly the reader who needs them.
+    const top = [
+      ['Learning paths', 'PATHS.html'],
+      ['Full catalog', 'CATALOG.html'],
+    ].map(([label, href]) => {
+      const active = current === href ? ' class="current"' : '';
+      return `<li><a href="${base}${href}"${active}>${escapeHtml(label)}</a></li>`;
+    }).join('');
+    const parts = [`<ul class="sidebar-top">${top}</ul>`];
     for (const [tree, branches] of grouped) {
       parts.push(`<h2>${escapeHtml(tree)}</h2>`);
       for (const [branch, leaves] of branches) {

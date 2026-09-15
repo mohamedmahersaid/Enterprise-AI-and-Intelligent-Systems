@@ -1,6 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
+import { slug } from './lib/derive.mjs';
+
 const catalog = JSON.parse(fs.readFileSync('data/catalog.json', 'utf8'));
 const errors = [];
 
@@ -186,7 +188,7 @@ function findNavFiles(dir) {
   return found;
 }
 
-const navFiles = ['README.md', 'CATALOG.md', ...findNavFiles('docs')];
+const navFiles = ['README.md', 'CATALOG.md', 'PATHS.md', ...findNavFiles('docs')];
 for (const file of navFiles) {
   if (!fs.existsSync(file)) continue;
   checkLinks(parseLines(fs.readFileSync(file, 'utf8')), file);
@@ -198,6 +200,90 @@ if (fs.existsSync('CATALOG.md')) {
     if (!catalogMd.includes(leaf.path)) errors.push(`CATALOG.md does not link leaf: ${leaf.path}`);
   }
 }
+
+// --- learning paths ----------------------------------------------------------
+
+/**
+ * Paths carry the editorial ordering; the leaves carry the content. These
+ * checks keep the two from drifting apart in the three ways they can:
+ * a path pointing at a leaf that no longer exists, a leaf that no path
+ * reaches, and PATHS.md disagreeing with the catalog it is generated from.
+ *
+ * The orphan check is the one with teeth. Without it a leaf can be added and
+ * simply never appear in any reading order - present in the catalog, invisible
+ * to anyone following a path. Placing a new leaf is a decision the author
+ * should have to make, so CI makes them make it.
+ */
+function checkPaths() {
+  const paths = catalog.paths ?? [];
+  if (!paths.length) {
+    errors.push('data/catalog.json has no paths. Every leaf must be reachable from a reading order.');
+    return;
+  }
+
+  if (catalog.pathCount !== paths.length) {
+    errors.push(`catalog pathCount is ${catalog.pathCount} but there are ${paths.length} paths. Run 'npm run regen'.`);
+  }
+
+  const leafIds = new Set(catalog.leaves.map((l) => l.id));
+  const reached = new Set();
+  const pathIds = new Set();
+
+  for (const p of paths) {
+    for (const field of ['id', 'name', 'audience', 'summary']) {
+      if (!p[field]) errors.push(`catalog path '${p.id ?? '(no id)'}' is missing '${field}'.`);
+    }
+    if (pathIds.has(p.id)) errors.push(`catalog has two paths with id '${p.id}'.`);
+    pathIds.add(p.id);
+
+    if (!p.steps?.length) {
+      errors.push(`catalog path '${p.id}' has no steps.`);
+      continue;
+    }
+    const seen = new Set();
+    for (const [i, step] of p.steps.entries()) {
+      if (!leafIds.has(step.leaf)) {
+        errors.push(`catalog path '${p.id}' step ${i + 1} references unknown leaf '${step.leaf}'.`);
+        continue;
+      }
+      if (seen.has(step.leaf)) {
+        errors.push(`catalog path '${p.id}' visits leaf '${step.leaf}' twice.`);
+      }
+      seen.add(step.leaf);
+      reached.add(step.leaf);
+      if (!step.why) errors.push(`catalog path '${p.id}' step ${i + 1} ('${step.leaf}') has no 'why'.`);
+    }
+  }
+
+  for (const leaf of catalog.leaves) {
+    if (!reached.has(leaf.id)) {
+      errors.push(
+        `leaf '${leaf.id}' appears in no learning path. Add it to a path in data/catalog.json ` +
+          `and run 'npm run regen'.`
+      );
+    }
+  }
+
+  if (!fs.existsSync('PATHS.md')) {
+    errors.push("PATHS.md is missing. Run 'npm run regen'.");
+    return;
+  }
+  const pathsMd = fs.readFileSync('PATHS.md', 'utf8');
+  for (const p of paths) {
+    if (!pathsMd.includes(`## ${p.name}`)) errors.push(`PATHS.md has no section for path '${p.name}'.`);
+    const anchor = `#${slug(p.name)}`;
+    if (!pathsMd.includes(`](${anchor})`)) {
+      errors.push(`PATHS.md index does not link path '${p.name}' at '${anchor}'.`);
+    }
+  }
+  for (const leaf of catalog.leaves) {
+    if (reached.has(leaf.id) && !pathsMd.includes(leaf.path)) {
+      errors.push(`PATHS.md does not link leaf '${leaf.id}', which a path references. Run 'npm run regen'.`);
+    }
+  }
+}
+
+checkPaths();
 
 // --- README derived figures --------------------------------------------------
 
@@ -269,5 +355,6 @@ console.log(
 console.log(
   'Checks: catalog counts, frontmatter/catalog agreement, heading hierarchy, required sections,\n'+
   '        mermaid fences, unresolved scaffold TODOs, relative links, CATALOG.md coverage,\n'+
+  '        learning paths (every leaf reachable, no dangling step, PATHS.md in step),\n'+
   '        README badges and curriculum map.'
 );
