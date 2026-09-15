@@ -40,8 +40,23 @@ diagram), Commands, Automation scripts, Lab (with validation criteria stating
 evidence rather than activity), Operational automation, Troubleshooting (five
 scenarios, each with cause and resolution), Interview questions (four, answered
 as a practitioner would in an interview rather than as definitions),
-Certification alignment, and References. Existing leaves run roughly 2,700-3,300
-words; match that depth rather than the headings alone.
+Certification alignment, and References. Match that depth rather than the
+headings alone.
+
+Existing leaves run 2,600-3,500 words, clustering around 2,950 — counting body
+text with frontmatter stripped and fenced code included. Read that as a symptom
+of covering ten sections properly, not as a target: a section padded to reach a
+floor, or cut to duck a ceiling, is worse than an honest count outside the band.
+It is deliberately not enforced by any check, because a word-count gate rewards
+exactly that padding. `npm run words` prints the current distribution, and
+`npm run words -- --all` lists every leaf, so the band above can be re-derived
+rather than trusted.
+
+The Beginner leaves are the longest, not the shortest — median 3,283 words
+against 2,826 for Advanced. A reader without the vocabulary needs it built
+before a point can land; an Advanced reader already has it and wants the
+trade-off. Write to the level, and expect an introductory leaf to cost more
+words than an expert one, not fewer.
 
 If you edit `data/catalog.json` directly — renaming a branch, changing a level —
 run `npm run regen` to rewrite the derived files, rather than editing them.
