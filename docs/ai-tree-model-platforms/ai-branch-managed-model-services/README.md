@@ -8,3 +8,4 @@
 | Advanced | [Azure OpenAI Enterprise Integration](ai-azure-openai-integration.md) |
 | Intermediate | [Prompt Engineering for IT Operations](ai-prompt-engineering-ops.md) |
 | Intermediate | [When the Provider Fails: Fallback Tiers, Graceful Degradation and Model Deprecation](ai-provider-failover.md) |
+| Beginner | [Your First Managed Endpoint: Keys, Quotas and Responses You Cannot Trust](ai-first-managed-endpoint.md) |

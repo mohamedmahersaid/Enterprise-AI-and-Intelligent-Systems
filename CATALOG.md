@@ -17,6 +17,7 @@ How enterprises actually host, call, tune and pay for large language models - fr
 - **Advanced:** [Azure OpenAI Enterprise Integration](docs/ai-tree-model-platforms/ai-branch-managed-model-services/ai-azure-openai-integration.md)
 - **Intermediate:** [Prompt Engineering for IT Operations](docs/ai-tree-model-platforms/ai-branch-managed-model-services/ai-prompt-engineering-ops.md)
 - **Intermediate:** [When the Provider Fails: Fallback Tiers, Graceful Degradation and Model Deprecation](docs/ai-tree-model-platforms/ai-branch-managed-model-services/ai-provider-failover.md)
+- **Beginner:** [Your First Managed Endpoint: Keys, Quotas and Responses You Cannot Trust](docs/ai-tree-model-platforms/ai-branch-managed-model-services/ai-first-managed-endpoint.md)
 
 ## Applied AI Systems
 
@@ -33,6 +34,7 @@ Building production AI systems on top of foundation models: retrieval-augmented 
 - **Advanced:** [AI Agents and Orchestration Patterns](docs/ai-tree-applied-systems/ai-branch-agents-integration/ai-agents-orchestration.md)
 - **Expert:** [MCP Servers, AI Security and Evaluation](docs/ai-tree-applied-systems/ai-branch-agents-integration/ai-mcp-security-evaluation.md)
 - **Intermediate:** [Content Safety and Guardrails: Input Filtering, Output Classification and Refusal Design](docs/ai-tree-applied-systems/ai-branch-agents-integration/ai-content-safety-guardrails.md)
+- **Beginner:** [Do You Need an Agent? Loops, Tools and the Cost of Letting a Model Decide](docs/ai-tree-applied-systems/ai-branch-agents-integration/ai-do-you-need-an-agent.md)
 
 ## AI Operations & Governance
 
@@ -43,6 +45,7 @@ Running AI systems as production software - deployment pipelines, drift detectio
 - **Intermediate:** [LLMOps: Deployment, Versioning and Drift Detection](docs/ai-tree-operations-governance/ai-branch-llmops-observability/ai-llmops-deployment-lifecycle.md)
 - **Advanced:** [AI Observability and Production Performance Monitoring](docs/ai-tree-operations-governance/ai-branch-llmops-observability/ai-observability-performance-monitoring.md)
 - **Advanced:** [AI Incident Response: Detection, Containment and Postmortems for Non-Deterministic Systems](docs/ai-tree-operations-governance/ai-branch-llmops-observability/ai-incident-response.md)
+- **Beginner:** [What to Log When Your AI Feature Goes Live](docs/ai-tree-operations-governance/ai-branch-llmops-observability/ai-what-to-log.md)
 
 ### Governance, Compliance and Enterprise Adoption
 
