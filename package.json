@@ -6,9 +6,10 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "validate": "npm run validate:content && npm run validate:mermaid && npm run lint:md",
+    "validate": "npm run validate:content && npm run validate:mermaid && npm run validate:python && npm run lint:md",
     "validate:content": "node scripts/validate-content.mjs",
     "validate:mermaid": "node scripts/validate-mermaid.mjs",
+    "validate:python": "node scripts/validate-python.mjs",
     "lint:md": "markdownlint-cli2 \"**/*.md\"",
     "words": "node scripts/word-report.mjs",
     "new-leaf": "node scripts/new-leaf.mjs",
