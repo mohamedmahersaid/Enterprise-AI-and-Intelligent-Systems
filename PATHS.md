@@ -10,12 +10,12 @@ a step you already know is a step you skip.
 
 | Path | Steps | For |
 | --- | ---: | --- |
-| [Ship your first AI feature](#ship-your-first-ai-feature) | 8 | An engineer with a working prototype who has been asked when it can go live. |
+| [Ship your first AI feature](#ship-your-first-ai-feature) | 10 | An engineer with a working prototype who has been asked when it can go live. |
 | [Build retrieval that actually answers](#build-retrieval-that-actually-answers) | 7 | An engineer whose search or RAG system returns plausible things that are not the right things. |
 | [Govern AI across an organisation](#govern-ai-across-an-organisation) | 6 | Whoever has been handed responsibility for AI risk, policy or approval. |
 | [Run the model platform](#run-the-model-platform) | 7 | A platform or infrastructure engineer who now owns GPUs, training jobs and model artefacts. |
 | [Decide what to run, and what it costs](#decide-what-to-run-and-what-it-costs) | 6 | An architect or lead answering 'which model, hosted where, and what will this cost at scale'. |
-| [Put an agent in front of real systems](#put-an-agent-in-front-of-real-systems) | 5 | An engineer being asked to let a model take actions rather than only produce text. |
+| [Put an agent in front of real systems](#put-an-agent-in-front-of-real-systems) | 6 | An engineer being asked to let a model take actions rather than only produce text. |
 
 ## Ship your first AI feature
 
@@ -25,19 +25,23 @@ The prototype already works. What follows is everything the demo let you skip: d
 
 1. **[From Prototype to Production: Gateway, Limits, Logging and Rollback](docs/ai-tree-production-systems/ai-branch-agent-runtime-cost/ai-prototype-to-production.md)** &middot; Beginner
    Start by naming what actually changes between a demo and a system other people depend on. Nothing later makes sense without that list.
-2. **[Do You Need RAG? Context Windows, Grounding and the Cheapest Thing That Works](docs/ai-tree-applied-systems/ai-branch-rag-knowledge/ai-do-you-need-rag.md)** &middot; Beginner
+2. **[Your First Managed Endpoint: Keys, Quotas and Responses You Cannot Trust](docs/ai-tree-model-platforms/ai-branch-managed-model-services/ai-first-managed-endpoint.md)** &middot; Beginner
+   The four lines that call the endpoint are the easy part. Where the key lives, what happens at the rate limit, and what to do with a reply that is text rather than data are the work.
+3. **[Do You Need RAG? Context Windows, Grounding and the Cheapest Thing That Works](docs/ai-tree-applied-systems/ai-branch-rag-knowledge/ai-do-you-need-rag.md)** &middot; Beginner
    Settle the retrieval question before you build retrieval. Often the corpus fits in the context window and the cheapest thing works.
-3. **[Prompt Engineering for IT Operations](docs/ai-tree-model-platforms/ai-branch-managed-model-services/ai-prompt-engineering-ops.md)** &middot; Intermediate
+4. **[Prompt Engineering for IT Operations](docs/ai-tree-model-platforms/ai-branch-managed-model-services/ai-prompt-engineering-ops.md)** &middot; Intermediate
    The prompt is the behaviour. Treat it as a versioned artefact now, or you will be unable to explain why yesterday's output differed.
-4. **[LLMOps: Deployment, Versioning and Drift Detection](docs/ai-tree-operations-governance/ai-branch-llmops-observability/ai-llmops-deployment-lifecycle.md)** &middot; Intermediate
+5. **[LLMOps: Deployment, Versioning and Drift Detection](docs/ai-tree-operations-governance/ai-branch-llmops-observability/ai-llmops-deployment-lifecycle.md)** &middot; Intermediate
    How a change reaches production: what gets promoted, what gets rolled back, and what a release even means when the model is someone else's.
-5. **[Content Safety and Guardrails: Input Filtering, Output Classification and Refusal Design](docs/ai-tree-applied-systems/ai-branch-agents-integration/ai-content-safety-guardrails.md)** &middot; Intermediate
+6. **[What to Log When Your AI Feature Goes Live](docs/ai-tree-operations-governance/ai-branch-llmops-observability/ai-what-to-log.md)** &middot; Beginner
+   Decide what to capture before you need it. The characteristic failure returns HTTP 200 with a wrong answer, so the logs you already have cannot find it.
+7. **[Content Safety and Guardrails: Input Filtering, Output Classification and Refusal Design](docs/ai-tree-applied-systems/ai-branch-agents-integration/ai-content-safety-guardrails.md)** &middot; Intermediate
    Guardrails are layers, not a switch. Decide your thresholds here, while the false-positive cost is still a design question rather than a support ticket.
-6. **[LLM Evaluation Harnesses and Regression Gates for Production AI](docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/ai-evaluation-harness-gates.md)** &middot; Advanced
+8. **[LLM Evaluation Harnesses and Regression Gates for Production AI](docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/ai-evaluation-harness-gates.md)** &middot; Advanced
    A release gate needs evidence. Build the harness before you need to argue that a change was safe.
-7. **[AI Observability and Production Performance Monitoring](docs/ai-tree-operations-governance/ai-branch-llmops-observability/ai-observability-performance-monitoring.md)** &middot; Advanced
+9. **[AI Observability and Production Performance Monitoring](docs/ai-tree-operations-governance/ai-branch-llmops-observability/ai-observability-performance-monitoring.md)** &middot; Advanced
    Once it is live, the question shifts from 'does it work' to 'how would I know if it stopped'.
-8. **[AI Incident Response: Detection, Containment and Postmortems for Non-Deterministic Systems](docs/ai-tree-operations-governance/ai-branch-llmops-observability/ai-incident-response.md)** &middot; Advanced
+10. **[AI Incident Response: Detection, Containment and Postmortems for Non-Deterministic Systems](docs/ai-tree-operations-governance/ai-branch-llmops-observability/ai-incident-response.md)** &middot; Advanced
    Read this before the incident, not during it. The blast-radius question is much harder to answer under pressure.
 
 ## Build retrieval that actually answers
@@ -126,13 +130,15 @@ The model choice, the hosting choice and the cost model are one decision, not th
 
 An agent that can act can act wrongly, at machine speed, in a loop. This path covers how agent orchestration works, then every bound you need before it touches anything that matters.
 
-1. **[AI Agents and Orchestration Patterns](docs/ai-tree-applied-systems/ai-branch-agents-integration/ai-agents-orchestration.md)** &middot; Advanced
+1. **[Do You Need an Agent? Loops, Tools and the Cost of Letting a Model Decide](docs/ai-tree-applied-systems/ai-branch-agents-integration/ai-do-you-need-an-agent.md)** &middot; Beginner
+   Settle which of three architectures you actually need before building any of them. Most things called agents are a single call with tools, and the loop is the expensive part.
+2. **[AI Agents and Orchestration Patterns](docs/ai-tree-applied-systems/ai-branch-agents-integration/ai-agents-orchestration.md)** &middot; Advanced
    How multi-step agent workflows are actually structured, and where they fail.
-2. **[Content Safety and Guardrails: Input Filtering, Output Classification and Refusal Design](docs/ai-tree-applied-systems/ai-branch-agents-integration/ai-content-safety-guardrails.md)** &middot; Intermediate
+3. **[Content Safety and Guardrails: Input Filtering, Output Classification and Refusal Design](docs/ai-tree-applied-systems/ai-branch-agents-integration/ai-content-safety-guardrails.md)** &middot; Intermediate
    An agent consumes untrusted input from tools and documents, not just from users.
-3. **[MCP Servers, AI Security and Evaluation](docs/ai-tree-applied-systems/ai-branch-agents-integration/ai-mcp-security-evaluation.md)** &middot; Expert
+4. **[MCP Servers, AI Security and Evaluation](docs/ai-tree-applied-systems/ai-branch-agents-integration/ai-mcp-security-evaluation.md)** &middot; Expert
    Every MCP server is code you are trusting with your agent's permissions. Evaluate before connecting.
-4. **[Agent Orchestration with LangGraph: State, Guardrails and Tool Authorisation](docs/ai-tree-production-systems/ai-branch-agent-runtime-cost/ai-agent-orchestration-guardrails.md)** &middot; Advanced
+5. **[Agent Orchestration with LangGraph: State, Guardrails and Tool Authorisation](docs/ai-tree-production-systems/ai-branch-agent-runtime-cost/ai-agent-orchestration-guardrails.md)** &middot; Advanced
    Loop limits, budgets and kill switches. An unbounded agent is a billing incident waiting to happen.
-5. **[AI Incident Response: Detection, Containment and Postmortems for Non-Deterministic Systems](docs/ai-tree-operations-governance/ai-branch-llmops-observability/ai-incident-response.md)** &middot; Advanced
+6. **[AI Incident Response: Detection, Containment and Postmortems for Non-Deterministic Systems](docs/ai-tree-operations-governance/ai-branch-llmops-observability/ai-incident-response.md)** &middot; Advanced
    When an agent does something wrong, the blast radius question is 'what did it touch', and you need the answer fast.

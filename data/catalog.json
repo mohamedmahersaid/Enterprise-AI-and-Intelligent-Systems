@@ -5,10 +5,10 @@
   "repository": "Enterprise-AI-and-Intelligent-Systems",
   "treeCount": 5,
   "branchCount": 10,
-  "expectedLeafCount": 31,
+  "expectedLeafCount": 34,
   "levelCounts": {
     "Advanced": 14,
-    "Beginner": 7,
+    "Beginner": 10,
     "Enterprise": 2,
     "Expert": 2,
     "Intermediate": 6
@@ -64,6 +64,14 @@
       "path": "docs/ai-tree-model-platforms/ai-branch-managed-model-services/ai-provider-failover.md"
     },
     {
+      "id": "ai-first-managed-endpoint",
+      "name": "Your First Managed Endpoint: Keys, Quotas and Responses You Cannot Trust",
+      "level": "Beginner",
+      "tree": "Running and Integrating Models",
+      "branch": "Managed Model Services and Prompt Discipline",
+      "path": "docs/ai-tree-model-platforms/ai-branch-managed-model-services/ai-first-managed-endpoint.md"
+    },
+    {
       "id": "ai-rag-architecture",
       "name": "RAG Architecture: Embeddings, Chunking and Vector Search",
       "level": "Advanced",
@@ -112,6 +120,14 @@
       "path": "docs/ai-tree-applied-systems/ai-branch-agents-integration/ai-content-safety-guardrails.md"
     },
     {
+      "id": "ai-do-you-need-an-agent",
+      "name": "Do You Need an Agent? Loops, Tools and the Cost of Letting a Model Decide",
+      "level": "Beginner",
+      "tree": "Applied AI Systems",
+      "branch": "Agents & Enterprise Integration",
+      "path": "docs/ai-tree-applied-systems/ai-branch-agents-integration/ai-do-you-need-an-agent.md"
+    },
+    {
       "id": "ai-llmops-deployment-lifecycle",
       "name": "LLMOps: Deployment, Versioning and Drift Detection",
       "level": "Intermediate",
@@ -134,6 +150,14 @@
       "tree": "AI Operations & Governance",
       "branch": "LLMOps and Production Observability",
       "path": "docs/ai-tree-operations-governance/ai-branch-llmops-observability/ai-incident-response.md"
+    },
+    {
+      "id": "ai-what-to-log",
+      "name": "What to Log When Your AI Feature Goes Live",
+      "level": "Beginner",
+      "tree": "AI Operations & Governance",
+      "branch": "LLMOps and Production Observability",
+      "path": "docs/ai-tree-operations-governance/ai-branch-llmops-observability/ai-what-to-log.md"
     },
     {
       "id": "ai-governance-compliance-framework",
@@ -276,6 +300,10 @@
           "why": "Start by naming what actually changes between a demo and a system other people depend on. Nothing later makes sense without that list."
         },
         {
+          "leaf": "ai-first-managed-endpoint",
+          "why": "The four lines that call the endpoint are the easy part. Where the key lives, what happens at the rate limit, and what to do with a reply that is text rather than data are the work."
+        },
+        {
           "leaf": "ai-do-you-need-rag",
           "why": "Settle the retrieval question before you build retrieval. Often the corpus fits in the context window and the cheapest thing works."
         },
@@ -286,6 +314,10 @@
         {
           "leaf": "ai-llmops-deployment-lifecycle",
           "why": "How a change reaches production: what gets promoted, what gets rolled back, and what a release even means when the model is someone else's."
+        },
+        {
+          "leaf": "ai-what-to-log",
+          "why": "Decide what to capture before you need it. The characteristic failure returns HTTP 200 with a wrong answer, so the logs you already have cannot find it."
         },
         {
           "leaf": "ai-content-safety-guardrails",
@@ -447,6 +479,10 @@
       "audience": "An engineer being asked to let a model take actions rather than only produce text.",
       "summary": "An agent that can act can act wrongly, at machine speed, in a loop. This path covers how agent orchestration works, then every bound you need before it touches anything that matters.",
       "steps": [
+        {
+          "leaf": "ai-do-you-need-an-agent",
+          "why": "Settle which of three architectures you actually need before building any of them. Most things called agents are a single call with tools, and the loop is the expensive part."
+        },
         {
           "leaf": "ai-agents-orchestration",
           "why": "How multi-step agent workflows are actually structured, and where they fail."

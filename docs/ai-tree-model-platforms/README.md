@@ -7,4 +7,4 @@ How enterprises actually host, call, tune and pay for large language models - fr
 ## Branches
 
 - [Local and Private Inference](ai-branch-local-inference/README.md) — 3 leaves
-- [Managed Model Services and Prompt Discipline](ai-branch-managed-model-services/README.md) — 3 leaves
+- [Managed Model Services and Prompt Discipline](ai-branch-managed-model-services/README.md) — 4 leaves

@@ -8,3 +8,4 @@
 | Intermediate | [LLMOps: Deployment, Versioning and Drift Detection](ai-llmops-deployment-lifecycle.md) |
 | Advanced | [AI Observability and Production Performance Monitoring](ai-observability-performance-monitoring.md) |
 | Advanced | [AI Incident Response: Detection, Containment and Postmortems for Non-Deterministic Systems](ai-incident-response.md) |
+| Beginner | [What to Log When Your AI Feature Goes Live](ai-what-to-log.md) |
