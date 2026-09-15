@@ -14,7 +14,7 @@ a step you already know is a step you skip.
 | [Build retrieval that actually answers](#build-retrieval-that-actually-answers) | 7 | An engineer whose search or RAG system returns plausible things that are not the right things. |
 | [Govern AI across an organisation](#govern-ai-across-an-organisation) | 6 | Whoever has been handed responsibility for AI risk, policy or approval. |
 | [Run the model platform](#run-the-model-platform) | 7 | A platform or infrastructure engineer who now owns GPUs, training jobs and model artefacts. |
-| [Decide what to run, and what it costs](#decide-what-to-run-and-what-it-costs) | 5 | An architect or lead answering 'which model, hosted where, and what will this cost at scale'. |
+| [Decide what to run, and what it costs](#decide-what-to-run-and-what-it-costs) | 6 | An architect or lead answering 'which model, hosted where, and what will this cost at scale'. |
 | [Put an agent in front of real systems](#put-an-agent-in-front-of-real-systems) | 5 | An engineer being asked to let a model take actions rather than only produce text. |
 
 ## Ship your first AI feature
@@ -111,11 +111,13 @@ The model choice, the hosting choice and the cost model are one decision, not th
    Run a model locally first. It makes every later cost and latency comparison concrete rather than theoretical.
 2. **[Model Selection, Sizing and Cost Control](docs/ai-tree-model-platforms/ai-branch-local-inference/ai-model-selection-cost.md)** &middot; Intermediate
    Size and capability against the actual task. The largest model that fits the budget is rarely the right answer.
-3. **[Azure OpenAI Enterprise Integration](docs/ai-tree-model-platforms/ai-branch-managed-model-services/ai-azure-openai-integration.md)** &middot; Advanced
+3. **[Local Inference at Production Scale: Batching, KV Cache and the Point It Stops Being Cheaper](docs/ai-tree-model-platforms/ai-branch-local-inference/ai-local-inference-at-scale.md)** &middot; Advanced
+   Before comparing local against managed, find out what local actually delivers under concurrency. The single-stream benchmark that makes self-hosting look cheap is measuring a condition production never has.
+4. **[Azure OpenAI Enterprise Integration](docs/ai-tree-model-platforms/ai-branch-managed-model-services/ai-azure-openai-integration.md)** &middot; Advanced
    What a governed managed endpoint gives you that a raw API key does not - and what it costs.
-4. **[When the Provider Fails: Fallback Tiers, Graceful Degradation and Model Deprecation](docs/ai-tree-model-platforms/ai-branch-managed-model-services/ai-provider-failover.md)** &middot; Intermediate
+5. **[When the Provider Fails: Fallback Tiers, Graceful Degradation and Model Deprecation](docs/ai-tree-model-platforms/ai-branch-managed-model-services/ai-provider-failover.md)** &middot; Intermediate
    Single-provider dependency is a decision, whether or not you made it deliberately. Plan the degradation before the outage.
-5. **[AI FinOps: Token Cost Attribution, GPU Utilisation and Build-versus-Buy Crossover](docs/ai-tree-production-systems/ai-branch-agent-runtime-cost/ai-finops-build-vs-buy.md)** &middot; Advanced
+6. **[AI FinOps: Token Cost Attribution, GPU Utilisation and Build-versus-Buy Crossover](docs/ai-tree-production-systems/ai-branch-agent-runtime-cost/ai-finops-build-vs-buy.md)** &middot; Advanced
    The arithmetic, with the crossover points that actually decide it.
 
 ## Put an agent in front of real systems

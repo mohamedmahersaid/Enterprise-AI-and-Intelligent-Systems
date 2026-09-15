@@ -10,6 +10,7 @@ How enterprises actually host, call, tune and pay for large language models - fr
 
 - **Beginner:** [Ollama and Local Model Serving](docs/ai-tree-model-platforms/ai-branch-local-inference/ai-ollama-local-inference.md)
 - **Intermediate:** [Model Selection, Sizing and Cost Control](docs/ai-tree-model-platforms/ai-branch-local-inference/ai-model-selection-cost.md)
+- **Advanced:** [Local Inference at Production Scale: Batching, KV Cache and the Point It Stops Being Cheaper](docs/ai-tree-model-platforms/ai-branch-local-inference/ai-local-inference-at-scale.md)
 
 ### Managed Model Services and Prompt Discipline
 
