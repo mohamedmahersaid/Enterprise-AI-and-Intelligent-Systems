@@ -48,12 +48,17 @@ jobs:
       # API and getting Not Found even with the source set to GitHub Actions;
       # deploy-pages below creates the deployment directly.
       #
-      # v5 exists for both Pages actions and is expected to drop the Node 20
-      # deprecation warning these emit. Not taken yet: the deploy path is
-      # currently blocked by a repository-side Pages fault, so a major bump
-      # could not be verified and would stack an untested change on an
-      # unresolved failure. Bump once deployment succeeds on v4.
-      - uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4
+      # Both Pages actions are on v5, which moves them off the deprecated Node
+      # 20 runtime: deploy-pages runs on node24 directly, and this one is a
+      # composite whose inner actions/upload-artifact went 4.6.2 (node20) to
+      # 7.0.0 (node24). Inputs are unchanged across the major bump - the path
+      # input below and the page_url output the deploy job reads both still
+      # exist in v5.
+      #
+      # Not yet observed to deploy successfully: publishing is blocked by a
+      # repository-side Pages fault that predates this bump, so a green run
+      # here proves the build half only.
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: site
 
@@ -65,4 +70,4 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
