@@ -30,6 +30,11 @@ jobs:
       - name: Parse every mermaid diagram
         run: npm run validate:mermaid
 
+      # The leaves ship scripts readers copy and run. Compiling them here keeps
+      # a syntax error from reaching readers; nothing is executed.
+      - name: Compile every python block
+        run: npm run validate:python
+
       - name: Lint markdown
         run: npm run lint:md
 
