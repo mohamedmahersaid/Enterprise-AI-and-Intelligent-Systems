@@ -343,6 +343,51 @@ function checkReadme() {
 
 checkReadme();
 
+// --- runner parity -----------------------------------------------------------
+
+/**
+ * Every `validate:*` npm script must be invoked by BOTH runners: the CI
+ * workflow and run.bat.
+ *
+ * This check exists because adding validate:commands did not add it to CI. The
+ * workflow enumerates each step individually rather than calling `npm run
+ * validate`, so a new step is silently absent and the build still reports
+ * success - a check that does not run is indistinguishable from a check that
+ * passes. run.bat had the same shape and was caught by hand; the workflow was
+ * not.
+ *
+ * It lives here, in a script CI already runs, rather than in a new script of
+ * its own - a parity check that can itself be left out of CI would reproduce
+ * the bug it exists to prevent.
+ */
+function checkRunnerParity() {
+  const scripts = JSON.parse(fs.readFileSync('package.json', 'utf8')).scripts;
+  const gates = Object.keys(scripts).filter((n) => n.startsWith('validate:'));
+
+  const runners = [
+    { file: '.github/workflows/validate.yml', label: 'the CI workflow' },
+    { file: 'run.bat', label: 'run.bat' },
+  ];
+
+  for (const { file, label } of runners) {
+    if (!fs.existsSync(file)) {
+      errors.push(`${file} is missing, so runner parity cannot be checked.`);
+      continue;
+    }
+    const text = fs.readFileSync(file, 'utf8');
+    for (const gate of gates) {
+      if (!text.includes(gate)) {
+        errors.push(
+          `${file}: ${label} never runs \`${gate}\`. A gate absent from a runner ` +
+            'reports success without checking anything - add the step or remove the script.'
+        );
+      }
+    }
+  }
+}
+
+checkRunnerParity();
+
 if (errors.length) {
   console.error(errors.join('\n'));
   console.error(`\n${errors.length} validation error(s).`);
@@ -356,5 +401,5 @@ console.log(
   'Checks: catalog counts, frontmatter/catalog agreement, heading hierarchy, required sections,\n'+
   '        mermaid fences, unresolved scaffold TODOs, relative links, CATALOG.md coverage,\n'+
   '        learning paths (every leaf reachable, no dangling step, PATHS.md in step),\n'+
-  '        README badges and curriculum map.'
+  '        README badges and curriculum map, runner parity (every gate runs in CI and run.bat).'
 );

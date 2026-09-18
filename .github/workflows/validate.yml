@@ -35,6 +35,11 @@ jobs:
       - name: Compile every python block
         run: npm run validate:python
 
+      # Textual only, nothing is executed. Guards the command blocks against
+      # literal credentials, destructive operations and placeholder drift.
+      - name: Check every command block
+        run: npm run validate:commands
+
       - name: Lint markdown
         run: npm run lint:md
 
