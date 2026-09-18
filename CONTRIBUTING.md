@@ -68,8 +68,13 @@ run `npm run regen` to rewrite the derived files, rather than editing them.
 | `npm run validate:content` | Heading hierarchy, required sections, frontmatter and catalog agreement, catalog self-consistency, unresolved TODOs, link resolution, CATALOG.md coverage, README figures |
 | `npm run validate:mermaid` | Every mermaid diagram parses |
 | `npm run validate:python` | Every python block in a leaf compiles (parsed, never executed) |
+| `npm run validate:commands` | Every command block is free of literal credentials, destructive operations, `curl \| sh`, plaintext `http://` and placeholder drift (textual, never executed) |
 | `npm run lint:md` | Markdown style |
-| `npm run validate` | All four, in order |
+| `npm run validate` | All five, in order |
+
+`validate:commands` is deliberately not a shell linter. Commands are documented
+with `<angle-bracket>` placeholders and some blocks are SQL, so a shell parser
+rejects correct content; it checks safety and convention invariants instead.
 
 ## On Windows
 
