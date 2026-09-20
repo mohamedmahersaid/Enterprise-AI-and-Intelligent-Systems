@@ -58,9 +58,26 @@ const TOOLS = {
 const PINNED = [
   {
     id: 'azure-api-version',
-    label: 'Azure OpenAI REST API versions',
-    note: 'Superseded versions keep working for a time and are then withdrawn.',
-    pattern: /api-version=([0-9]{4}-[0-9]{2}-[0-9]{2}(?:-preview)?)/g,
+    label: 'Azure REST API versions',
+    // Each Azure service versions its REST API independently, so the service
+    // is captured alongside the date. An earlier version of this file labelled
+    // every match "Azure OpenAI", which made three unrelated services look
+    // like one inconsistency and invited an "alignment" that would have broken
+    // all three. The service name is what makes the row actionable.
+    note:
+      'Each service versions independently - a date that differs between ' +
+      'services is expected, not a mismatch. Superseded versions keep working ' +
+      'for a time and are then withdrawn.',
+    pattern:
+      /(?:\/(openai)\/|\/(contentsafety)\/|\/(indexes)\/)[^"'\s]*?api-version=([0-9]{4}-[0-9]{2}-[0-9]{2}(?:-preview)?)/g,
+    format: (m) => {
+      const service = m[1]
+        ? 'Azure OpenAI'
+        : m[2]
+          ? 'Azure AI Content Safety'
+          : 'Azure AI Search';
+      return `${service} ${m[4]}`;
+    },
   },
   {
     id: 'azure-model',
@@ -128,7 +145,7 @@ export function deriveAssumptions(catalog) {
       // Patterns are global; reset lastIndex so reuse across leaves is safe.
       spec.pattern.lastIndex = 0;
       for (const match of body.matchAll(spec.pattern)) {
-        const value = match[1];
+        const value = spec.format ? spec.format(match) : match[1];
         const bucket = pinned.get(spec.id);
         if (!bucket.has(value)) bucket.set(value, new Set());
         bucket.get(value).add(leaf.id);
