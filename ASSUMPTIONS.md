@@ -14,15 +14,15 @@ The value of the list is that it makes the assumptions visible. A reader whose c
 
 These are the things a vendor can withdraw or supersede.
 
-### Azure OpenAI REST API versions
+### Azure REST API versions
 
-Superseded versions keep working for a time and are then withdrawn.
+Each service versions independently - a date that differs between services is expected, not a mismatch. Superseded versions keep working for a time and are then withdrawn.
 
 | Value | Used by |
 | --- | --- |
-| `2024-07-01` | `ai-how-retrieval-finds-things` |
-| `2024-09-01` | `ai-content-safety-guardrails` |
-| `2024-10-21` | `ai-prompt-engineering-ops` |
+| `Azure AI Content Safety 2024-09-01` | `ai-content-safety-guardrails` |
+| `Azure AI Search 2024-07-01` | `ai-how-retrieval-finds-things` |
+| `Azure OpenAI 2024-10-21` | `ai-prompt-engineering-ops` |
 
 ### Azure OpenAI model names
 
