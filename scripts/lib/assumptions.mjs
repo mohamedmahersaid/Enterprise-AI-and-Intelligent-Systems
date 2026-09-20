@@ -1,0 +1,219 @@
+/**
+ * Derives the version assumptions the curriculum makes, from the curriculum.
+ *
+ * The leaves pin things that expire. A model tag is withdrawn, an Azure API
+ * version is superseded, a CLI renames a flag - and the content goes quietly
+ * wrong. Nothing recorded what any leaf depended on, so a reader hitting a
+ * failure could not tell whether they had made a mistake or the world had
+ * moved. That is the gap this closes.
+ *
+ * What is recorded is deliberately narrow: WHAT THE REPOSITORY ASSUMES, read
+ * out of the repository. It is not, and must not be presented as, a claim that
+ * any of it is current. Confirming that a model tag still exists requires
+ * asking the vendor, which no build step here can do - so the generated
+ * document says so plainly rather than implying a validation that never
+ * happened. A false "verified" is worse than an honest "unverified".
+ *
+ * Everything here is extracted, never hand-maintained, so it cannot drift from
+ * the content the way a hand-written list would. `npm run regen` writes the
+ * document; validate-content asserts it is in step, the same contract PATHS.md
+ * has.
+ */
+import fs from 'node:fs';
+
+/**
+ * Leading command tokens worth declaring, mapped to what a reader must obtain.
+ * Shell builtins and text-mangling utilities are omitted on purpose: `grep`
+ * tells a reader nothing about what to install, while `az` tells them
+ * everything.
+ */
+const TOOLS = {
+  az: 'Azure CLI',
+  kubectl: 'kubectl',
+  helm: 'Helm',
+  ollama: 'Ollama',
+  vllm: 'vLLM',
+  mlflow: 'MLflow',
+  feast: 'Feast',
+  promptfoo: 'promptfoo',
+  ray: 'Ray',
+  docker: 'Docker',
+  terraform: 'Terraform',
+  psql: 'psql (PostgreSQL client)',
+  'nvidia-smi': 'NVIDIA driver and CUDA runtime',
+  curl: 'curl',
+  jq: 'jq',
+  git: 'git',
+  python: 'Python 3',
+  python3: 'Python 3',
+  pip: 'pip',
+};
+
+/**
+ * Pinned artefacts, grouped by the question a reader asks when one breaks.
+ * Each pattern targets something a vendor can withdraw or supersede. Anything
+ * that cannot expire does not belong here - an inventory that lists everything
+ * is read by nobody.
+ */
+const PINNED = [
+  {
+    id: 'azure-api-version',
+    label: 'Azure OpenAI REST API versions',
+    note: 'Superseded versions keep working for a time and are then withdrawn.',
+    pattern: /api-version=([0-9]{4}-[0-9]{2}-[0-9]{2}(?:-preview)?)/g,
+  },
+  {
+    id: 'azure-model',
+    label: 'Azure OpenAI model names',
+    note: 'Deployment names are chosen locally; these are the underlying models.',
+    pattern: /\b(gpt-4o(?:-mini)?|text-embedding-3(?:-[a-z]+)?)\b/g,
+  },
+  {
+    id: 'ollama-model',
+    label: 'Ollama model tags',
+    note: 'Tags are withdrawn and re-pointed upstream; a pull can fail or change.',
+    pattern: /\b([a-z0-9.]+:\d+b(?:-[a-z0-9_]+)*)\b/g,
+  },
+  {
+    id: 'container-image',
+    label: 'Container images',
+    note: 'Base images are rebuilt and old tags eventually stop being published.',
+    pattern: /\b(nvidia\/cuda:[0-9][0-9a-z.\-]*)\b/g,
+  },
+];
+
+/** Command blocks are fenced as ```text; python blocks are checked elsewhere. */
+function commandLines(body) {
+  const out = [];
+  let inside = false;
+  for (const line of body.split('\n')) {
+    if (!inside && line.trimEnd() === '```text') {
+      inside = true;
+    } else if (inside && line.trimStart().startsWith('```')) {
+      inside = false;
+    } else if (inside) {
+      out.push(line);
+    }
+  }
+  return out;
+}
+
+/** The tools a leaf's own commands invoke, in stable order. */
+function toolsFor(body) {
+  const found = new Set();
+  for (const line of commandLines(body)) {
+    const text = line.trim();
+    if (!text || text.startsWith('#')) continue;
+    const token = text.split(/\s+/)[0];
+    if (TOOLS[token]) found.add(TOOLS[token]);
+  }
+  return [...found].sort();
+}
+
+/**
+ * Builds the inventory. Returns leaves in catalog order and pinned artefacts
+ * grouped by kind, each carrying the leaves that mention it so a reader
+ * chasing one expiry knows exactly what it affects.
+ */
+export function deriveAssumptions(catalog) {
+  const leaves = [];
+  const pinned = new Map(PINNED.map((p) => [p.id, new Map()]));
+
+  for (const leaf of catalog.leaves) {
+    if (!fs.existsSync(leaf.path)) continue;
+    const body = fs.readFileSync(leaf.path, 'utf8');
+    leaves.push({ id: leaf.id, name: leaf.name, tools: toolsFor(body) });
+
+    for (const spec of PINNED) {
+      // Patterns are global; reset lastIndex so reuse across leaves is safe.
+      spec.pattern.lastIndex = 0;
+      for (const match of body.matchAll(spec.pattern)) {
+        const value = match[1];
+        const bucket = pinned.get(spec.id);
+        if (!bucket.has(value)) bucket.set(value, new Set());
+        bucket.get(value).add(leaf.id);
+      }
+    }
+  }
+
+  return {
+    leaves,
+    pinned: PINNED.map((spec) => ({
+      ...spec,
+      values: [...pinned.get(spec.id).entries()]
+        .map(([value, ids]) => ({ value, leaves: [...ids].sort() }))
+        .sort((a, b) => a.value.localeCompare(b.value)),
+    })),
+  };
+}
+
+/** Renders the document. Pure function of the inventory, so it is stable. */
+export function renderAssumptionsMd(data) {
+  const lines = [];
+  lines.push('# Version assumptions');
+  lines.push('');
+  lines.push(
+    'Generated by `npm run regen` from the leaves themselves. Do not edit by hand.'
+  );
+  lines.push('');
+  lines.push('## What this is, and what it is not');
+  lines.push('');
+  lines.push(
+    'This records **what the curriculum assumes**, extracted from the commands ' +
+    'the leaves actually ship. It is **not** a statement that any of it is ' +
+    'current.'
+  );
+  lines.push('');
+  lines.push(
+    'Nothing here has been checked against a vendor. Confirming that a model ' +
+    'tag still exists, or that an API version has not been withdrawn, means ' +
+    'asking the vendor - which no check in this repository can do. Treat every ' +
+    'row below as **unverified**, and verify the ones you depend on before ' +
+    'relying on them in production.'
+  );
+  lines.push('');
+  lines.push(
+    'The value of the list is that it makes the assumptions visible. A reader ' +
+    'whose command fails can see what the leaf expected and decide whether ' +
+    'they made a mistake or the world moved.'
+  );
+  lines.push('');
+
+  lines.push('## Pinned artefacts');
+  lines.push('');
+  lines.push('These are the things a vendor can withdraw or supersede.');
+  lines.push('');
+  for (const spec of data.pinned) {
+    lines.push(`### ${spec.label}`);
+    lines.push('');
+    lines.push(spec.note);
+    lines.push('');
+    if (!spec.values.length) {
+      lines.push('None found.');
+      lines.push('');
+      continue;
+    }
+    lines.push('| Value | Used by |');
+    lines.push('| --- | --- |');
+    for (const { value, leaves } of spec.values) {
+      lines.push(`| \`${value}\` | ${leaves.map((id) => `\`${id}\``).join(', ')} |`);
+    }
+    lines.push('');
+  }
+
+  lines.push('## Tools each leaf expects');
+  lines.push('');
+  lines.push(
+    'Derived from the leading command in every `text` block. A leaf listing a ' +
+    'tool assumes the reader can install it and has whatever access it needs.'
+  );
+  lines.push('');
+  lines.push('| Leaf | Expects |');
+  lines.push('| --- | --- |');
+  for (const leaf of data.leaves) {
+    lines.push(`| \`${leaf.id}\` | ${leaf.tools.join(', ') || '—'} |`);
+  }
+  lines.push('');
+
+  return lines.join('\n');
+}

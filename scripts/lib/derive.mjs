@@ -6,6 +6,7 @@
  * six navigation files and getting one of them subtly wrong.
  */
 import fs from 'node:fs';
+import { deriveAssumptions, renderAssumptionsMd } from './assumptions.mjs';
 import path from 'node:path';
 
 export const CATALOG_PATH = 'data/catalog.json';
@@ -181,6 +182,14 @@ function writeReadme(catalog, trees) {
   fs.writeFileSync('README.md', readme);
 }
 
+/**
+ * ASSUMPTIONS.md is derived from the leaf bodies rather than from the catalog,
+ * so it is written last - after any regeneration that could touch a leaf.
+ */
+export function writeAssumptionsMd(catalog) {
+  fs.writeFileSync('ASSUMPTIONS.md', renderAssumptionsMd(deriveAssumptions(catalog)));
+}
+
 /** Rewrite every derived file from the catalog. */
 export function regenerate(catalog) {
   const trees = group(catalog);
@@ -189,4 +198,5 @@ export function regenerate(catalog) {
   writeCatalogMd(catalog, trees);
   writePathsMd(catalog);
   writeReadme(catalog, trees);
+  writeAssumptionsMd(catalog);
 }
