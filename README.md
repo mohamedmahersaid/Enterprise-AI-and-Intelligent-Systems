@@ -37,6 +37,11 @@ if you would rather be told what to read in what order. The catalog lists every 
 by tree and branch; the paths list them in the order a particular reader needs them,
 and every leaf appears in at least one path.
 
+Before running anything, [ASSUMPTIONS.md](ASSUMPTIONS.md) lists the tools each leaf
+expects and the model tags, API versions and images its commands pin. Those are
+assumptions recorded from the content, not claims that they are still current —
+verify the ones you depend on.
+
 ## How to use this repository
 
 1. Select a tree based on the operational outcome you need.

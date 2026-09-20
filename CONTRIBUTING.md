@@ -16,7 +16,9 @@ Never include real credentials, internal URLs, customer data, private reports, o
 
 `data/catalog.json` is the source of truth. `CATALOG.md`, `README.md` and every
 tree and branch README are derived from it, and CI asserts they agree — so do
-not edit them by hand. Scaffold the leaf instead:
+not edit them by hand. `ASSUMPTIONS.md` is derived too, but from the leaf bodies
+rather than the catalog: it records the tools and pinned versions the commands
+depend on. Scaffold the leaf instead:
 
 ```bash
 npm install
@@ -71,6 +73,12 @@ run `npm run regen` to rewrite the derived files, rather than editing them.
 | `npm run validate:commands` | Every command block is free of literal credentials, destructive operations, `curl \| sh`, plaintext `http://` and placeholder drift (textual, never executed) |
 | `npm run lint:md` | Markdown style |
 | `npm run validate` | All five, in order |
+
+`validate:content` also re-derives `ASSUMPTIONS.md` and fails if it is out of
+step, so changing a command or a pinned version means running `npm run regen`.
+That document records what the curriculum **assumes**, not what vendors
+currently ship — nothing in this repository can confirm a model tag still
+exists, and it says so rather than implying a validation that never happened.
 
 `validate:commands` is deliberately not a shell linter. Commands are documented
 with `<angle-bracket>` placeholders and some blocks are SQL, so a shell parser

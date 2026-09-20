@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import { deriveAssumptions, renderAssumptionsMd } from './lib/assumptions.mjs';
 import path from 'node:path';
 
 import { slug } from './lib/derive.mjs';
@@ -343,6 +344,33 @@ function checkReadme() {
 
 checkReadme();
 
+// --- version assumptions -----------------------------------------------------
+
+/**
+ * ASSUMPTIONS.md is derived from the leaf bodies, so editing a command can
+ * silently invalidate it. Re-deriving and comparing is the same contract
+ * PATHS.md has: the generated file is checked, never trusted.
+ *
+ * This asserts the document is in step. It cannot assert the assumptions are
+ * still true - that needs a vendor, not a build step - and the document says
+ * so itself rather than implying a validation that never happened.
+ */
+function checkAssumptions() {
+  if (!fs.existsSync('ASSUMPTIONS.md')) {
+    errors.push("ASSUMPTIONS.md is missing. Run 'npm run regen'.");
+    return;
+  }
+  const expected = renderAssumptionsMd(deriveAssumptions(catalog));
+  if (fs.readFileSync('ASSUMPTIONS.md', 'utf8') !== expected) {
+    errors.push(
+      "ASSUMPTIONS.md disagrees with the leaves it is derived from. A command " +
+        "or a pinned version changed. Run 'npm run regen'."
+    );
+  }
+}
+
+checkAssumptions();
+
 // --- runner parity -----------------------------------------------------------
 
 /**
@@ -401,5 +429,6 @@ console.log(
   'Checks: catalog counts, frontmatter/catalog agreement, heading hierarchy, required sections,\n'+
   '        mermaid fences, unresolved scaffold TODOs, relative links, CATALOG.md coverage,\n'+
   '        learning paths (every leaf reachable, no dangling step, PATHS.md in step),\n'+
-  '        README badges and curriculum map, runner parity (every gate runs in CI and run.bat).'
+  '        README badges and curriculum map, version assumptions in step,\n'+
+  '        runner parity (every gate runs in CI and run.bat).'
 );
