@@ -88,7 +88,15 @@ prints a usage line or names the variable to set; it does not crash. A script
 whose declared dependency is not installed is listed as skipped by name, never
 counted as passing. CI installs the lightweight ones from
 `scripts/requirements.txt` (pinned and hash-checked) and points `LEAF_PYTHON` at
-that environment; set `LEAF_PYTHON` locally to do the same. Containment is not a
+that environment. To do the same locally:
+
+```bash
+python3 -m venv .venv
+.venv/bin/pip install --require-hashes -r scripts/requirements.txt
+LEAF_PYTHON=.venv/bin/python npm run validate
+```
+
+`.venv/` is ignored by git, the linter and the site build. Containment is not a
 sandbox: a script can still read its parent's files and reach the network, so the
 check runs only in CI jobs that hold no deploy token. A script reads credentials
 from environment variables, never from its own arguments, where they would be

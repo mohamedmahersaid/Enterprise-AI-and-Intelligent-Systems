@@ -17,7 +17,7 @@ import { readCatalog, group, slug } from './lib/derive.mjs';
 import { STYLE, SCRIPT } from './lib/site-assets.mjs';
 
 const OUT = 'site';
-const SKIP_DIRS = new Set(['node_modules', '.git', '.github', OUT]);
+const SKIP_DIRS = new Set(['node_modules', '.git', '.github', '.venv', OUT]);
 
 // ---------------------------------------------------------------------------
 // markdown
