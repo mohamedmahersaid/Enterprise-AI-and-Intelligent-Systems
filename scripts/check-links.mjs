@@ -9,11 +9,12 @@
  * to the document it claims to be rather than to a homepage or a login wall.
  *
  * Three outcomes, kept distinct because they mean different things:
- *   broken      404, 410, a DNS failure or a refused connection - the link is
- *               wrong or gone, and the check fails.
- *   unconfirmed 401, 403, 429 or a 5xx - the host refused or failed us. Many
- *               sites block automated clients, so this is reported, not failed:
- *               it says the link could not be confirmed, not that it is bad.
+ *   broken      404, 410, a host that does not exist or a refused connection -
+ *               the link is wrong or gone, and the check fails.
+ *   unconfirmed 401, 403, 429, a 5xx, a timeout or a dropped connection - the
+ *               host refused or failed us. Many sites block automated clients,
+ *               so this is reported, not failed: it says the link could not be
+ *               confirmed, not that it is bad.
  *   ok          2xx after redirects.
  *
  * Usage: node scripts/check-links.mjs [--json report.json]
@@ -74,7 +75,7 @@ async function probe(url) {
       const type = res.headers.get('content-type') ?? '';
       if (type.includes('html')) {
         const text = (await res.text()).slice(0, 400_000);
-        title = decode((text.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1] ?? '').replace(/\s+/g, ' ').trim());
+        title = decode((text.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1] ?? '')).replace(/[\s\u2028\u2029]+/g, ' ').trim();
       } else {
         await res.body?.cancel();
         title = type.split(';')[0];
@@ -82,7 +83,7 @@ async function probe(url) {
       last = { status: res.status, final: res.url, title };
       if (res.status < 500 && res.status !== 429) return last;
     } catch (error) {
-      last = { status: 0, final: url, title: '', error: error.cause?.code ?? error.name };
+      last = { status: 0, final: url, title: '', error: error.cause?.code ?? error.cause?.message ?? error.name };
     } finally {
       clearTimeout(timer);
     }
@@ -90,9 +91,14 @@ async function probe(url) {
   return last;
 }
 
-function verdict({ status }) {
+// Only these network failures prove a link is wrong; anything else - a reset,
+// a timeout, a TLS or protocol quirk - says as much about the path as the page.
+const GONE = new Set(['ENOTFOUND', 'ECONNREFUSED', 'ERR_INVALID_URL']);
+
+function verdict({ status, error }) {
   if (status >= 200 && status < 400) return 'ok';
-  if (status === 404 || status === 410 || status === 0) return 'broken';
+  if (status === 404 || status === 410) return 'broken';
+  if (status === 0 && GONE.has(error)) return 'broken';
   return 'unconfirmed';
 }
 
@@ -126,7 +132,12 @@ async function main() {
     '',
   ].join('\n');
 
-  console.log(md);
+  // One plain line per link first, so the log stays readable whatever a page
+  // title contains; the table is for the job summary.
+  for (const r of results) {
+    console.log(`${r.verdict.padEnd(11)} ${String(r.status || r.error).padEnd(12)} ${r.url}  [${r.title}]`);
+  }
+  console.log(`\n${md}`);
   if (process.env.GITHUB_STEP_SUMMARY) fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, md);
   const jsonAt = process.argv.indexOf('--json');
   if (jsonAt > -1) fs.writeFileSync(process.argv[jsonAt + 1], JSON.stringify(results, null, 2));
