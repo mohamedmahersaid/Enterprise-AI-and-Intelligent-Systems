@@ -157,6 +157,9 @@ measures retrieval alone against known query-to-document pairs, reports recall f
 mode, and names which queries each mode misses - the evidence that decides whether you
 need keywords, meaning, or both.
 
+Requires `pip install requests`. The query key is read from `SEARCH_API_KEY` rather than
+the command line, where it would be kept in shell history.
+
 ```python
 #!/usr/bin/env python3
 """Measure retrieval recall per mode, with no model involved.
@@ -167,6 +170,7 @@ nothing downstream can recover a passage that was never retrieved.
 """
 import argparse
 import json
+import os
 import sys
 from collections import defaultdict
 
@@ -193,10 +197,10 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("pairs", help='JSONL of {"query": ..., "expected_doc": ...}')
     parser.add_argument("--endpoint", required=True)
-    parser.add_argument("--key", required=True)
     parser.add_argument("--index", required=True)
     parser.add_argument("-k", type=int, default=20)
     args = parser.parse_args()
+    key = os.environ.get("SEARCH_API_KEY") or parser.error("set SEARCH_API_KEY first")
 
     with open(args.pairs) as handle:
         cases = [json.loads(line) for line in handle if line.strip()]
@@ -205,7 +209,7 @@ def main():
     hits = defaultdict(int)
     for mode in ("keyword", "semantic", "hybrid"):
         for case in cases:
-            found = search(args.endpoint, args.key, args.index, mode,
+            found = search(args.endpoint, key, args.index, mode,
                            case["query"], args.k)
             if case["expected_doc"] in found:
                 hits[mode] += 1

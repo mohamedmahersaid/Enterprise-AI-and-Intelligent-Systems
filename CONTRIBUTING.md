@@ -69,16 +69,28 @@ run `npm run regen` to rewrite the derived files, rather than editing them.
 | --- | --- |
 | `npm run validate:content` | Heading hierarchy, required sections, frontmatter and catalog agreement, catalog self-consistency, unresolved TODOs, link resolution, CATALOG.md coverage, README figures |
 | `npm run validate:mermaid` | Every mermaid diagram parses |
-| `npm run validate:python` | Every python block in a leaf compiles (parsed, never executed) |
+| `npm run validate:python` | Every python block in a leaf compiles, and every third-party module it imports is named by a `pip install` in the same leaf (parsed, never executed) |
+| `npm run validate:scripts` | Every python block, run with no arguments in an empty directory, completes or stops with its own message rather than a traceback |
 | `npm run validate:commands` | Every command block is free of literal credentials, destructive operations, `curl \| sh`, plaintext `http://` and placeholder drift (textual, never executed) |
 | `npm run lint:md` | Markdown style |
-| `npm run validate` | All five, in order |
+| `npm run validate` | All six, in order |
 
 `validate:content` also re-derives `ASSUMPTIONS.md` and fails if it is out of
 step, so changing a command or a pinned version means running `npm run regen`.
 That document records what the curriculum **assumes**, not what vendors
 currently ship — nothing in this repository can confirm a model tag still
 exists, and it says so rather than implying a validation that never happened.
+
+`validate:scripts` runs code, so it contains it rather than trusting it: each
+block runs in a throwaway directory with no stdin, a stripped environment and a
+timeout. The contract is the one a reader meets first — started bare, a script
+prints a usage line or names the variable to set; it does not crash. A script
+whose declared dependency is not installed is listed as skipped by name, never
+counted as passing. CI installs the lightweight ones from
+`scripts/requirements.txt` (pinned and hash-checked) and points `LEAF_PYTHON` at
+that environment; set `LEAF_PYTHON` locally to do the same. Credentials belong in
+environment variables, never in arguments, where they would be kept in shell
+history and visible in the process list.
 
 `validate:commands` is deliberately not a shell linter. Commands are documented
 with `<angle-bracket>` placeholders and some blocks are SQL, so a shell parser

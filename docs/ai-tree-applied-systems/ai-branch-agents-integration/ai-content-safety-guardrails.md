@@ -148,6 +148,10 @@ filter nobody can defend in either direction. This runs a labelled set through t
 filter at every threshold and reports what each setting actually costs, so the choice is
 made from a table rather than a feeling.
 
+Requires `pip install requests`. The endpoint and key are read from
+`CONTENT_SAFETY_ENDPOINT` and `CONTENT_SAFETY_KEY` rather than the command line, where a
+key would be kept in shell history and shown to anyone who can list processes.
+
 ```python
 #!/usr/bin/env python3
 """Choose content-filter thresholds from measured precision and recall.
@@ -156,14 +160,16 @@ Takes a labelled corpus of prompts - benign ones drawn from real traffic and
 violating ones per category - and sweeps the severity threshold. Reports, for
 each category and threshold, what fraction of violations is caught and what
 fraction of legitimate work is blocked.
+
+Usage: guardrail_threshold_tuner.py <corpus.jsonl>
 """
 import json
+import os
 import sys
-from collections import defaultdict
 
 import requests
 
-ENDPOINT = "https://example.cognitiveservices.azure.com"
+ENDPOINT = os.environ.get("CONTENT_SAFETY_ENDPOINT", "").rstrip("/")
 SEVERITIES = [0, 2, 4, 6]  # provider severity levels, ascending
 
 
@@ -217,7 +223,12 @@ def main(corpus_path, key):
 
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv[1], sys.argv[2]))
+    if len(sys.argv) != 2:
+        sys.exit("usage: guardrail_threshold_tuner.py <corpus.jsonl>")
+    key = os.environ.get("CONTENT_SAFETY_KEY")
+    if not ENDPOINT or not key:
+        sys.exit("set CONTENT_SAFETY_ENDPOINT and CONTENT_SAFETY_KEY first")
+    sys.exit(main(sys.argv[1], key))
 ```
 
 ## Lab

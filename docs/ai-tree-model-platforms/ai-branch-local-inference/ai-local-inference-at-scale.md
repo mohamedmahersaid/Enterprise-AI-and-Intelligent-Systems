@@ -181,6 +181,8 @@ vllm serve <model> --enable-prefix-caching --max-num-seqs 64
 
 ### capacity_probe.py
 
+Requires `pip install requests`.
+
 ```python
 #!/usr/bin/env python3
 """Find the concurrency a local endpoint actually sustains, and price it.

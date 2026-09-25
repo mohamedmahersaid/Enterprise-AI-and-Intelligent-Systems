@@ -154,6 +154,9 @@ Fallback tiers are configured once and never exercised, so the quality cliff is
 discovered during the incident. This runs a golden set against the primary and each
 fallback, reports the delta per tier, and says whether degrading beats failing here.
 
+Requires `pip install requests`. The key is read from `PROVIDER_API_KEY` rather than the
+command line, where it would be kept in shell history.
+
 ```python
 #!/usr/bin/env python3
 """Measure what each fallback tier actually costs in answer quality.
@@ -164,6 +167,7 @@ number you need before an incident: how much worse degraded is, per tier.
 """
 import argparse
 import json
+import os
 import sys
 import time
 
@@ -196,10 +200,10 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("golden", help='JSONL of {"prompt": ..., "keywords": [...]}')
     parser.add_argument("--endpoint", required=True)
-    parser.add_argument("--key", required=True)
     parser.add_argument("--tiers", nargs="+", required=True,
                         help="model ids, primary first")
     args = parser.parse_args()
+    key = os.environ.get("PROVIDER_API_KEY") or parser.error("set PROVIDER_API_KEY first")
 
     with open(args.golden) as handle:
         cases = [json.loads(line) for line in handle if line.strip()]
@@ -209,7 +213,7 @@ def main():
         scores, latencies, errors = [], [], 0
         for case in cases:
             try:
-                answer, elapsed = ask(args.endpoint, args.key, tier, case["prompt"])
+                answer, elapsed = ask(args.endpoint, key, tier, case["prompt"])
             except requests.RequestException:
                 errors += 1
                 continue

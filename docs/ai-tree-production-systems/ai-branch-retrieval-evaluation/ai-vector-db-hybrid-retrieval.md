@@ -130,6 +130,8 @@ psql -c "SELECT count(*) FROM documents WHERE embedding IS NULL;"
 #!/usr/bin/env python3
 """Measures retrieval quality: recall@k and MRR for dense, sparse and hybrid.
 Also detects post-filter recall collapse, which is silent in production.
+
+Usage: retrieval_quality_eval.py <golden_queries.json>
 """
 import sys
 import json
@@ -173,7 +175,10 @@ def evaluate(name, search_fn, golden):
     return avg_r, short
 
 
-golden = json.load(open("golden_queries.json"))
+if len(sys.argv) != 2:
+    sys.exit("usage: retrieval_quality_eval.py <golden_queries.json>")
+with open(sys.argv[1]) as handle:
+    golden = json.load(handle)
 
 # Replace these with real clients.
 def dense(q, k, f):   return []

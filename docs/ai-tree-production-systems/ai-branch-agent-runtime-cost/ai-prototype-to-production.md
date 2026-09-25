@@ -140,6 +140,9 @@ The six boundaries are easy to agree with and easy to skip, and the usual discov
 an incident. This probes a deployed endpoint for each one and prints a verdict, so
 "is this ready for users?" has an answer that is not an opinion.
 
+Requires `pip install requests`, with `GATEWAY_URL` and `GATEWAY_KEY` set to the gateway
+under test and a key it issued.
+
 ```python
 #!/usr/bin/env python3
 """Probe a deployed AI endpoint for the boundaries production requires.
@@ -153,8 +156,8 @@ import time
 
 import requests
 
-GATEWAY = os.environ["GATEWAY_URL"]
-KEY = os.environ["GATEWAY_KEY"]
+GATEWAY = os.environ.get("GATEWAY_URL", "").rstrip("/")
+KEY = os.environ.get("GATEWAY_KEY", "")
 BODY = {"model": "gpt-4o", "messages": [{"role": "user", "content": "ping"}], "max_tokens": 8}
 
 
@@ -234,6 +237,8 @@ def main():
 
 
 if __name__ == "__main__":
+    if not GATEWAY or not KEY:
+        sys.exit("set GATEWAY_URL and GATEWAY_KEY to the gateway under test")
     sys.exit(main())
 ```
 

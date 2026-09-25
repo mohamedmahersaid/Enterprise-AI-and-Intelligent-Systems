@@ -262,6 +262,8 @@ def finish(out_dir, metrics):
 
 
 if __name__ == "__main__":
+    if not os.environ.get("DATA_PATH"):
+        sys.exit("set DATA_PATH to the training data file; its hash goes in the record")
     demo = capture(
         out_dir=os.environ.get("RUN_DIR", "runs/demo"),
         data_path=os.environ["DATA_PATH"],

@@ -98,8 +98,12 @@ curl -X POST http://localhost:11434/api/chat -d "{\"model\":\"llama3.1:8b\",\"me
 belong in any production agent regardless of which framework wraps it:
 a hard step limit, argument validation before execution, and full
 trajectory logging for post-hoc debugging.
+
+Run with --demo to exercise the guardrails against a scripted model before
+wiring a real one; without it, the script stops until call_model is wired.
 """
 import json
+import sys
 import time
 
 MAX_STEPS = 8
@@ -131,13 +135,27 @@ def call_model(messages):
         "Wire this to your model provider's tool-calling chat completion API")
 
 
-def run_agent(goal):
+def scripted_model(replies):
+    """A canned model for --demo: replays fixed responses so the step limit,
+    argument validation and trajectory log can be seen working offline."""
+    queue = iter(replies)
+    return lambda messages: next(queue, {"content": "No further action."})
+
+
+DEMO_REPLIES = [
+    {"tool_call": {"name": "lookup_inventory", "arguments": {"sku": "AB-1234"}}},
+    {"tool_call": {"name": "lookup_inventory", "arguments": {"sku": "AB1234"}}},
+    {"content": "AB1234 has 42 in stock, so no ticket is needed."},
+]
+
+
+def run_agent(goal, model=call_model):
     trajectory = []
     messages = [{"role": "system", "content": "You are an inventory operations agent."},
                 {"role": "user", "content": goal}]
 
     for step in range(1, MAX_STEPS + 1):
-        response = call_model(messages)
+        response = model(messages)
         trajectory.append({"step": step, "model_output": response})
 
         tool_call = response.get("tool_call")
@@ -170,7 +188,13 @@ def run_agent(goal):
 
 
 if __name__ == "__main__":
-    result = run_agent("Check stock for SKU AB1234 and open a ticket if it is out of stock.")
+    goal = "Check stock for SKU AB1234 and open a ticket if it is out of stock."
+    model = scripted_model(DEMO_REPLIES) if "--demo" in sys.argv[1:] else call_model
+    try:
+        result = run_agent(goal, model)
+    except NotImplementedError as exc:
+        sys.exit("call_model is not wired yet: %s. Run with --demo to see the "
+                 "guardrails work against a scripted model." % exc)
     print(json.dumps(result, indent=2))
 ```
 

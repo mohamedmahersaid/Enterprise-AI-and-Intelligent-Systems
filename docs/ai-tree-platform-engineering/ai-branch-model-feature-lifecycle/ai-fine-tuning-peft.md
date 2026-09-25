@@ -224,6 +224,8 @@ def main(train_path, eval_path, threshold=0.8):
 
 
 if __name__ == "__main__":
+    if len(sys.argv) != 3:
+        sys.exit("usage: ft_dataset_gate.py <train.jsonl> <eval.jsonl>")
     sys.exit(main(sys.argv[1], sys.argv[2]))
 ```
 

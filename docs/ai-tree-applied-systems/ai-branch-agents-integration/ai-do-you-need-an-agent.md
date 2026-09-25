@@ -195,7 +195,10 @@ import argparse
 
 def ask(question: str) -> bool:
     while True:
-        answer = input(f"{question} [y/n] ").strip().lower()
+        try:
+            answer = input(f"{question} [y/n] ").strip().lower()
+        except EOFError:  # stdin closed or piped empty: nobody is there to answer
+            raise SystemExit("\nNo answer given. Run this in a terminal; it asks three questions.")
         if answer in {"y", "yes"}:
             return True
         if answer in {"n", "no"}:
