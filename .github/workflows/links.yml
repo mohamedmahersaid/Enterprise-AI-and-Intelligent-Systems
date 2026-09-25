@@ -1,0 +1,75 @@
+name: Check reference links
+
+# The network is not something a pull-request check should depend on, so link
+# health is checked on a schedule and on demand instead. validate-content
+# already guarantees every reference has an https URL; this confirms the URL
+# still answers and records the page title it resolves to.
+on:
+  schedule:
+    - cron: '0 6 * * 1' # Mondays 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      broken: ${{ steps.summary.outputs.broken }}
+      report: ${{ steps.summary.outputs.report }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22'
+
+      # No dependencies: the checker uses Node's built-in fetch.
+      - name: Fetch every cited link
+        id: check
+        run: node scripts/check-links.mjs --json link-report.json
+        continue-on-error: true
+
+      - name: Summarise broken links
+        id: summary
+        run: |
+          broken=$(jq '[.[] | select(.verdict == "broken")] | length' link-report.json)
+          echo "broken=$broken" >> "$GITHUB_OUTPUT"
+          {
+            echo 'report<<REPORT_END'
+            jq -r '.[] | select(.verdict == "broken") | "- \(.url) (\(if .status == 0 then .error else .status end)) - used in \(.where | join(", "))"' link-report.json
+            echo 'REPORT_END'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Fail on broken links
+        if: steps.summary.outputs.broken != '0'
+        run: exit 1
+
+  # Separate job so the token that can write issues never shares a job with
+  # repository code; it only files what the check job reported.
+  report:
+    needs: check
+    if: always() && github.event_name == 'schedule' && needs.check.outputs.broken != '0'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Open or update the broken-links issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          REPORT: ${{ needs.check.outputs.report }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          title="Broken reference links"
+          body=$(printf 'The weekly link check found links that no longer resolve.\n\n%s\n\nFull report: %s\n' "$REPORT" "$RUN_URL")
+          existing=$(gh issue list --state open --search "in:title \"$title\"" --json number --jq '.[0].number')
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "$body"
+          else
+            gh issue create --title "$title" --body "$body"
+          fi
