@@ -1,5 +1,6 @@
 /**
- * Fetches every external link the curriculum cites and reports what came back.
+ * Fetches every external link the curriculum cites - inline links, autolinks
+ * and reference definitions, outside code blocks - and reports what came back.
  *
  * validate-content proves each reference has a URL. It cannot prove the URL
  * still answers, or that it is the page the reference names - that needs the
@@ -32,7 +33,9 @@ const catalog = JSON.parse(fs.readFileSync('data/catalog.json', 'utf8'));
 function collect() {
   const found = new Map();
   const add = (url, where) => {
-    const clean = url.replace(/[).,;]+$/, '');
+    // Not ')': the extractor already stops at the link's own closing paren, and
+    // stripping it would cut the end off a URL such as .../Foo_(bar).
+    const clean = url.replace(/[.,;]+$/, '');
     if (!found.has(clean)) found.set(clean, new Set());
     found.get(clean).add(where);
   };
@@ -43,7 +46,9 @@ function collect() {
     for (const [i, line] of lines.entries()) {
       if (line.trimStart().startsWith('```')) fenced = !fenced;
       if (fenced) continue; // command examples point at placeholders, not sources
-      for (const m of line.matchAll(/\]\((https:\/\/[^)\s]+)\)/g)) add(m[1], `${leaf.path}:${i + 1}`);
+      // [text](url) with balanced parentheses, <url> autolinks, and [id]: url.
+      const links = /\]\((https:\/\/(?:[^()\s]|\([^()\s]*\))+)\)|<(https:\/\/[^>\s]+)>|^\s*\[[^\]]+\]:\s*<?(https:\/\/[^>\s]+)/g;
+      for (const m of line.matchAll(links)) add(m[1] ?? m[2] ?? m[3], `${leaf.path}:${i + 1}`);
     }
   }
   const registry = JSON.parse(fs.readFileSync('data/certifications.json', 'utf8'));
@@ -89,7 +94,16 @@ async function probe(url) {
       last = { status: res.status, final: res.url, title };
       if (res.status < 500 && res.status !== 429) return last;
     } catch (error) {
-      last = { status: 0, final: url, title: '', error: error.cause?.code ?? error.cause?.message ?? error.name };
+      // Node tries each of a host's addresses in turn and reports an
+      // AggregateError; a refused IPv4 attempt can sit behind an IPv6 one
+      // that failed only because the runner has no IPv6 route.
+      const codes = [error.cause?.code, ...(error.cause?.errors ?? []).map((e) => e.code)];
+      last = {
+        status: 0,
+        final: url,
+        title: '',
+        error: codes.find((c) => GONE.has(c)) ?? error.cause?.code ?? error.cause?.message ?? error.name,
+      };
     } finally {
       clearTimeout(timer);
     }

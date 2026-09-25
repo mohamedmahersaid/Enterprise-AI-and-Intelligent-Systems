@@ -43,7 +43,15 @@ jobs:
 
       - name: Summarise broken links
         id: summary
+        if: always()
         run: |
+          # A missing report means the checker never finished - not that
+          # links are broken - so fail without claiming any are.
+          if [ ! -f link-report.json ]; then
+            echo 'broken=error' >> "$GITHUB_OUTPUT"
+            echo '::error::check-links.mjs did not produce a report'
+            exit 1
+          fi
           broken=$(jq '[.[] | select(.verdict == "broken")] | length' link-report.json)
           echo "broken=$broken" >> "$GITHUB_OUTPUT"
           {
@@ -60,7 +68,9 @@ jobs:
   # repository code; it only files what the check job reported.
   report:
     needs: check
-    if: always() && github.event_name == 'schedule' && needs.check.outputs.broken != '0'
+    # Keyed on a non-empty list of broken links, so a run that crashed or never
+    # started cannot file an issue claiming links are broken.
+    if: always() && github.event_name == 'schedule' && needs.check.outputs.report != ''
     runs-on: ubuntu-latest
     permissions:
       issues: write
@@ -74,7 +84,10 @@ jobs:
         run: |
           title="Broken reference links"
           body=$(printf 'The weekly link check found links that no longer resolve.\n\n%s\n\nFull report: %s\n' "$REPORT" "$RUN_URL")
-          existing=$(gh issue list --state open --search "in:title \"$title\"" --json number --jq '.[0].number')
+          # Only an issue this workflow opened, with exactly this title: anyone can
+          # open an issue with a similar name, and the report must not land on it.
+          existing=$(gh issue list --state open --author app/github-actions --search "in:title \"$title\"" \
+            --json number,title --jq "map(select(.title == \"$title\")) | .[0].number // empty")
           if [ -n "$existing" ]; then
             gh issue comment "$existing" --body "$body"
           else

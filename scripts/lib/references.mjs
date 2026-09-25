@@ -12,14 +12,19 @@
  */
 import fs from 'node:fs';
 
-const ENTRY = /^- \[(?<text>[^\]]+)\]\((?<url>[^)\s]+)\) - (?<why>\S.*)$/;
+// One level of nesting is allowed in both: a title can contain [brackets] and a
+// URL can contain (parentheses), as Wikipedia disambiguation pages do.
+const ENTRY = /^- \[(?<text>(?:[^\[\]]|\[[^\[\]]*\])+)\]\((?<url>(?:[^()\s]|\([^()\s]*\))+)\) - (?<why>\S.*)$/;
 
 /** The bullet lines of a leaf's `## References` section. */
 export function referenceLines(body) {
   const out = [];
   let inside = false;
+  let fenced = false;
   for (const [index, line] of body.split('\n').entries()) {
-    if (line.startsWith('## ')) {
+    // A `## References` inside a code block is example text, not a heading.
+    if (line.trimStart().startsWith('```')) fenced = !fenced;
+    if (!fenced && line.startsWith('## ')) {
       inside = line.trim() === '## References';
       continue;
     }
