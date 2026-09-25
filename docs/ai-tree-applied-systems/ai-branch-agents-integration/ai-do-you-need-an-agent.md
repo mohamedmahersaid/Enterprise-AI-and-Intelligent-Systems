@@ -319,7 +319,7 @@ each costs, so the choice between them is evidence rather than vocabulary.
 
 **Likely cause:** Expected behaviour for a loop. The execution path is chosen at runtime, so different paths reach different answers.
 
-**Resolution:** If consistency matters more than flexibility, that is the signal to move down to a workflow. If you must keep the loop, constrain the tool set and pin temperature to zero - both narrow the path space without removing it.
+**Resolution:** If consistency matters more than flexibility, that is the signal to move down to a workflow. If you must keep the loop, constrain the tool set and pin the sampling - temperature to zero where the model accepts it, a fixed reasoning effort where it does not. Both narrow the path space without removing it.
 
 ### Scenario 4: A tool ran twice and something was duplicated - an email, a refund, a ticket.
 

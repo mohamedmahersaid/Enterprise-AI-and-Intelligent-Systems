@@ -268,7 +268,7 @@ sys.exit(0)
 
 **Likely cause:** Nondeterministic generation combined with single-run measurement.
 
-**Resolution:** Set temperature to zero where the use case allows, run each case several times and aggregate, and set the gate tolerance above the measured variance. Measure the noise floor explicitly before choosing the tolerance - a gate tighter than the system's own nondeterminism produces flaky failures, and a flaky gate is disabled within weeks, which costs more than having no gate at all.
+**Resolution:** Set temperature to zero where the model and the use case allow - reasoning models reject it, so fix their reasoning effort instead - run each case several times and aggregate, and set the gate tolerance above the measured variance. Measure the noise floor explicitly before choosing the tolerance - a gate tighter than the system's own nondeterminism produces flaky failures, and a flaky gate is disabled within weeks, which costs more than having no gate at all.
 
 ### Scenario 2: LLM-as-judge consistently rates one variant higher, but humans disagree.
 

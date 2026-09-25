@@ -57,7 +57,7 @@ az cognitiveservices account deployment show -g rg-ai -n aoai-prod --deployment-
 Stand up a canary deployment at low capacity alongside the production deployment.
 
 ```text
-az cognitiveservices account deployment create -g rg-ai -n aoai-prod --deployment-name chat-canary --model-name gpt-4o --model-version 2025-03-01 --sku-name Standard --sku-capacity 5
+az cognitiveservices account deployment create -g rg-ai -n aoai-prod --deployment-name chat-canary --model-name gpt-5.1 --model-version 2025-11-13 --sku-name Standard --sku-capacity 5
 ```
 
 ### Command 3
@@ -126,7 +126,6 @@ import urllib.request
 
 AOAI_ENDPOINT = os.environ.get("AZURE_OPENAI_ENDPOINT", "")
 AOAI_KEY = os.environ.get("AZURE_OPENAI_API_KEY", "")
-API_VERSION = "2024-10-21"
 MAX_DRIFT_PCT = float(os.environ.get("MAX_DRIFT_PCT", "5.0"))
 
 
@@ -144,10 +143,12 @@ def load_goldenset(path):
 
 
 def call_deployment(deployment, prompt):
-    url = "%s/openai/deployments/%s/chat/completions?api-version=%s" % (
-        AOAI_ENDPOINT.rstrip("/"), deployment, API_VERSION)
-    body = {"messages": [{"role": "user", "content": prompt}],
-            "temperature": 0, "max_tokens": 400}
+    url = "%s/openai/v1/chat/completions" % AOAI_ENDPOINT.rstrip("/")
+    body = {"model": deployment, "messages": [{"role": "user", "content": prompt}],
+            # Reasoning models - the GPT-5 family - reject temperature and max_tokens;
+            # the cap is max_completion_tokens, and it counts reasoning tokens too,
+            # so an empty answer means the cap is too low for the effort used.
+            "max_completion_tokens": 400}
     req = urllib.request.Request(url, data=json.dumps(body).encode(),
                                  headers={"Content-Type": "application/json",
                                           "api-key": AOAI_KEY})
@@ -220,7 +221,7 @@ if __name__ == "__main__":
 
 ### Steps
 
-1. Create two Azure OpenAI deployments of the same model at different pinned versions: chat-prod and chat-canary, each with an explicit sku-capacity.
+1. Create two Azure OpenAI deployments, each pinned to an explicit model version and with an explicit sku-capacity: chat-prod on the model in service today, and chat-canary on the model that will replace it when that one retires.
 2. Write 20-30 golden questions with expected keyword lists into golden_questions.jsonl, covering the core intents your application actually serves.
 3. Set AZURE_OPENAI_ENDPOINT and AZURE_OPENAI_API_KEY, then run the drift detector script comparing chat-canary against chat-prod.
 4. Deliberately edit the canary deployment's system prompt to remove a key instruction, re-run the script, and confirm drift_pct rises and the script exits non-zero.

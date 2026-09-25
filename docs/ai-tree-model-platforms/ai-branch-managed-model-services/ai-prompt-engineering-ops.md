@@ -26,7 +26,7 @@ The second is **explicit refusal paths**. Operational prompts must tell the mode
 
 The third is **grounding discipline**: instruct the model to answer only from provided context and to cite which supplied document supports each claim. Where citation is absent, the claim is a candidate hallucination and can be flagged automatically.
 
-Finally, temperature near zero for anything deterministic, and an evaluation set that runs on every prompt change.
+Finally, pin what varies the output. On models that accept it, such as a local Llama, that means temperature near zero. Reasoning models - the GPT-5 family on Azure OpenAI - reject temperature, so there it means a pinned model version, a fixed reasoning effort and a strict output schema. Then an evaluation set that runs on every prompt change.
 
 ## Architecture and flow
 
@@ -38,7 +38,7 @@ flowchart TD
     B --> B3[3 Task instruction]
     B --> B4[4 JSON schema contract]
     B --> B5[5 Few-shot examples]
-    B1 & B2 & B3 & B4 & B5 --> C[Model call\ntemperature 0]
+    B1 & B2 & B3 & B4 & B5 --> C[Model call\npinned version + strict schema]
     C --> D{Schema valid?}
     D -->|No| E[Retry once, then\nescalate to human]
     D -->|Yes| F{Confidence >= threshold?}
@@ -75,10 +75,10 @@ python eval_prompts.py --prompt prompts/incident-triage.md --set evalsets/incide
 
 ### Command 4
 
-Test a prompt payload from the shell and extract only the content field.
+Test a prompt payload from the shell and extract only the content field. The v1 API takes the deployment name as `model` in request.json and needs no api-version.
 
 ```text
-curl -s $AOAI/openai/deployments/chat/chat/completions?api-version=2024-10-21 -H "api-key: $KEY" -H "Content-Type: application/json" -d @request.json | jq '.choices[0].message.content'
+curl -s $AOAI/openai/v1/chat/completions -H "api-key: $KEY" -H "Content-Type: application/json" -d @request.json | jq '.choices[0].message.content'
 ```
 
 ### Command 5
@@ -131,7 +131,6 @@ AOAI_KEY = os.environ.get("AZURE_OPENAI_API_KEY", "")
 DEPLOYMENT = os.environ.get("AOAI_DEPLOYMENT", "chat")
 OLLAMA = os.environ.get("OLLAMA_HOST", "http://127.0.0.1:11434")
 LOCAL_MODEL = os.environ.get("LOCAL_MODEL", "llama3.1:8b")
-API_VERSION = "2024-10-21"
 CONFIDENCE_FLOOR = 0.70
 
 SCHEMA = {
@@ -189,13 +188,16 @@ def post(url, payload, headers, timeout=120):
 
 
 def call_azure(user_msg):
-    url = "%s/openai/deployments/%s/chat/completions?api-version=%s" % (
-        AOAI.rstrip("/"), DEPLOYMENT, API_VERSION)
+    # The v1 API: one path for every deployment, which is named in the body.
+    url = "%s/openai/v1/chat/completions" % AOAI.rstrip("/")
     body = {
+        "model": DEPLOYMENT,
         "messages": [{"role": "system", "content": SYSTEM_PROMPT},
                      {"role": "user", "content": user_msg}],
-        "temperature": 0,
-        "max_tokens": 700,
+        # Reasoning models - the GPT-5 family - reject temperature and max_tokens;
+        # the cap is max_completion_tokens, and it counts reasoning tokens too,
+        # so an empty answer means the cap is too low for the effort used.
+        "max_completion_tokens": 700,
         "response_format": {
             "type": "json_schema",
             "json_schema": {"name": "triage", "strict": True, "schema": SCHEMA},
@@ -383,9 +385,9 @@ if __name__ == "__main__":
 
 ### Scenario 4: Identical inputs produce different outputs across runs, breaking downstream reconciliation.
 
-**Likely cause:** Temperature above zero, or a shifting prompt prefix from injected timestamps or non-deterministic context ordering.
+**Likely cause:** Temperature above zero on a model that accepts it, a model version that moved underneath the deployment, or a shifting prompt prefix from injected timestamps or non-deterministic context ordering.
 
-**Resolution:** Set temperature to 0 and fix top_p for operational tasks. Sort retrieved context deterministically. Accept that some residual non-determinism remains even at temperature 0 on hosted models, so design downstream systems to be idempotent rather than assuming byte-identical output.
+**Resolution:** Pin the model version. Where the model accepts them, set temperature to 0 and fix top_p; reasoning models such as the GPT-5 family reject both, so fix the reasoning effort and enforce a strict output schema instead. Sort retrieved context deterministically. Accept that some residual non-determinism remains on hosted models whatever the settings, so design downstream systems to be idempotent rather than assuming byte-identical output.
 
 ### Scenario 5: A prompt change improved one scenario and quietly broke three others.
 
@@ -414,7 +416,7 @@ Prompts live in Git in the application repository with the same branch protectio
 ## Certification alignment
 
 - **Microsoft Certified: Azure AI Apps and Agents Developer Associate (AI-103)** - Implement generative AI and agentic solutions: applying the five-part prompt structure and enforcing a strict JSON schema through structured output on Azure OpenAI.
-- **Microsoft Certified: Azure AI Fundamentals (AI-901)** - Identify AI concepts and capabilities: grounding a model in supplied context, why a model hallucinates a root cause, and using temperature near zero for deterministic tasks.
+- **Microsoft Certified: Azure AI Fundamentals (AI-901)** - Identify AI concepts and capabilities: grounding a model in supplied context, why a model hallucinates a root cause, and which settings make a deterministic task repeatable.
 - **Vendor-neutral** - OWASP GenAI LLM Top 10 2026: LLM01:2026 Prompt Injection and LLM10:2026 Improper Output Handling.
 - **Vendor-neutral** - NIST AI RMF MEASURE function: test, evaluate, verify and validate AI system outputs.
 

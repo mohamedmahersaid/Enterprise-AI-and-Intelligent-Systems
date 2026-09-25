@@ -89,7 +89,7 @@ flowchart TD
 Call the model through the gateway, forwarding end-user identity rather than a shared service token
 
 ```text
-curl -s localhost:4000/v1/chat/completions -H "Authorization: Bearer $KEY" -H "x-end-user: alice@example.com" -d "{\"model\":\"gpt-4o\",\"messages\":[{\"role\":\"user\",\"content\":\"ping\"}]}"
+curl -s localhost:4000/v1/chat/completions -H "Authorization: Bearer $KEY" -H "x-end-user: alice@example.com" -d "{\"model\":\"chat\",\"messages\":[{\"role\":\"user\",\"content\":\"ping\"}]}"
 ```
 
 ### Command 2
@@ -158,7 +158,7 @@ import requests
 
 GATEWAY = os.environ.get("GATEWAY_URL", "").rstrip("/")
 KEY = os.environ.get("GATEWAY_KEY", "")
-BODY = {"model": "gpt-4o", "messages": [{"role": "user", "content": "ping"}], "max_tokens": 8}
+BODY = {"model": "chat", "messages": [{"role": "user", "content": "ping"}], "max_tokens": 8}
 
 
 def call(headers=None, body=None):
