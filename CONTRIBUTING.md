@@ -88,9 +88,11 @@ prints a usage line or names the variable to set; it does not crash. A script
 whose declared dependency is not installed is listed as skipped by name, never
 counted as passing. CI installs the lightweight ones from
 `scripts/requirements.txt` (pinned and hash-checked) and points `LEAF_PYTHON` at
-that environment; set `LEAF_PYTHON` locally to do the same. Credentials belong in
-environment variables, never in arguments, where they would be kept in shell
-history and visible in the process list.
+that environment; set `LEAF_PYTHON` locally to do the same. Containment is not a
+sandbox: a script can still read its parent's files and reach the network, so the
+check runs only in CI jobs that hold no deploy token. A script reads credentials
+from environment variables, never from its own arguments, where they would be
+kept in shell history and visible in the process list.
 
 `validate:commands` is deliberately not a shell linter. Commands are documented
 with `<angle-bracket>` placeholders and some blocks are SQL, so a shell parser

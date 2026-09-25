@@ -70,6 +70,8 @@ export function normalise(name) {
 const DISTRIBUTION = {
   bs4: 'beautifulsoup4',
   cv2: 'opencv-python',
+  dotenv: 'python-dotenv',
+  jwt: 'pyjwt',
   PIL: 'pillow',
   sklearn: 'scikit-learn',
   yaml: 'pyyaml',
@@ -77,6 +79,18 @@ const DISTRIBUTION = {
 
 export function distributionFor(module) {
   return normalise(DISTRIBUTION[module] ?? module);
+}
+
+/**
+ * Whether a leaf declares what `import module` needs. Namespace packages ship
+ * as several distributions under one import name - `import azure` comes from
+ * `azure-identity`, `azure-search-documents` and others - so any declared
+ * distribution under the namespace counts.
+ */
+export function isDeclared(module, declared) {
+  if (declared.has(distributionFor(module))) return true;
+  const namespace = `${normalise(module)}-`;
+  return [...declared].some((name) => name.startsWith(namespace));
 }
 
 const PIP_INSTALL =

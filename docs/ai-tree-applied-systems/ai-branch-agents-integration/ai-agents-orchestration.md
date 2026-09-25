@@ -99,8 +99,8 @@ belong in any production agent regardless of which framework wraps it:
 a hard step limit, argument validation before execution, and full
 trajectory logging for post-hoc debugging.
 
-Run with --demo to exercise the guardrails against a scripted model before
-wiring a real one; without it, the script stops until call_model is wired.
+Run with --demo to see argument validation and trajectory logging work
+against a scripted model before wiring a real one; without it, the script stops until call_model is wired.
 """
 import json
 import sys
@@ -136,8 +136,9 @@ def call_model(messages):
 
 
 def scripted_model(replies):
-    """A canned model for --demo: replays fixed responses so the step limit,
-    argument validation and trajectory log can be seen working offline."""
+    """A canned model for --demo: replays fixed responses so argument
+    validation and the trajectory log can be seen working offline. The step
+    limit needs a goal that loops - Lab step 4 exercises it."""
     queue = iter(replies)
     return lambda messages: next(queue, {"content": "No further action."})
 
@@ -194,7 +195,7 @@ if __name__ == "__main__":
         result = run_agent(goal, model)
     except NotImplementedError as exc:
         sys.exit("call_model is not wired yet: %s. Run with --demo to see the "
-                 "guardrails work against a scripted model." % exc)
+                 "loop work against a scripted model." % exc)
     print(json.dumps(result, indent=2))
 ```
 

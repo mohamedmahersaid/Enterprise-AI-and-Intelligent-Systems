@@ -16,6 +16,9 @@ jobs:
       # to point at different code, a SHA cannot. The trailing comment records
       # which release each SHA corresponds to so it can be reviewed and bumped.
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        # validate:scripts executes leaf code; leave no token in .git/config for it.
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
         with:
           node-version: '22'

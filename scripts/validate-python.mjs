@@ -18,7 +18,7 @@
  */
 import fs from 'node:fs';
 import { spawnSync } from 'node:child_process';
-import { PYTHON, declaredPackages, distributionFor, pythonBlocks } from './lib/python-blocks.mjs';
+import { PYTHON, declaredPackages, distributionFor, isDeclared, pythonBlocks } from './lib/python-blocks.mjs';
 
 const { leaves } = JSON.parse(fs.readFileSync('data/catalog.json', 'utf8'));
 
@@ -152,7 +152,7 @@ for (const [index, block] of blocks.entries()) {
   }
   for (const module of imports[index]) {
     thirdParty++;
-    if (!declared.get(block.file).has(distributionFor(module))) {
+    if (!isDeclared(module, declared.get(block.file))) {
       undeclared.push({ block, module });
     }
   }
@@ -162,7 +162,7 @@ for (const { block, module } of undeclared) {
   console.error(
     `${block.file}:${block.offset} ${block.name || 'python block'} imports ` +
     `\`${module}\`, but the leaf never tells the reader to install it.\n` +
-    `    Add \`pip install ${distributionFor(module)}\` near the script, or guard the ` +
+    `    Add a \`pip install\` for the package that provides it (usually \`${distributionFor(module)}\`) near the script, or guard the ` +
     `import with \`except ImportError\` if the script works without it.`
   );
 }
