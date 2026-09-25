@@ -2,6 +2,7 @@
 id: 'ai-private-enterprise-rag'
 title: 'Grounding Enterprise Data Privately: Offline RAG and Access Control'
 level: 'Enterprise'
+readiness: 'lab'
 forest: 'AI & Intelligent Systems'
 tree: 'Applied AI Systems'
 branch: 'RAG & Knowledge Systems'
@@ -13,6 +14,7 @@ branch: 'RAG & Knowledge Systems'
 **Tree:** [Applied AI Systems](../README.md)
 **Branch:** [RAG & Knowledge Systems](README.md)
 **Forest:** [AI & Intelligent Systems](../../../README.md)
+**Readiness:** [Lab](../../../READINESS.md#lab) - checked offline, not yet run against a live service. A live run needs a local Ollama server and an Azure subscription.
 
 ## Explanation
 

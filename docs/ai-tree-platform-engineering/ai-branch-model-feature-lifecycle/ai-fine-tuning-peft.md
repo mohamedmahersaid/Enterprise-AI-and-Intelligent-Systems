@@ -2,6 +2,7 @@
 id: 'ai-fine-tuning-peft'
 title: 'Fine-Tuning and PEFT: When to Tune, LoRA Adapters and Evaluation'
 level: 'Intermediate'
+readiness: 'lab'
 forest: 'AI & Intelligent Systems'
 tree: 'AI Platform Engineering'
 branch: 'Model and Feature Lifecycle'
@@ -13,6 +14,7 @@ branch: 'Model and Feature Lifecycle'
 **Tree:** [AI Platform Engineering](../README.md)
 **Branch:** [Model and Feature Lifecycle](README.md)
 **Forest:** [AI & Intelligent Systems](../../../README.md)
+**Readiness:** [Lab](../../../READINESS.md#lab) - checked offline, not yet run against a live service. A live run needs an NVIDIA GPU.
 
 ## Explanation
 

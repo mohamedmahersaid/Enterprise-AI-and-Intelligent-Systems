@@ -2,6 +2,7 @@
 id: 'ai-first-gpu-job'
 title: 'Your First GPU Job: What You Are Renting, Why It Queues and How Not to Waste It'
 level: 'Beginner'
+readiness: 'lab'
 forest: 'AI & Intelligent Systems'
 tree: 'AI Platform Engineering'
 branch: 'Training and GPU Infrastructure'
@@ -13,6 +14,7 @@ branch: 'Training and GPU Infrastructure'
 **Tree:** [AI Platform Engineering](../README.md)
 **Branch:** [Training and GPU Infrastructure](README.md)
 **Forest:** [AI & Intelligent Systems](../../../README.md)
+**Readiness:** [Lab](../../../READINESS.md#lab) - checked offline, not yet run against a live service. A live run needs an NVIDIA GPU and a Slurm cluster.
 
 ## Explanation
 

@@ -2,6 +2,7 @@
 id: 'ai-do-you-need-rag'
 title: 'Do You Need RAG? Context Windows, Grounding and the Cheapest Thing That Works'
 level: 'Beginner'
+readiness: 'lab'
 forest: 'AI & Intelligent Systems'
 tree: 'Applied AI Systems'
 branch: 'RAG & Knowledge Systems'
@@ -13,6 +14,7 @@ branch: 'RAG & Knowledge Systems'
 **Tree:** [Applied AI Systems](../README.md)
 **Branch:** [RAG & Knowledge Systems](README.md)
 **Forest:** [AI & Intelligent Systems](../../../README.md)
+**Readiness:** [Lab](../../../READINESS.md#lab) - checked offline, not yet run against a live service. A live run needs a hosted model provider's API key.
 
 ## Explanation
 

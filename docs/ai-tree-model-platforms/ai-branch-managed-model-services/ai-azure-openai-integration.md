@@ -2,6 +2,7 @@
 id: 'ai-azure-openai-integration'
 title: 'Azure OpenAI Enterprise Integration'
 level: 'Advanced'
+readiness: 'lab'
 forest: 'AI & Intelligent Systems'
 tree: 'Running and Integrating Models'
 branch: 'Managed Model Services and Prompt Discipline'
@@ -13,6 +14,7 @@ branch: 'Managed Model Services and Prompt Discipline'
 **Tree:** [Running and Integrating Models](../README.md)
 **Branch:** [Managed Model Services and Prompt Discipline](README.md)
 **Forest:** [AI & Intelligent Systems](../../../README.md)
+**Readiness:** [Lab](../../../READINESS.md#lab) - checked offline, not yet run against a live service. A live run needs an Azure subscription.
 
 ## Explanation
 

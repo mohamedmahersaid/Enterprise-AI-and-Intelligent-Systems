@@ -2,6 +2,7 @@
 id: 'ai-evaluation-harness-gates'
 title: 'LLM Evaluation Harnesses and Regression Gates for Production AI'
 level: 'Advanced'
+readiness: 'lab'
 forest: 'AI & Intelligent Systems'
 tree: 'Production AI Systems'
 branch: 'Retrieval and Evaluation'
@@ -13,6 +14,7 @@ branch: 'Retrieval and Evaluation'
 **Tree:** [Production AI Systems](../README.md)
 **Branch:** [Retrieval and Evaluation](README.md)
 **Forest:** [AI & Intelligent Systems](../../../README.md)
+**Readiness:** [Lab](../../../READINESS.md#lab) - checked offline, not yet run against a live service. A live run needs a local Ollama server.
 
 ## Explanation
 

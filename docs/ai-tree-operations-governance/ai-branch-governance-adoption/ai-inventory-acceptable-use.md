@@ -2,6 +2,7 @@
 id: 'ai-inventory-acceptable-use'
 title: 'Before the Framework: AI Inventory, Acceptable Use and Who Decides'
 level: 'Beginner'
+readiness: 'lab'
 forest: 'AI & Intelligent Systems'
 tree: 'AI Operations & Governance'
 branch: 'Governance, Compliance and Enterprise Adoption'
@@ -13,6 +14,7 @@ branch: 'Governance, Compliance and Enterprise Adoption'
 **Tree:** [AI Operations & Governance](../README.md)
 **Branch:** [Governance, Compliance and Enterprise Adoption](README.md)
 **Forest:** [AI & Intelligent Systems](../../../README.md)
+**Readiness:** [Lab](../../../READINESS.md#lab) - checked offline, not yet run against a live service. A live run needs a service you already operate.
 
 ## Explanation
 

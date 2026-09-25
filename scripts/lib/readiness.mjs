@@ -268,6 +268,7 @@ export function renderReadinessMd(catalog, validation = loadValidation()) {
   const count = (level) => catalog.leaves.filter((l) => l.readiness === level).length;
   const total = catalog.leaves.length;
   const escape = (s) => s.replace(/\|/g, '\\|');
+  const free = catalog.leaves.filter((l) => l.needs?.length && l.needs.every((n) => n === 'runner' || n === 'ollama')).length;
 
   const out = [
     '# Readiness',
@@ -332,8 +333,8 @@ export function renderReadinessMd(catalog, validation = loadValidation()) {
     ...Object.entries(NEEDS).map(([id, n]) =>
       `| ${n.label} | ${n.detail} | ${catalog.leaves.filter((l) => l.needs?.includes(id)).length} |`),
     '',
-    'Leaves that need only a stock runner or Ollama can be validated in CI at no cost.',
-    'The rest need infrastructure or credentials this repository does not hold.',
+    `${free} of ${total} leaves need only a stock runner or Ollama, so CI can validate them`,
+    'at no cost. The rest need infrastructure or credentials this repository does not hold.',
     '',
     '## Every leaf',
     '',

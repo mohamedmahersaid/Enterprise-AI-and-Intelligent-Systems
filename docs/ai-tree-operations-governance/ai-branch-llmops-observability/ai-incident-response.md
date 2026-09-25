@@ -2,6 +2,7 @@
 id: 'ai-incident-response'
 title: 'AI Incident Response: Detection, Containment and Postmortems for Non-Deterministic Systems'
 level: 'Advanced'
+readiness: 'lab'
 forest: 'AI & Intelligent Systems'
 tree: 'AI Operations & Governance'
 branch: 'LLMOps and Production Observability'
@@ -13,6 +14,7 @@ branch: 'LLMOps and Production Observability'
 **Tree:** [AI Operations & Governance](../README.md)
 **Branch:** [LLMOps and Production Observability](README.md)
 **Forest:** [AI & Intelligent Systems](../../../README.md)
+**Readiness:** [Lab](../../../READINESS.md#lab) - checked offline, not yet run against a live service. A live run needs a local Ollama server, an Azure subscription and a service you already operate.
 
 ## Explanation
 

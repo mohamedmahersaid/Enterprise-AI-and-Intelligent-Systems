@@ -2,6 +2,7 @@
 id: 'ai-mcp-security-evaluation'
 title: 'MCP Servers, AI Security and Evaluation'
 level: 'Expert'
+readiness: 'lab'
 forest: 'AI & Intelligent Systems'
 tree: 'Applied AI Systems'
 branch: 'Agents & Enterprise Integration'
@@ -13,6 +14,7 @@ branch: 'Agents & Enterprise Integration'
 **Tree:** [Applied AI Systems](../README.md)
 **Branch:** [Agents & Enterprise Integration](README.md)
 **Forest:** [AI & Intelligent Systems](../../../README.md)
+**Readiness:** [Lab](../../../READINESS.md#lab) - checked offline, not yet run against a live service. A live run needs a local Ollama server and an Azure subscription.
 
 ## Explanation
 

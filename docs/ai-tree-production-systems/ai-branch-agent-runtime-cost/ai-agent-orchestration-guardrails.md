@@ -2,6 +2,7 @@
 id: 'ai-agent-orchestration-guardrails'
 title: 'Agent Orchestration with LangGraph: State, Guardrails and Tool Authorisation'
 level: 'Advanced'
+readiness: 'lab'
 forest: 'AI & Intelligent Systems'
 tree: 'Production AI Systems'
 branch: 'Agent Runtime and Cost Control'
@@ -13,6 +14,7 @@ branch: 'Agent Runtime and Cost Control'
 **Tree:** [Production AI Systems](../README.md)
 **Branch:** [Agent Runtime and Cost Control](README.md)
 **Forest:** [AI & Intelligent Systems](../../../README.md)
+**Readiness:** [Lab](../../../READINESS.md#lab) - checked offline, not yet run against a live service. A live run needs a local Ollama server, a Kubernetes cluster and a service you already operate.
 
 ## Explanation
 
