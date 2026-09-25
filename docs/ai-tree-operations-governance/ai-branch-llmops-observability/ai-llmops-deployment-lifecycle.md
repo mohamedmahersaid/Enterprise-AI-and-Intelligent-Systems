@@ -49,15 +49,15 @@ flowchart TD
 Confirm the exact pinned model version currently serving production.
 
 ```text
-az cognitiveservices account deployment show -g rg-ai -n aoai-prod --deployment-name chat --query properties.model.version
+az cognitiveservices account deployment show -g rg-ai -n aoai-prod --deployment-name chat-prod --query properties.model.version
 ```
 
 ### Command 2
 
-Stand up a canary deployment at low capacity alongside the production deployment.
+Stand up a canary deployment at low capacity alongside the production deployment, on the model that will replace production's. Global Standard is where a successor model is offered first; it may process prompts outside the account's region, so use it only where data residency allows.
 
 ```text
-az cognitiveservices account deployment create -g rg-ai -n aoai-prod --deployment-name chat-canary --model-name gpt-5.1 --model-version 2025-11-13 --sku-name Standard --sku-capacity 5
+az cognitiveservices account deployment create -g rg-ai -n aoai-prod --deployment-name chat-canary --model-name gpt-5.4 --model-version 2026-03-05 --model-format OpenAI --sku-name GlobalStandard --sku-capacity 5
 ```
 
 ### Command 3
@@ -127,6 +127,10 @@ import urllib.request
 AOAI_ENDPOINT = os.environ.get("AZURE_OPENAI_ENDPOINT", "")
 AOAI_KEY = os.environ.get("AZURE_OPENAI_API_KEY", "")
 MAX_DRIFT_PCT = float(os.environ.get("MAX_DRIFT_PCT", "5.0"))
+# The system prompt both deployments run under, and an optional override for
+# the candidate alone - how a prompt regression is tested before it ships.
+SYSTEM_PROMPT_FILE = os.environ.get("SYSTEM_PROMPT_FILE", "")
+CANDIDATE_SYSTEM_PROMPT_FILE = os.environ.get("CANDIDATE_SYSTEM_PROMPT_FILE", "")
 
 
 def load_goldenset(path):
@@ -142,9 +146,21 @@ def load_goldenset(path):
     return rows
 
 
-def call_deployment(deployment, prompt):
+def read_prompt(path):
+    if not path:
+        return None
+    if not os.path.exists(path):
+        print("ERROR: system prompt file not found: %s" % path)
+        sys.exit(2)
+    with open(path, encoding="utf-8") as fh:
+        return fh.read()
+
+
+def call_deployment(deployment, prompt, system=None):
     url = "%s/openai/v1/chat/completions" % AOAI_ENDPOINT.rstrip("/")
-    body = {"model": deployment, "messages": [{"role": "user", "content": prompt}],
+    messages = [{"role": "system", "content": system}] if system else []
+    messages.append({"role": "user", "content": prompt})
+    body = {"model": deployment, "messages": messages,
             # Reasoning models - the GPT-5 family - reject temperature and max_tokens;
             # the cap is max_completion_tokens, and it counts reasoning tokens too,
             # so an empty answer means the cap is too low for the effort used.
@@ -163,11 +179,11 @@ def score(answer, expected_keywords):
     return hits / len(expected_keywords) if expected_keywords else 0.0
 
 
-def run_suite(deployment, rows):
+def run_suite(deployment, rows, system=None):
     scores = []
     for row in rows:
         try:
-            answer = call_deployment(deployment, row["prompt"])
+            answer = call_deployment(deployment, row["prompt"], system)
         except Exception as exc:
             print("  %s: request failed for '%s...': %s" % (
                 deployment, row["prompt"][:40], exc))
@@ -190,10 +206,12 @@ def main():
         sys.exit(2)
 
     rows = load_goldenset(path)
+    system = read_prompt(SYSTEM_PROMPT_FILE)
+    candidate_system = read_prompt(CANDIDATE_SYSTEM_PROMPT_FILE) or system
     print("Scoring baseline deployment '%s' on %d questions..." % (baseline, len(rows)))
-    baseline_score = run_suite(baseline, rows)
+    baseline_score = run_suite(baseline, rows, system)
     print("Scoring candidate deployment '%s' on %d questions..." % (candidate, len(rows)))
-    candidate_score = run_suite(candidate, rows)
+    candidate_score = run_suite(candidate, rows, candidate_system)
 
     drift_pct = (baseline_score - candidate_score) * 100.0
     report = {
@@ -223,8 +241,8 @@ if __name__ == "__main__":
 
 1. Create two Azure OpenAI deployments, each pinned to an explicit model version and with an explicit sku-capacity: chat-prod on the model in service today, and chat-canary on the model that will replace it when that one retires.
 2. Write 20-30 golden questions with expected keyword lists into golden_questions.jsonl, covering the core intents your application actually serves.
-3. Set AZURE_OPENAI_ENDPOINT and AZURE_OPENAI_API_KEY, then run the drift detector script comparing chat-canary against chat-prod.
-4. Deliberately edit the canary deployment's system prompt to remove a key instruction, re-run the script, and confirm drift_pct rises and the script exits non-zero.
+3. Put your application's system prompt in system_prompt.txt, set SYSTEM_PROMPT_FILE to it along with AZURE_OPENAI_ENDPOINT and AZURE_OPENAI_API_KEY, then run the drift detector script comparing chat-canary against chat-prod.
+4. Copy system_prompt.txt, remove a key instruction from the copy, point CANDIDATE_SYSTEM_PROMPT_FILE at it so only the canary runs the regressed prompt, re-run the script, and confirm drift_pct rises and the script exits non-zero.
 5. Wire the script into a CI pipeline stage that runs on every pull request touching prompts/ or the deployment configuration, failing the build on non-zero exit.
 6. Add a scheduled nightly run of the same script against production only, comparing today's score to a stored baseline from last week to catch provider-side model drift.
 7. Configure an Azure Monitor scheduled query alert that fires when drift.json's pass field is false, routed to your on-call channel.

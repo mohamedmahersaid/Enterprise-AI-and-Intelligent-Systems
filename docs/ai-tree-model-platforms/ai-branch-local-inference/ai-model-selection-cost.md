@@ -88,10 +88,10 @@ ollama run llama3.1:8b --verbose
 
 ### Command 6
 
-Throttle a deployment by lowering provisioned TPM as an emergency cost brake.
+Throttle a deployment by re-applying it at lower TPM capacity as an emergency cost brake. The CLI has no deployment update command; create with the same name, model and SKU replaces the capacity.
 
 ```text
-az cognitiveservices account deployment update -g rg-ai -n aoai-prod --deployment-name chat-large --sku-capacity 10
+az cognitiveservices account deployment create -g rg-ai -n aoai-prod --deployment-name chat-small --model-name gpt-5.4-mini --model-version 2026-03-17 --model-format OpenAI --sku-name GlobalStandard --sku-capacity 10
 ```
 
 ### Command 7
@@ -266,8 +266,8 @@ if __name__ == "__main__":
 ### Steps
 
 1. Collect 50-100 real prompts from one production workload, for example incident summarisation, and write a reference answer for each into evalset.csv with columns prompt and expected.
-2. Deploy a small hosted model and a frontier model in Azure OpenAI with explicit TPM capacity, and pull an 8B model locally with Ollama.
-3. Set AZURE_OPENAI_ENDPOINT and AZURE_OPENAI_API_KEY, then run the comparison harness against the evaluation set.
+2. Deploy a small hosted model as chat-small (Command 2) and a larger one as chat-large - gpt-5.1 2025-11-13 in regional Standard, for example - in Azure OpenAI with explicit TPM capacity, and pull an 8B model locally with Ollama. If you choose other names, rename the CANDIDATES keys to match.
+3. Copy the current per-million-token input and output prices for your region and deployment type from the Azure OpenAI pricing page into CANDIDATES, set AZURE_OPENAI_ENDPOINT and AZURE_OPENAI_API_KEY, then run the comparison harness against the evaluation set.
 4. Record quality, p50 and p95 latency and USD per 1000 requests for each candidate from model-comparison.json.
 5. Compute the crossover point: at what monthly request volume does the amortised GPU cost of the local model beat the hosted per-token cost?
 6. Restructure one prompt so the long static system instructions come first, re-run it, and confirm cached input tokens appear in the usage payload.

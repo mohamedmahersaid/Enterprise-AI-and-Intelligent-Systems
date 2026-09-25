@@ -37,7 +37,9 @@ These are what the Microsoft Foundry model retirement schedule is keyed on. A ve
 
 | Value | Used by |
 | --- | --- |
-| `gpt-5.1 2025-11-13` | `ai-azure-openai-integration`, `ai-llmops-deployment-lifecycle` |
+| `"$MODEL" "$LAST_GOOD"` | `ai-incident-response` |
+| `gpt-5.1 2025-11-13` | `ai-azure-openai-integration` |
+| `gpt-5.4 2026-03-05` | `ai-llmops-deployment-lifecycle` |
 | `gpt-5.4-mini 2026-03-17` | `ai-model-selection-cost` |
 
 ### Azure OpenAI model names
@@ -46,7 +48,8 @@ Deployment names are chosen locally; these are the underlying models.
 
 | Value | Used by |
 | --- | --- |
-| `gpt-5.1` | `ai-azure-openai-integration`, `ai-llmops-deployment-lifecycle`, `ai-model-selection-cost`, `ai-observability-performance-monitoring` |
+| `gpt-5.1` | `ai-azure-openai-integration`, `ai-model-selection-cost`, `ai-observability-performance-monitoring` |
+| `gpt-5.4` | `ai-llmops-deployment-lifecycle` |
 | `gpt-5.4-mini` | `ai-model-selection-cost` |
 | `text-embedding-3` | `ai-rag-architecture` |
 
