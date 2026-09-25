@@ -132,6 +132,8 @@ promptfoo eval --no-cache --repeat 5 --output variance-report.json
 """Regression gate for an LLM system. Compares a candidate run against the
 stored baseline and blocks on any metric falling below its floor.
 Emits the SPECIFIC regressed cases so the result is actionable.
+
+Usage: eval_regression_gate.py <eval_baseline.json> <eval_candidate.json>
 """
 import json
 import sys
@@ -146,8 +148,12 @@ FLOORS = {
 }
 MAX_DROP = 0.02   # allowed regression vs baseline, for judge noise
 
-baseline = json.load(open("eval_baseline.json"))
-candidate = json.load(open("eval_candidate.json"))
+if len(sys.argv) != 3:
+    sys.exit("usage: eval_regression_gate.py <eval_baseline.json> <eval_candidate.json>")
+with open(sys.argv[1]) as handle:
+    baseline = json.load(handle)
+with open(sys.argv[2]) as handle:
+    candidate = json.load(handle)
 
 failures = []
 

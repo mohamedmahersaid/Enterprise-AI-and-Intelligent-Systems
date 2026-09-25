@@ -119,6 +119,8 @@ feast materialize-incremental $(date -u +%Y-%m-%dT%H:%M:%S) && feast feature-vie
 
 ### detect_training_serving_skew.py
 
+Requires `pip install feast pandas`.
+
 ```python
 #!/usr/bin/env python3
 """Compares feature values from the offline and online stores for the same

@@ -127,6 +127,8 @@ mlflow models get-latest-versions --name fraud-classifier --stages Production | 
 
 ### mlflow-promotion-gate.py
 
+Requires `pip install mlflow`.
+
 ```python
 #!/usr/bin/env python3
 """Promotion gate for MLflow model registry.

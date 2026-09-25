@@ -4,10 +4,11 @@ rem  AI & Intelligent Systems curriculum - Windows launcher
 rem
 rem  Double-click for a menu, or name a target from a shell:
 rem
-rem      run.bat validate        all five checks, in the order CI runs them
+rem      run.bat validate        all six checks, in the order CI runs them
 rem      run.bat content         structure, catalog and README figures
 rem      run.bat mermaid         parse every diagram
 rem      run.bat python          compile every python block (needs Python 3)
+rem      run.bat scripts         run every python block bare (needs Python 3)
 rem      run.bat commands        check every command block for unsafe patterns
 rem      run.bat lint            markdown style
 rem      run.bat regen           rewrite derived files from data\catalog.json
@@ -55,7 +56,7 @@ echo   AI ^& Intelligent Systems - curriculum toolchain
 echo ===========================================================================
 call :print_context
 echo.
-echo   [1] Validate everything        content + mermaid + python + commands + lint
+echo   [1] Validate everything        content + mermaid + python + scripts + commands + lint
 echo   [2] Validate content only
 echo   [3] Validate mermaid diagrams
 echo   [4] Lint markdown
@@ -96,6 +97,7 @@ if /i "!WHAT!"=="validate"  goto :t_validate
 if /i "!WHAT!"=="content"   goto :t_content
 if /i "!WHAT!"=="mermaid"   goto :t_mermaid
 if /i "!WHAT!"=="python"    goto :t_python
+if /i "!WHAT!"=="scripts"   goto :t_scripts
 if /i "!WHAT!"=="commands"  goto :t_commands
 if /i "!WHAT!"=="lint"      goto :t_lint
 if /i "!WHAT!"=="regen"     goto :t_regen
@@ -121,6 +123,8 @@ if errorlevel 1 exit /b 1
 call :run_step "Parsing every mermaid diagram" validate:mermaid
 if errorlevel 1 exit /b 1
 call :run_step "Compiling every python block" validate:python
+if errorlevel 1 exit /b 1
+call :run_step "Running every python block" validate:scripts
 if errorlevel 1 exit /b 1
 call :run_step "Checking every command block" validate:commands
 if errorlevel 1 exit /b 1
@@ -148,6 +152,15 @@ rem never executes them.
 call :ensure_deps
 if errorlevel 1 exit /b 1
 call :run_step "Compiling every python block" validate:python
+exit /b !ERRORLEVEL!
+
+rem Needs Python 3 on PATH, or LEAF_PYTHON set to an interpreter. Runs each
+rem python block with no arguments in a throwaway directory and fails on a
+rem traceback; a script whose declared dependency is missing is listed as skipped.
+:t_scripts
+call :ensure_deps
+if errorlevel 1 exit /b 1
+call :run_step "Running every python block" validate:scripts
 exit /b !ERRORLEVEL!
 
 rem Textual only - nothing is executed. Checks the command blocks the leaves
@@ -363,11 +376,13 @@ exit /b 0
 echo.
 echo   run.bat [target]
 echo.
-echo     validate    content + mermaid + python + markdown lint, in CI order
+echo     validate    all six checks below, in CI order
 echo     content     heading hierarchy, required sections, frontmatter and catalog
 echo                 agreement, unresolved TODOs, links, README figures
 echo     mermaid     parse every diagram headlessly
 echo     python      compile every python block; needs Python 3 on PATH
+echo     scripts     run every python block bare; fails on a traceback
+echo     commands    check every command block for unsafe patterns
 echo     lint        markdown style
 echo     regen       rewrite derived files from data\catalog.json
 echo     new-leaf    guided scaffold for a new leaf

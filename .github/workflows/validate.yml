@@ -16,6 +16,9 @@ jobs:
       # to point at different code, a SHA cannot. The trailing comment records
       # which release each SHA corresponds to so it can be reviewed and bumped.
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        # validate:scripts executes leaf code; leave no token in .git/config for it.
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
         with:
           node-version: '22'
@@ -24,6 +27,19 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Fails on a high or critical advisory in the toolchain. Two high-severity
+      # advisories once sat in these logs unnoticed because nothing failed on them.
+      - name: Audit dependencies
+        run: npm audit --audit-level=high
+
+      # The leaf scripts' lightweight dependencies, pinned and hash-checked, in a
+      # venv so the runner's system Python is left alone.
+      - name: Install leaf script dependencies
+        run: |
+          python3 -m venv "$RUNNER_TEMP/leaf-python"
+          "$RUNNER_TEMP/leaf-python/bin/pip" install --require-hashes -r scripts/requirements.txt
+          echo "LEAF_PYTHON=$RUNNER_TEMP/leaf-python/bin/python" >> "$GITHUB_ENV"
+
       - name: Validate structure, catalog and README figures
         run: npm run validate:content
 
@@ -31,9 +47,16 @@ jobs:
         run: npm run validate:mermaid
 
       # The leaves ship scripts readers copy and run. Compiling them here keeps
-      # a syntax error from reaching readers; nothing is executed.
+      # a syntax error from reaching readers, and every third-party import must
+      # be declared by the leaf; nothing is executed.
       - name: Compile every python block
         run: npm run validate:python
+
+      # Compiling is not working. Runs each block bare, as a reader first will,
+      # and fails on a traceback; scripts needing an uninstalled dependency are
+      # listed as skipped by name.
+      - name: Run every python block
+        run: npm run validate:scripts
 
       # Textual only, nothing is executed. Guards the command blocks against
       # literal credentials, destructive operations and placeholder drift.

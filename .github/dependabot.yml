@@ -1,0 +1,30 @@
+# Weekly update proposals for everything this repository pins. Each ecosystem's
+# updates arrive as one grouped pull request, which CI validates like any other.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      toolchain:
+        patterns: ['*']
+
+  # The workflows pin actions to a commit SHA; Dependabot bumps the SHA and the
+  # version comment beside it together.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ['*']
+
+  # scripts/requirements.txt is compiled from scripts/requirements.in with hashes.
+  - package-ecosystem: pip
+    directory: /scripts
+    schedule:
+      interval: weekly
+    groups:
+      leaf-scripts:
+        patterns: ['*']

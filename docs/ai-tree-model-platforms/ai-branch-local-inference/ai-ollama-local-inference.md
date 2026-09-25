@@ -132,11 +132,12 @@ ollama rm llama3.1:8b
 Writes a JSON report used as evidence that only approved models are resident.
 """
 import json
+import os
 import sys
 import time
 import urllib.request
 
-OLLAMA = "http://127.0.0.1:11434"
+OLLAMA = os.environ.get("OLLAMA_HOST", "http://127.0.0.1:11434")
 APPROVED = [
     "llama3.1:8b-instruct-q4_K_M",
     "qwen2.5:7b-instruct-q4_K_M",

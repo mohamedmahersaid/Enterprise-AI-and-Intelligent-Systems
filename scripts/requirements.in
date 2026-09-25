@@ -1,0 +1,11 @@
+# Third-party packages the leaf scripts import, installed in CI so
+# validate:scripts can run those scripts rather than skip them. Readers do not
+# need this file; each leaf names what its own script requires.
+#
+# Only lightweight dependencies belong here. mlflow, feast (with pandas) and
+# langgraph are declared by their leaves but deliberately not installed: their
+# scripts are reported as skipped by name.
+#
+# Regenerate the pinned, hashed lockfile after editing, from this directory:
+#   pip-compile --generate-hashes --strip-extras --output-file=requirements.txt requirements.in
+requests==2.34.2
