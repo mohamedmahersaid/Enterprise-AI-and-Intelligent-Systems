@@ -9,6 +9,13 @@ updates:
     groups:
       toolchain:
         patterns: ['*']
+    ignore:
+      # mermaid 12.0.0 depends on chevrotain ~11.1.2, which pins lodash-es
+      # 4.17.23 (GHSA-r5fr-rjxr-66jc, GHSA-f23m-r3pf-42rh), so CI's audit
+      # fails on it. Stay on 11.x until a mermaid 12 release depends on a
+      # chevrotain that no longer ships a vulnerable lodash-es, then delete this.
+      - dependency-name: mermaid
+        update-types: ['version-update:semver-major']
 
   # The workflows pin actions to a commit SHA; Dependabot bumps the SHA and the
   # version comment beside it together.
