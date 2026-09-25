@@ -1,0 +1,536 @@
+{
+  "$comment": [
+    "Every credential the leaves cite, and every one they must no longer cite.",
+    "Maintained by hand from vendor sources: nothing in this repository can check a vendor, so each entry records where its facts came from and how well.",
+    "evidence: 'read' = the source page was fetched and read; 'search-extract' = the vendor's own pages were blocked to the verifier and the facts come from search-engine extracts of them; 'unverified' = no vendor text could be read.",
+    "validate-content fails when a leaf names a retired exam, or cites a credential not listed here.",
+    "frameworks: numbered lists the leaves cite by ID. An ID must carry its edition (LLM03:2026) and name the entry it has in that edition."
+  ],
+  "verified": "2026-09-25",
+  "credentials": [
+    {
+      "id": "AI-103",
+      "vendor": "Microsoft",
+      "credential": "Microsoft Certified: Azure AI Apps and Agents Developer Associate",
+      "exam": "AI-103: Developing AI Apps and Agents on Azure",
+      "status": "active",
+      "match": [
+        "AI-103",
+        "Azure AI Apps and Agents Developer"
+      ],
+      "domains": [
+        "Plan and manage an Azure AI solution (25-30%)",
+        "Implement generative AI and agentic solutions (30-35%)",
+        "Implement computer vision solutions (10-15%)",
+        "Implement text analysis solutions (10-15%)",
+        "Implement information extraction solutions (10-15%)"
+      ],
+      "source": "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/ai-103",
+      "evidence": "read"
+    },
+    {
+      "id": "AI-901",
+      "vendor": "Microsoft",
+      "credential": "Microsoft Certified: Azure AI Fundamentals",
+      "exam": "AI-901: Microsoft Azure AI Fundamentals",
+      "status": "active",
+      "match": [
+        "AI-901"
+      ],
+      "domains": [
+        "Identify AI concepts and capabilities (40-45%)",
+        "Implement AI solutions by using Microsoft Foundry (55-60%)"
+      ],
+      "source": "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/ai-901",
+      "evidence": "read"
+    },
+    {
+      "id": "AI-300",
+      "vendor": "Microsoft",
+      "credential": "Microsoft Certified: Machine Learning Operations Engineer Associate",
+      "exam": "AI-300: Operationalizing Machine Learning and Generative AI Solutions",
+      "status": "active",
+      "match": [
+        "AI-300",
+        "Machine Learning Operations Engineer"
+      ],
+      "domains": [
+        "Design and implement an MLOps infrastructure (15-20%)",
+        "Implement machine learning model lifecycle and operations (25-30%)",
+        "Design and implement a GenAIOps infrastructure (20-25%)",
+        "Implement generative AI quality assurance and observability (10-15%)",
+        "Optimize generative AI systems and model performance (10-15%)"
+      ],
+      "source": "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/ai-300",
+      "evidence": "read"
+    },
+    {
+      "id": "AI-500",
+      "vendor": "Microsoft",
+      "credential": "Microsoft Certified: Multi-Agent AI Solutions Expert",
+      "exam": "AI-500: Designing and Implementing Multi-Agent AI Solutions",
+      "status": "beta",
+      "match": [
+        "AI-500",
+        "Multi-Agent AI Solutions Expert"
+      ],
+      "domains": [
+        "Architect multi-agent solutions (15-20%)",
+        "Develop multi-agent solutions in Azure (30-35%)",
+        "Evaluate, optimize, and monitor multi-agent solutions (20-25%)",
+        "Secure, govern, and deploy multi-agent solutions (20-25%)"
+      ],
+      "source": "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/ai-500",
+      "evidence": "read"
+    },
+    {
+      "id": "SC-500",
+      "vendor": "Microsoft",
+      "credential": "Microsoft Certified: Cloud and AI Security Engineer Associate",
+      "exam": "SC-500: Implementing End-to-End Security Controls for Cloud and AI Workloads",
+      "status": "active",
+      "match": [
+        "SC-500",
+        "Cloud and AI Security Engineer"
+      ],
+      "domains": [
+        "Manage identity, access, and governance (20-25%)",
+        "Secure storage, databases, and networking (25-30%)",
+        "Secure compute (20-25%)",
+        "Manage and monitor security posture (20-25%)"
+      ],
+      "source": "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/sc-500",
+      "evidence": "read"
+    },
+    {
+      "id": "SC-900",
+      "vendor": "Microsoft",
+      "credential": "Microsoft Certified: Security, Compliance, and Identity Fundamentals",
+      "exam": "SC-900: Microsoft Security, Compliance, and Identity Fundamentals",
+      "status": "active",
+      "match": [
+        "SC-900"
+      ],
+      "domains": [
+        "Describe the concepts of security, compliance, and identity (10-15%)",
+        "Describe the capabilities of Microsoft Entra (25-30%)",
+        "Describe the capabilities of Microsoft security solutions (35-40%)",
+        "Describe the capabilities of Microsoft compliance solutions (20-25%)"
+      ],
+      "source": "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/sc-900",
+      "evidence": "read"
+    },
+    {
+      "id": "SC-100",
+      "vendor": "Microsoft",
+      "credential": "Microsoft Certified: Cybersecurity Architect Expert",
+      "exam": "SC-100: Microsoft Cybersecurity Architect",
+      "status": "active",
+      "match": [
+        "SC-100"
+      ],
+      "domains": [
+        "Design solutions that align with security best practices and priorities (20-25%)",
+        "Design security operations, identity, and compliance capabilities (25-30%)",
+        "Design security solutions for infrastructure (25-30%)",
+        "Design security solutions for applications and data (20-25%)"
+      ],
+      "source": "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/sc-100",
+      "evidence": "read"
+    },
+    {
+      "id": "SC-200",
+      "vendor": "Microsoft",
+      "credential": "Microsoft Certified: Security Operations Analyst Associate",
+      "exam": "SC-200: Microsoft Security Operations Analyst",
+      "status": "active",
+      "match": [
+        "SC-200"
+      ],
+      "domains": [
+        "Manage a security operations environment (40-45%)",
+        "Respond to security incidents (35-40%)",
+        "Perform threat hunting (20-25%)"
+      ],
+      "source": "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/sc-200",
+      "evidence": "read"
+    },
+    {
+      "id": "AZ-305",
+      "vendor": "Microsoft",
+      "credential": "Microsoft Certified: Azure Solutions Architect Expert",
+      "exam": "AZ-305: Designing Microsoft Azure Infrastructure Solutions",
+      "status": "active",
+      "match": [
+        "AZ-305"
+      ],
+      "domains": [
+        "Design identity, governance, and monitoring solutions (25-30%)",
+        "Design data storage solutions (20-25%)",
+        "Design business continuity solutions (15-20%)",
+        "Design infrastructure solutions (30-35%)"
+      ],
+      "source": "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/az-305",
+      "evidence": "read"
+    },
+    {
+      "id": "AZ-104",
+      "vendor": "Microsoft",
+      "credential": "Microsoft Certified: Azure Administrator Associate",
+      "exam": "AZ-104: Microsoft Azure Administrator",
+      "status": "active",
+      "match": [
+        "AZ-104"
+      ],
+      "domains": [
+        "Manage Azure identities and governance (20-25%)",
+        "Implement and manage storage (15-20%)",
+        "Deploy and manage Azure compute resources (20-25%)",
+        "Implement and manage virtual networking (15-20%)",
+        "Monitor and maintain Azure resources (10-15%)"
+      ],
+      "source": "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/az-104",
+      "evidence": "read"
+    },
+    {
+      "id": "AZ-400",
+      "vendor": "Microsoft",
+      "credential": "Microsoft Certified: DevOps Engineer Expert",
+      "exam": "AZ-400: Designing and Implementing Microsoft DevOps Solutions",
+      "status": "active",
+      "match": [
+        "AZ-400"
+      ],
+      "domains": [
+        "Design and implement processes and communications (10-15%)",
+        "Design and implement a source control strategy (10-15%)",
+        "Design and implement build and release pipelines (50-55%)",
+        "Develop a security and compliance plan (10-15%)",
+        "Implement an instrumentation strategy (5-10%)"
+      ],
+      "source": "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/az-400",
+      "evidence": "read"
+    },
+    {
+      "id": "aws-mla",
+      "vendor": "AWS",
+      "credential": "AWS Certified Machine Learning Engineer - Associate",
+      "status": "active",
+      "match": [
+        "Machine Learning Engineer - Associate",
+        "Machine Learning Engineer – Associate"
+      ],
+      "domains": [],
+      "source": "https://aws.amazon.com/certification/certified-machine-learning-engineer-associate/",
+      "evidence": "search-extract",
+      "note": "Cited by credential name, not exam code: the English exam moves from MLA-C01 to MLA-C02 after 28 September 2026 (MLA-C02 GA 14 January 2027), and the credential continues across the change."
+    },
+    {
+      "id": "aws-aif",
+      "vendor": "AWS",
+      "credential": "AWS Certified AI Practitioner",
+      "status": "active",
+      "match": [
+        "AWS Certified AI Practitioner"
+      ],
+      "domains": [
+        "Domain 1: Fundamentals of AI and ML (20%)",
+        "Domain 2: Fundamentals of GenAI (24%)",
+        "Domain 3: Applications of Foundation Models (28%)",
+        "Domain 4: Guidelines for Responsible AI (14%)",
+        "Domain 5: Security, Compliance, and Governance for AI Solutions (14%)"
+      ],
+      "source": "https://docs.aws.amazon.com/aws-certification/latest/ai-practitioner-01/ai-practitioner-01.html",
+      "evidence": "search-extract"
+    },
+    {
+      "id": "aws-saa",
+      "vendor": "AWS",
+      "credential": "AWS Certified Solutions Architect - Associate",
+      "status": "active",
+      "match": [
+        "Solutions Architect - Associate",
+        "Solutions Architect – Associate"
+      ],
+      "domains": [
+        "Domain 1: Design Secure Architectures (30%)",
+        "Domain 2: Design Resilient Architectures (26%)",
+        "Domain 3: Design High-Performing Architectures (24%)",
+        "Domain 4: Design Cost-Optimized Architectures (20%)"
+      ],
+      "source": "https://docs.aws.amazon.com/aws-certification/latest/solutions-architect-associate-03/solutions-architect-associate-03.html",
+      "evidence": "search-extract"
+    },
+    {
+      "id": "gcp-pmle",
+      "vendor": "Google Cloud",
+      "credential": "Google Cloud Professional Machine Learning Engineer",
+      "status": "active",
+      "match": [
+        "Professional Machine Learning Engineer"
+      ],
+      "domains": [],
+      "source": "https://cloud.google.com/learn/certification/machine-learning-engineer",
+      "evidence": "read",
+      "note": "Status read on the certification page; the exam guide PDF was unreachable, so no domains are recorded."
+    },
+    {
+      "id": "gcp-pca",
+      "vendor": "Google Cloud",
+      "credential": "Google Cloud Professional Cloud Architect",
+      "status": "active",
+      "match": [
+        "Professional Cloud Architect"
+      ],
+      "domains": [],
+      "source": "https://cloud.google.com/learn/certification/cloud-architect",
+      "evidence": "read",
+      "note": "Status read on the certification page; the exam guide PDF was unreachable."
+    },
+    {
+      "id": "gcp-cdl",
+      "vendor": "Google Cloud",
+      "credential": "Google Cloud Digital Leader",
+      "status": "active",
+      "match": [
+        "Cloud Digital Leader"
+      ],
+      "domains": [],
+      "source": "https://cloud.google.com/learn/certification/cloud-digital-leader",
+      "evidence": "read"
+    },
+    {
+      "id": "cka",
+      "vendor": "CNCF / Linux Foundation",
+      "credential": "Certified Kubernetes Administrator (CKA)",
+      "status": "active",
+      "match": [
+        "CKA"
+      ],
+      "domains": [
+        "Cluster Architecture, Installation & Configuration (25%)",
+        "Workloads & Scheduling (15%)",
+        "Services & Networking (20%)",
+        "Storage (10%)",
+        "Troubleshooting (30%)"
+      ],
+      "source": "https://github.com/cncf/curriculum/blob/master/cka/README.md",
+      "evidence": "read"
+    },
+    {
+      "id": "ckad",
+      "vendor": "CNCF / Linux Foundation",
+      "credential": "Certified Kubernetes Application Developer (CKAD)",
+      "status": "active",
+      "match": [
+        "CKAD"
+      ],
+      "domains": [
+        "Application Design and Build (20%)",
+        "Application Deployment (20%)",
+        "Application Observability and Maintenance (15%)",
+        "Application Environment, Configuration and Security (25%)",
+        "Services and Networking (20%)"
+      ],
+      "source": "https://github.com/cncf/curriculum/blob/master/ckad/README.md",
+      "evidence": "read"
+    },
+    {
+      "id": "nvidia-aiio",
+      "vendor": "NVIDIA",
+      "credential": "NVIDIA-Certified Associate: AI Infrastructure and Operations",
+      "status": "unverified",
+      "match": [
+        "AI Infrastructure and Operations"
+      ],
+      "domains": [],
+      "source": "https://www.nvidia.com/en-us/learn/certification/ai-infrastructure-operations-associate/",
+      "evidence": "unverified"
+    },
+    {
+      "id": "databricks-mlp",
+      "vendor": "Databricks",
+      "credential": "Databricks Certified Machine Learning Professional",
+      "status": "unverified",
+      "match": [
+        "Databricks Certified Machine Learning Professional"
+      ],
+      "domains": [],
+      "source": "https://www.databricks.com/learn/certification/machine-learning-professional",
+      "evidence": "unverified"
+    },
+    {
+      "id": "iapp-aigp",
+      "vendor": "IAPP",
+      "credential": "IAPP Artificial Intelligence Governance Professional (AIGP)",
+      "status": "unverified",
+      "match": [
+        "AIGP"
+      ],
+      "domains": [],
+      "source": "https://iapp.org/certify/aigp/",
+      "evidence": "unverified"
+    },
+    {
+      "id": "isc2-cissp",
+      "vendor": "ISC2",
+      "credential": "ISC2 Certified Information Systems Security Professional (CISSP)",
+      "status": "unverified",
+      "match": [
+        "CISSP"
+      ],
+      "domains": [],
+      "source": "https://www.isc2.org/certifications/cissp",
+      "evidence": "unverified"
+    },
+    {
+      "id": "finops-fcp",
+      "vendor": "FinOps Foundation",
+      "credential": "FinOps Certified Practitioner",
+      "status": "unverified",
+      "match": [
+        "FinOps Certified Practitioner"
+      ],
+      "domains": [],
+      "source": "https://learn.finops.org/page/finops-certified-practitioner",
+      "evidence": "unverified"
+    },
+    {
+      "id": "pmi-acp",
+      "vendor": "PMI",
+      "credential": "PMI Agile Certified Practitioner (PMI-ACP)",
+      "status": "unverified",
+      "match": [
+        "PMI-ACP"
+      ],
+      "domains": [],
+      "source": "https://www.pmi.org/certifications/agile-acp",
+      "evidence": "unverified"
+    },
+    {
+      "id": "isaca-cisa",
+      "vendor": "ISACA",
+      "credential": "ISACA Certified Information Systems Auditor (CISA)",
+      "status": "unverified",
+      "match": [
+        "CISA"
+      ],
+      "domains": [],
+      "source": "https://www.isaca.org/credentialing/cisa",
+      "evidence": "unverified"
+    },
+    {
+      "id": "isaca-crisc",
+      "vendor": "ISACA",
+      "credential": "ISACA Certified in Risk and Information Systems Control (CRISC)",
+      "status": "unverified",
+      "match": [
+        "CRISC"
+      ],
+      "domains": [],
+      "source": "https://www.isaca.org/credentialing/crisc",
+      "evidence": "unverified"
+    },
+    {
+      "id": "comptia-secplus",
+      "vendor": "CompTIA",
+      "credential": "CompTIA Security+",
+      "status": "unverified",
+      "match": [
+        "Security+"
+      ],
+      "domains": [],
+      "source": "https://www.comptia.org/en-us/certifications/security/",
+      "evidence": "unverified"
+    },
+    {
+      "id": "lf-prometheus-pca",
+      "vendor": "Linux Foundation",
+      "credential": "Prometheus Certified Associate (PCA)",
+      "status": "unverified",
+      "match": [
+        "Prometheus Certified Associate"
+      ],
+      "domains": [],
+      "source": "https://training.linuxfoundation.org/certification/prometheus-certified-associate/",
+      "evidence": "unverified"
+    }
+  ],
+  "retired": [
+    {
+      "code": "AI-102",
+      "names": [
+        "Azure AI Engineer Associate"
+      ],
+      "retired": "2026-06-30",
+      "successor": "AI-103",
+      "source": "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/ai-102",
+      "quote": "This exam was retired on June 30, 2026, at 11:59 PM Central Standard Time."
+    },
+    {
+      "code": "AI-900",
+      "names": [],
+      "retired": "2026-06-30",
+      "successor": "AI-901",
+      "source": "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/ai-900",
+      "quote": "This exam was retired on June 30, 2026, at 11:59 PM Central Standard Time.",
+      "note": "The credential, Microsoft Certified: Azure AI Fundamentals, continues; only the exam changed."
+    },
+    {
+      "code": "DP-100",
+      "names": [
+        "Azure Data Scientist Associate"
+      ],
+      "retired": "2026-06-01",
+      "successor": "AI-300",
+      "source": "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/dp-100",
+      "quote": "This exam was retired on June 1, 2026, at 11:59 PM Central Standard Time. [DP-100 study guide] | \"This certification and the renewal assessment are retired.\" [https://learn.microsoft.com/en-us/credentials/certifications/azure-data-scientist/] | \"Azure Data Scientist Associate (DP-100) retired as of "
+    },
+    {
+      "code": "AZ-500",
+      "names": [
+        "Azure Security Engineer Associate"
+      ],
+      "retired": "2026-08-31",
+      "successor": "SC-500",
+      "source": "https://learn.microsoft.com/en-us/credentials/certifications/azure-security-engineer/",
+      "quote": "This certification, related exam, and renewal assessments was retired on August 31, 2026. You will no longer be able to earn or renew this certification after this date. | Study guide: \"This exam was retired on August 31, 2026, at 11:59 PM Central Standard Time.\" | \"Azure Security Engineer Associate"
+    },
+    {
+      "code": "MLS-C01",
+      "names": [
+        "Machine Learning - Specialty",
+        "Machine Learning – Specialty"
+      ],
+      "retired": "2026-03-31",
+      "successor": "aws-mla",
+      "source": "https://aws.amazon.com/certification/certified-machine-learning-specialty/",
+      "evidence": "search-extract",
+      "quote": "The last day to take the AWS Certified Machine Learning - Specialty exam (MLS-C01) is March 31, 2026."
+    }
+  ],
+  "frameworks": [
+    {
+      "id": "owasp-llm-top10",
+      "name": "OWASP GenAI LLM Top 10",
+      "edition": "2026",
+      "released": "2026-08-04",
+      "source": "https://github.com/GenAI-Security-Project/GenAI-LLM-Top10/tree/main/2026/final",
+      "publication": "https://genai.owasp.org/resource/owasp-genai-llm-top-10-2026/",
+      "evidence": "read",
+      "note": "Read from the canonical Markdown source; genai.owasp.org itself was blocked to the checker. Earlier editions (2023, 2025) numbered these risks differently, so an ID is only meaningful with its year.",
+      "entries": {
+        "LLM01": "Prompt Injection",
+        "LLM02": "Sensitive Information Disclosure",
+        "LLM03": "Excessive Agency",
+        "LLM04": "Supply Chain",
+        "LLM05": "Data and Model Poisoning",
+        "LLM06": "Unbounded Consumption",
+        "LLM07": "Misinformation",
+        "LLM08": "Hidden Context Exposure",
+        "LLM09": "Vector and Embedding Weaknesses",
+        "LLM10": "Improper Output Handling"
+      }
+    }
+  ]
+}

@@ -20,6 +20,7 @@
  * has.
  */
 import fs from 'node:fs';
+import { citations, loadRegistry } from './certifications.mjs';
 
 /**
  * Leading command tokens worth declaring, mapped to what a reader must obtain.
@@ -153,8 +154,14 @@ export function deriveAssumptions(catalog) {
     }
   }
 
+  const registry = loadRegistry();
   return {
     leaves,
+    certifications: {
+      verified: registry.verified,
+      cited: citations(catalog, registry).filter((c) => c.leaves.length),
+      retired: registry.retired,
+    },
     pinned: PINNED.map((spec) => ({
       ...spec,
       values: [...pinned.get(spec.id).entries()]
@@ -217,6 +224,36 @@ export function renderAssumptionsMd(data) {
     }
     lines.push('');
   }
+
+  lines.push('## Certifications cited');
+  lines.push('');
+  lines.push(
+    `From \`data/certifications.json\`, last checked against vendor sources on ` +
+    `${data.certifications.verified}. Unlike the rows above, these were looked up - ` +
+    'but only as well as the evidence column says. **read**: the vendor page was ' +
+    'fetched and read. **search-extract**: the vendor blocked the checker, and the ' +
+    "facts come from search-engine extracts of the vendor's own pages. " +
+    '**unverified**: no vendor text could be read; the citation is kept as written.'
+  );
+  lines.push('');
+  lines.push('| Credential | Status | Evidence | Cited by |');
+  lines.push('| --- | --- | --- | --- |');
+  for (const c of data.certifications.cited) {
+    lines.push(
+      `| [${c.credential}](${c.source}) | ${c.status} | ${c.evidence} | ` +
+      `${c.leaves.map((id) => `\`${id}\``).join(', ')} |`
+    );
+  }
+  lines.push('');
+  lines.push('No leaf may cite these; validate-content fails if one does.');
+  lines.push('');
+  lines.push('| Retired exam | Retired | Replaced by |');
+  lines.push('| --- | --- | --- |');
+  for (const r of data.certifications.retired) {
+    const successor = data.certifications.cited.find((c) => c.id === r.successor);
+    lines.push(`| [${r.code}](${r.source}) | ${r.retired} | ${successor?.credential ?? r.successor} |`);
+  }
+  lines.push('');
 
   lines.push('## Tools each leaf expects');
   lines.push('');

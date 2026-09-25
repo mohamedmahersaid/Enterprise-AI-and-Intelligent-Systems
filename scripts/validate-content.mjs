@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import { deriveAssumptions, renderAssumptionsMd } from './lib/assumptions.mjs';
+import { checkCertifications } from './lib/certifications.mjs';
 import path from 'node:path';
 
 import { slug } from './lib/derive.mjs';
@@ -371,6 +372,11 @@ function checkAssumptions() {
 
 checkAssumptions();
 
+// --- certifications ----------------------------------------------------------
+
+// Retired exams and unregistered credentials; see scripts/lib/certifications.mjs.
+errors.push(...checkCertifications(catalog));
+
 // --- runner parity -----------------------------------------------------------
 
 /**
@@ -430,5 +436,6 @@ console.log(
   '        mermaid fences, unresolved scaffold TODOs, relative links, CATALOG.md coverage,\n'+
   '        learning paths (every leaf reachable, no dangling step, PATHS.md in step),\n'+
   '        README badges and curriculum map, version assumptions in step,\n'+
+  '        certifications (none retired, every one registered),\n'+
   '        runner parity (every gate runs in CI and run.bat).'
 );
