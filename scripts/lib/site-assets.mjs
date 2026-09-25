@@ -93,6 +93,8 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
 .lv-Advanced { color: var(--advanced); }
 .lv-Enterprise { color: var(--enterprise); }
 .lv-Expert { color: var(--expert); }
+.rd-lab { color: var(--muted); border-style: dashed; }
+.rd-validated { color: var(--beginner); }
 .crumb { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
 .crumb a { color: var(--muted); }
 .meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 0 0 22px; font-size: 13px; color: var(--muted); }
@@ -160,7 +162,7 @@ export const SCRIPT = `
       a.href = BASE + item.url;
       a.innerHTML = '<span class="t"></span><span class="s"></span>';
       a.firstChild.textContent = item.title;
-      a.lastChild.textContent = item.level + ' \\u00b7 ' + item.branch;
+      a.lastChild.textContent = item.level + ' \\u00b7 ' + item.readiness + ' \\u00b7 ' + item.branch;
       box.appendChild(a);
     });
   }

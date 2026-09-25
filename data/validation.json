@@ -1,0 +1,4 @@
+{
+  "$comment": "Live runs of leaf commands against the real service. A leaf is 'validated' in data/catalog.json exactly while its latest run here passed; see READINESS.md and scripts/lib/readiness.mjs. Each run: leaf (catalog id), date (YYYY-MM-DD), workflow (path under .github/workflows/), run (the GitHub Actions run URL), environment (runner image and service versions), covered (which commands or lab steps ran), result (pass or fail). Add a run by pull request, never from the workflow itself.",
+  "runs": []
+}

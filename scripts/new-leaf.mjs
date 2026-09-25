@@ -10,11 +10,16 @@
  *
  *   npm run new-leaf -- --id ai-example-leaf --title "Example Leaf" \
  *     --level Intermediate --tree "AI Platform Engineering" \
- *     --branch "Model and Feature Lifecycle"
+ *     --branch "Model and Feature Lifecycle" [--needs azure,kubernetes]
+ *
+ * A new leaf starts at readiness `lab`: nothing has run it live. --needs says
+ * what a live run requires and defaults to `runner`; the check raises it as
+ * soon as the commands call a tool that proves more (see scripts/lib/readiness.mjs).
  */
 import fs from 'node:fs';
 import path from 'node:path';
 import { readCatalog, writeCatalog, recount, regenerate, group } from './lib/derive.mjs';
+import { NEEDS, readinessLine } from './lib/readiness.mjs';
 
 const LEVELS = ['Beginner', 'Intermediate', 'Advanced', 'Enterprise', 'Expert'];
 const SECTIONS = [
@@ -54,7 +59,7 @@ const trees = group(catalog);
 for (const required of ['id', 'title', 'level', 'tree', 'branch']) {
   if (!args[required]) {
     fail(`--${required} is required`,
-      'usage: npm run new-leaf -- --id <slug> --title "<title>" --level <level> --tree "<tree>" --branch "<branch>"');
+      'usage: npm run new-leaf -- --id <slug> --title "<title>" --level <level> --tree "<tree>" --branch "<branch>" [--needs <need,...>]');
   }
 }
 if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(args.id)) fail(`--id must be a lowercase slug, got '${args.id}'`);
@@ -66,9 +71,19 @@ if (!trees.get(args.tree).has(args.branch)) {
     `branches in that tree:\n${[...trees.get(args.tree).keys()].map((b) => `  ${b}`).join('\n')}`);
 }
 
+const needs = (args.needs ?? 'runner').split(',').map((n) => n.trim()).filter(Boolean);
+const unknownNeeds = needs.filter((n) => !NEEDS[n]);
+if (unknownNeeds.length) fail(`unknown --needs ${unknownNeeds.join(', ')}`, `known needs: ${Object.keys(NEEDS).join(', ')}`);
+if (needs.includes('runner') && needs.length > 1) fail('--needs runner means nothing else is needed; drop it or the others');
+const orderedNeeds = Object.keys(NEEDS).filter((n) => needs.includes(n));
+
 const siblings = trees.get(args.tree).get(args.branch);
 const leafPath = path.join(path.dirname(siblings[0].path), `${args.id}.md`);
 if (fs.existsSync(leafPath)) fail(`${leafPath} already exists`);
+const record = {
+  id: args.id, name: args.title, level: args.level, readiness: 'lab', needs: orderedNeeds,
+  tree: args.tree, branch: args.branch, path: leafPath,
+};
 
 const body = SECTIONS.map(([heading, todo]) => {
   if (heading === 'Architecture and flow') {
@@ -110,6 +125,7 @@ fs.writeFileSync(leafPath,
 id: '${args.id}'
 title: '${args.title.replace(/'/g, "''")}'
 level: '${args.level}'
+readiness: 'lab'
 forest: 'AI & Intelligent Systems'
 tree: '${args.tree}'
 branch: '${args.branch}'
@@ -121,6 +137,7 @@ branch: '${args.branch}'
 **Tree:** [${args.tree}](../README.md)
 **Branch:** [${args.branch}](README.md)
 **Forest:** [AI & Intelligent Systems](../../../README.md)
+${readinessLine(record)}
 
 ${body}
 
@@ -131,10 +148,7 @@ ${body}
 
 // Insert after the last leaf of the same branch so catalog order stays grouped.
 const lastSibling = catalog.leaves.lastIndexOf(siblings[siblings.length - 1]);
-catalog.leaves.splice(lastSibling + 1, 0, {
-  id: args.id, name: args.title, level: args.level,
-  tree: args.tree, branch: args.branch, path: leafPath,
-});
+catalog.leaves.splice(lastSibling + 1, 0, record);
 
 recount(catalog);
 writeCatalog(catalog);

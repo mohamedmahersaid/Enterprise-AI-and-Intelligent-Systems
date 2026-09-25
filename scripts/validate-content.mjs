@@ -2,12 +2,14 @@ import fs from 'node:fs';
 import { deriveAssumptions, renderAssumptionsMd } from './lib/assumptions.mjs';
 import { checkCertifications } from './lib/certifications.mjs';
 import { checkReferences } from './lib/references.mjs';
+import { checkReadiness, checkReadinessLine, loadValidation, renderReadinessMd } from './lib/readiness.mjs';
 import path from 'node:path';
 
-import { slug } from './lib/derive.mjs';
+import { readinessSummary, slug } from './lib/derive.mjs';
 
 const catalog = JSON.parse(fs.readFileSync('data/catalog.json', 'utf8'));
 const errors = [];
+const validation = loadValidation();
 
 const REQUIRED_SECTIONS = [
   'Explanation',
@@ -28,6 +30,7 @@ const FRONTMATTER_FIELDS = [
   ['level', (leaf) => leaf.level],
   ['tree', (leaf) => leaf.tree],
   ['branch', (leaf) => leaf.branch],
+  ['readiness', (leaf) => leaf.readiness],
 ];
 
 /** Split a markdown file into lines, flagging those inside fenced code blocks. */
@@ -158,6 +161,9 @@ for (const leaf of catalog.leaves) {
   const headings = checkHeadings(lines, leaf.path);
   checkLinks(lines, leaf.path);
 
+  const readinessError = checkReadinessLine(leaf, content, validation);
+  if (readinessError) errors.push(readinessError);
+
   const h1 = headings.filter((h) => h.level === 1);
   if (h1.length !== 1) errors.push(`${leaf.path}: expected exactly 1 H1 heading, found ${h1.length}.`);
   else if (h1[0].text !== leaf.name) {
@@ -191,7 +197,7 @@ function findNavFiles(dir) {
   return found;
 }
 
-const navFiles = ['README.md', 'CATALOG.md', 'PATHS.md', ...findNavFiles('docs')];
+const navFiles = ['README.md', 'CATALOG.md', 'PATHS.md', 'READINESS.md', ...findNavFiles('docs')];
 for (const file of navFiles) {
   if (!fs.existsSync(file)) continue;
   checkLinks(parseLines(fs.readFileSync(file, 'utf8')), file);
@@ -321,6 +327,8 @@ function checkReadme() {
   const levels = Object.keys(catalog.levelCounts).sort()
     .map((k) => `${k}: ${catalog.levelCounts[k]}`).join(' · ');
   expect('the level distribution', /\*\*Level distribution:\*\* (.+)/, levels);
+  expect('the readiness summary', /\*\*Readiness:\*\* (.+?) \(\[what that means\]\(READINESS\.md\)\)/,
+    readinessSummary(catalog));
 
   // curriculum map: one row per tree, with its branch and leaf counts
   const perTree = new Map();
@@ -383,6 +391,21 @@ errors.push(...checkCertifications(catalog));
 // Every reference links its source; see scripts/lib/references.mjs.
 errors.push(...checkReferences(catalog));
 
+// --- readiness -----------------------------------------------------------------
+
+/**
+ * A readiness level is a claim, so it is checked against its evidence: a leaf
+ * is validated only while data/validation.json records a passing latest run,
+ * and every need its commands prove is listed. READINESS.md is derived from
+ * both and must be in step. See scripts/lib/readiness.mjs.
+ */
+errors.push(...checkReadiness(catalog, validation));
+if (!fs.existsSync('READINESS.md')) {
+  errors.push("READINESS.md is missing. Run 'npm run regen'.");
+} else if (fs.readFileSync('READINESS.md', 'utf8') !== renderReadinessMd(catalog, validation)) {
+  errors.push("READINESS.md disagrees with data/catalog.json or data/validation.json. Run 'npm run regen'.");
+}
+
 // --- runner parity -----------------------------------------------------------
 
 /**
@@ -443,5 +466,6 @@ console.log(
   '        learning paths (every leaf reachable, no dangling step, PATHS.md in step),\n'+
   '        README badges and curriculum map, version assumptions in step,\n'+
   '        certifications (none retired, every one registered), references (each links its source),\n'+
+  '        readiness (each level backed by its evidence, every proven need listed, READINESS.md in step),\n'+
   '        runner parity (every gate runs in CI and run.bat).'
 );
