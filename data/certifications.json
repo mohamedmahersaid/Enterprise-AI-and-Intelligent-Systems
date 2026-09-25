@@ -1,10 +1,11 @@
 {
   "$comment": [
-    "Every credential the leaves cite, and every one they must no longer cite.",
+    "Every credential the leaves cite, every exam they must no longer cite, and the numbered frameworks they cite by ID.",
     "Maintained by hand from vendor sources: nothing in this repository can check a vendor, so each entry records where its facts came from and how well.",
-    "evidence: 'read' = the source page was fetched and read; 'search-extract' = the vendor's own pages were blocked to the verifier and the facts come from search-engine extracts of them; 'unverified' = no vendor text could be read.",
-    "validate-content fails when a leaf names a retired exam, or cites a credential not listed here.",
-    "frameworks: numbered lists the leaves cite by ID. An ID must carry its edition (LLM03:2026) and name the entry it has in that edition."
+    "evidence: 'read' = the source page was fetched and read; 'search-extract' = the vendor's pages were blocked to the checker and the facts come from search-engine extracts of them; 'unverified' = no vendor text could be read.",
+    "credentials[].label is the exact bold text a leaf's alignment line must use. domains, where recorded, are copied from the vendor's study guide; a line citing such a credential must open with one of them. An empty domains list means none could be read, and the line's coverage is free text.",
+    "retired[].names are matched loosely (any case for codes, any dash or whitespace, across line breaks); keep them specific enough not to collide with a current credential.",
+    "validate-content fails on a retired exam anywhere in a leaf, an unregistered or non-canonical label, a missing domain, or an OWASP ID without its edition. Run 'npm run regen' after editing: ASSUMPTIONS.md summarises this file."
   ],
   "verified": "2026-09-25",
   "credentials": [
@@ -12,12 +13,9 @@
       "id": "AI-103",
       "vendor": "Microsoft",
       "credential": "Microsoft Certified: Azure AI Apps and Agents Developer Associate",
+      "label": "Microsoft Certified: Azure AI Apps and Agents Developer Associate (AI-103)",
       "exam": "AI-103: Developing AI Apps and Agents on Azure",
       "status": "active",
-      "match": [
-        "AI-103",
-        "Azure AI Apps and Agents Developer"
-      ],
       "domains": [
         "Plan and manage an Azure AI solution (25-30%)",
         "Implement generative AI and agentic solutions (30-35%)",
@@ -32,11 +30,9 @@
       "id": "AI-901",
       "vendor": "Microsoft",
       "credential": "Microsoft Certified: Azure AI Fundamentals",
+      "label": "Microsoft Certified: Azure AI Fundamentals (AI-901)",
       "exam": "AI-901: Microsoft Azure AI Fundamentals",
       "status": "active",
-      "match": [
-        "AI-901"
-      ],
       "domains": [
         "Identify AI concepts and capabilities (40-45%)",
         "Implement AI solutions by using Microsoft Foundry (55-60%)"
@@ -48,12 +44,9 @@
       "id": "AI-300",
       "vendor": "Microsoft",
       "credential": "Microsoft Certified: Machine Learning Operations Engineer Associate",
+      "label": "Microsoft Certified: Machine Learning Operations Engineer Associate (AI-300)",
       "exam": "AI-300: Operationalizing Machine Learning and Generative AI Solutions",
       "status": "active",
-      "match": [
-        "AI-300",
-        "Machine Learning Operations Engineer"
-      ],
       "domains": [
         "Design and implement an MLOps infrastructure (15-20%)",
         "Implement machine learning model lifecycle and operations (25-30%)",
@@ -68,12 +61,9 @@
       "id": "AI-500",
       "vendor": "Microsoft",
       "credential": "Microsoft Certified: Multi-Agent AI Solutions Expert",
+      "label": "Microsoft Certified: Multi-Agent AI Solutions Expert (AI-500, beta)",
       "exam": "AI-500: Designing and Implementing Multi-Agent AI Solutions",
       "status": "beta",
-      "match": [
-        "AI-500",
-        "Multi-Agent AI Solutions Expert"
-      ],
       "domains": [
         "Architect multi-agent solutions (15-20%)",
         "Develop multi-agent solutions in Azure (30-35%)",
@@ -87,12 +77,9 @@
       "id": "SC-500",
       "vendor": "Microsoft",
       "credential": "Microsoft Certified: Cloud and AI Security Engineer Associate",
+      "label": "Microsoft Certified: Cloud and AI Security Engineer Associate (SC-500)",
       "exam": "SC-500: Implementing End-to-End Security Controls for Cloud and AI Workloads",
       "status": "active",
-      "match": [
-        "SC-500",
-        "Cloud and AI Security Engineer"
-      ],
       "domains": [
         "Manage identity, access, and governance (20-25%)",
         "Secure storage, databases, and networking (25-30%)",
@@ -106,11 +93,9 @@
       "id": "SC-900",
       "vendor": "Microsoft",
       "credential": "Microsoft Certified: Security, Compliance, and Identity Fundamentals",
+      "label": "Microsoft Certified: Security, Compliance, and Identity Fundamentals (SC-900)",
       "exam": "SC-900: Microsoft Security, Compliance, and Identity Fundamentals",
       "status": "active",
-      "match": [
-        "SC-900"
-      ],
       "domains": [
         "Describe the concepts of security, compliance, and identity (10-15%)",
         "Describe the capabilities of Microsoft Entra (25-30%)",
@@ -124,11 +109,9 @@
       "id": "SC-100",
       "vendor": "Microsoft",
       "credential": "Microsoft Certified: Cybersecurity Architect Expert",
+      "label": "Microsoft Certified: Cybersecurity Architect Expert (SC-100)",
       "exam": "SC-100: Microsoft Cybersecurity Architect",
       "status": "active",
-      "match": [
-        "SC-100"
-      ],
       "domains": [
         "Design solutions that align with security best practices and priorities (20-25%)",
         "Design security operations, identity, and compliance capabilities (25-30%)",
@@ -142,11 +125,9 @@
       "id": "SC-200",
       "vendor": "Microsoft",
       "credential": "Microsoft Certified: Security Operations Analyst Associate",
+      "label": "Microsoft Certified: Security Operations Analyst Associate (SC-200)",
       "exam": "SC-200: Microsoft Security Operations Analyst",
       "status": "active",
-      "match": [
-        "SC-200"
-      ],
       "domains": [
         "Manage a security operations environment (40-45%)",
         "Respond to security incidents (35-40%)",
@@ -159,11 +140,9 @@
       "id": "AZ-305",
       "vendor": "Microsoft",
       "credential": "Microsoft Certified: Azure Solutions Architect Expert",
+      "label": "Microsoft Certified: Azure Solutions Architect Expert (AZ-305)",
       "exam": "AZ-305: Designing Microsoft Azure Infrastructure Solutions",
       "status": "active",
-      "match": [
-        "AZ-305"
-      ],
       "domains": [
         "Design identity, governance, and monitoring solutions (25-30%)",
         "Design data storage solutions (20-25%)",
@@ -177,11 +156,9 @@
       "id": "AZ-104",
       "vendor": "Microsoft",
       "credential": "Microsoft Certified: Azure Administrator Associate",
+      "label": "Microsoft Certified: Azure Administrator Associate (AZ-104)",
       "exam": "AZ-104: Microsoft Azure Administrator",
       "status": "active",
-      "match": [
-        "AZ-104"
-      ],
       "domains": [
         "Manage Azure identities and governance (20-25%)",
         "Implement and manage storage (15-20%)",
@@ -196,11 +173,9 @@
       "id": "AZ-400",
       "vendor": "Microsoft",
       "credential": "Microsoft Certified: DevOps Engineer Expert",
+      "label": "Microsoft Certified: DevOps Engineer Expert (AZ-400)",
       "exam": "AZ-400: Designing and Implementing Microsoft DevOps Solutions",
       "status": "active",
-      "match": [
-        "AZ-400"
-      ],
       "domains": [
         "Design and implement processes and communications (10-15%)",
         "Design and implement a source control strategy (10-15%)",
@@ -215,11 +190,8 @@
       "id": "aws-mla",
       "vendor": "AWS",
       "credential": "AWS Certified Machine Learning Engineer - Associate",
+      "label": "AWS Certified Machine Learning Engineer - Associate",
       "status": "active",
-      "match": [
-        "Machine Learning Engineer - Associate",
-        "Machine Learning Engineer – Associate"
-      ],
       "domains": [],
       "source": "https://aws.amazon.com/certification/certified-machine-learning-engineer-associate/",
       "evidence": "search-extract",
@@ -229,10 +201,8 @@
       "id": "aws-aif",
       "vendor": "AWS",
       "credential": "AWS Certified AI Practitioner",
+      "label": "AWS Certified AI Practitioner",
       "status": "active",
-      "match": [
-        "AWS Certified AI Practitioner"
-      ],
       "domains": [
         "Domain 1: Fundamentals of AI and ML (20%)",
         "Domain 2: Fundamentals of GenAI (24%)",
@@ -247,11 +217,8 @@
       "id": "aws-saa",
       "vendor": "AWS",
       "credential": "AWS Certified Solutions Architect - Associate",
+      "label": "AWS Certified Solutions Architect - Associate",
       "status": "active",
-      "match": [
-        "Solutions Architect - Associate",
-        "Solutions Architect – Associate"
-      ],
       "domains": [
         "Domain 1: Design Secure Architectures (30%)",
         "Domain 2: Design Resilient Architectures (26%)",
@@ -265,10 +232,8 @@
       "id": "gcp-pmle",
       "vendor": "Google Cloud",
       "credential": "Google Cloud Professional Machine Learning Engineer",
+      "label": "Google Cloud Professional Machine Learning Engineer",
       "status": "active",
-      "match": [
-        "Professional Machine Learning Engineer"
-      ],
       "domains": [],
       "source": "https://cloud.google.com/learn/certification/machine-learning-engineer",
       "evidence": "read",
@@ -278,10 +243,8 @@
       "id": "gcp-pca",
       "vendor": "Google Cloud",
       "credential": "Google Cloud Professional Cloud Architect",
+      "label": "Google Cloud Professional Cloud Architect",
       "status": "active",
-      "match": [
-        "Professional Cloud Architect"
-      ],
       "domains": [],
       "source": "https://cloud.google.com/learn/certification/cloud-architect",
       "evidence": "read",
@@ -291,10 +254,8 @@
       "id": "gcp-cdl",
       "vendor": "Google Cloud",
       "credential": "Google Cloud Digital Leader",
+      "label": "Google Cloud Digital Leader",
       "status": "active",
-      "match": [
-        "Cloud Digital Leader"
-      ],
       "domains": [],
       "source": "https://cloud.google.com/learn/certification/cloud-digital-leader",
       "evidence": "read"
@@ -303,10 +264,8 @@
       "id": "cka",
       "vendor": "CNCF / Linux Foundation",
       "credential": "Certified Kubernetes Administrator (CKA)",
+      "label": "Certified Kubernetes Administrator (CKA)",
       "status": "active",
-      "match": [
-        "CKA"
-      ],
       "domains": [
         "Cluster Architecture, Installation & Configuration (25%)",
         "Workloads & Scheduling (15%)",
@@ -321,10 +280,8 @@
       "id": "ckad",
       "vendor": "CNCF / Linux Foundation",
       "credential": "Certified Kubernetes Application Developer (CKAD)",
+      "label": "Certified Kubernetes Application Developer (CKAD)",
       "status": "active",
-      "match": [
-        "CKAD"
-      ],
       "domains": [
         "Application Design and Build (20%)",
         "Application Deployment (20%)",
@@ -339,10 +296,8 @@
       "id": "nvidia-aiio",
       "vendor": "NVIDIA",
       "credential": "NVIDIA-Certified Associate: AI Infrastructure and Operations",
+      "label": "NVIDIA-Certified Associate: AI Infrastructure and Operations",
       "status": "unverified",
-      "match": [
-        "AI Infrastructure and Operations"
-      ],
       "domains": [],
       "source": "https://www.nvidia.com/en-us/learn/certification/ai-infrastructure-operations-associate/",
       "evidence": "unverified"
@@ -351,10 +306,8 @@
       "id": "databricks-mlp",
       "vendor": "Databricks",
       "credential": "Databricks Certified Machine Learning Professional",
+      "label": "Databricks Certified Machine Learning Professional",
       "status": "unverified",
-      "match": [
-        "Databricks Certified Machine Learning Professional"
-      ],
       "domains": [],
       "source": "https://www.databricks.com/learn/certification/machine-learning-professional",
       "evidence": "unverified"
@@ -363,10 +316,8 @@
       "id": "iapp-aigp",
       "vendor": "IAPP",
       "credential": "IAPP Artificial Intelligence Governance Professional (AIGP)",
+      "label": "IAPP Artificial Intelligence Governance Professional (AIGP)",
       "status": "unverified",
-      "match": [
-        "AIGP"
-      ],
       "domains": [],
       "source": "https://iapp.org/certify/aigp/",
       "evidence": "unverified"
@@ -375,10 +326,8 @@
       "id": "isc2-cissp",
       "vendor": "ISC2",
       "credential": "ISC2 Certified Information Systems Security Professional (CISSP)",
+      "label": "ISC2 Certified Information Systems Security Professional (CISSP)",
       "status": "unverified",
-      "match": [
-        "CISSP"
-      ],
       "domains": [],
       "source": "https://www.isc2.org/certifications/cissp",
       "evidence": "unverified"
@@ -387,10 +336,8 @@
       "id": "finops-fcp",
       "vendor": "FinOps Foundation",
       "credential": "FinOps Certified Practitioner",
+      "label": "FinOps Certified Practitioner",
       "status": "unverified",
-      "match": [
-        "FinOps Certified Practitioner"
-      ],
       "domains": [],
       "source": "https://learn.finops.org/page/finops-certified-practitioner",
       "evidence": "unverified"
@@ -399,10 +346,8 @@
       "id": "pmi-acp",
       "vendor": "PMI",
       "credential": "PMI Agile Certified Practitioner (PMI-ACP)",
+      "label": "PMI Agile Certified Practitioner (PMI-ACP)",
       "status": "unverified",
-      "match": [
-        "PMI-ACP"
-      ],
       "domains": [],
       "source": "https://www.pmi.org/certifications/agile-acp",
       "evidence": "unverified"
@@ -411,10 +356,8 @@
       "id": "isaca-cisa",
       "vendor": "ISACA",
       "credential": "ISACA Certified Information Systems Auditor (CISA)",
+      "label": "ISACA Certified Information Systems Auditor (CISA)",
       "status": "unverified",
-      "match": [
-        "CISA"
-      ],
       "domains": [],
       "source": "https://www.isaca.org/credentialing/cisa",
       "evidence": "unverified"
@@ -423,10 +366,8 @@
       "id": "isaca-crisc",
       "vendor": "ISACA",
       "credential": "ISACA Certified in Risk and Information Systems Control (CRISC)",
+      "label": "ISACA Certified in Risk and Information Systems Control (CRISC)",
       "status": "unverified",
-      "match": [
-        "CRISC"
-      ],
       "domains": [],
       "source": "https://www.isaca.org/credentialing/crisc",
       "evidence": "unverified"
@@ -435,10 +376,8 @@
       "id": "comptia-secplus",
       "vendor": "CompTIA",
       "credential": "CompTIA Security+",
+      "label": "CompTIA Security+",
       "status": "unverified",
-      "match": [
-        "Security+"
-      ],
       "domains": [],
       "source": "https://www.comptia.org/en-us/certifications/security/",
       "evidence": "unverified"
@@ -447,10 +386,8 @@
       "id": "lf-prometheus-pca",
       "vendor": "Linux Foundation",
       "credential": "Prometheus Certified Associate (PCA)",
+      "label": "Prometheus Certified Associate (PCA)",
       "status": "unverified",
-      "match": [
-        "Prometheus Certified Associate"
-      ],
       "domains": [],
       "source": "https://training.linuxfoundation.org/certification/prometheus-certified-associate/",
       "evidence": "unverified"
@@ -465,7 +402,9 @@
       "retired": "2026-06-30",
       "successor": "AI-103",
       "source": "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/ai-102",
-      "quote": "This exam was retired on June 30, 2026, at 11:59 PM Central Standard Time."
+      "quote": "This exam was retired on June 30, 2026, at 11:59 PM Central Standard Time.",
+      "evidence": "read",
+      "successor_source": "https://learn.microsoft.com/partner-center/announcements/2026-june"
     },
     {
       "code": "AI-900",
@@ -474,7 +413,9 @@
       "successor": "AI-901",
       "source": "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/ai-900",
       "quote": "This exam was retired on June 30, 2026, at 11:59 PM Central Standard Time.",
-      "note": "The credential, Microsoft Certified: Azure AI Fundamentals, continues; only the exam changed."
+      "evidence": "read",
+      "successor_source": "https://learn.microsoft.com/en-us/credentials/certifications/exams/ai-900/",
+      "successor_note": "The credential, Microsoft Certified: Azure AI Fundamentals, continues and now requires AI-901; only the exam changed."
     },
     {
       "code": "DP-100",
@@ -484,7 +425,9 @@
       "retired": "2026-06-01",
       "successor": "AI-300",
       "source": "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/dp-100",
-      "quote": "This exam was retired on June 1, 2026, at 11:59 PM Central Standard Time. [DP-100 study guide] | \"This certification and the renewal assessment are retired.\" [https://learn.microsoft.com/en-us/credentials/certifications/azure-data-scientist/] | \"Azure Data Scientist Associate (DP-100) retired as of "
+      "quote": "This exam was retired on June 1, 2026, at 11:59 PM Central Standard Time.",
+      "evidence": "read",
+      "successor_source": "https://learn.microsoft.com/partner-center/announcements/2026-june"
     },
     {
       "code": "AZ-500",
@@ -494,19 +437,21 @@
       "retired": "2026-08-31",
       "successor": "SC-500",
       "source": "https://learn.microsoft.com/en-us/credentials/certifications/azure-security-engineer/",
-      "quote": "This certification, related exam, and renewal assessments was retired on August 31, 2026. You will no longer be able to earn or renew this certification after this date. | Study guide: \"This exam was retired on August 31, 2026, at 11:59 PM Central Standard Time.\" | \"Azure Security Engineer Associate"
+      "quote": "This certification, related exam, and renewal assessments was retired on August 31, 2026.",
+      "evidence": "read",
+      "successor_source": "https://learn.microsoft.com/partner-center/announcements/2026-august"
     },
     {
       "code": "MLS-C01",
       "names": [
-        "Machine Learning - Specialty",
-        "Machine Learning – Specialty"
+        "Machine Learning Specialty"
       ],
       "retired": "2026-03-31",
       "successor": "aws-mla",
       "source": "https://aws.amazon.com/certification/certified-machine-learning-specialty/",
+      "quote": "The last day to take the AWS Certified Machine Learning - Specialty exam (MLS-C01) is March 31, 2026.",
       "evidence": "search-extract",
-      "quote": "The last day to take the AWS Certified Machine Learning - Specialty exam (MLS-C01) is March 31, 2026."
+      "successor_note": "AWS names no single successor; it points holders to several credentials, of which Machine Learning Engineer - Associate is the closest match."
     }
   ],
   "frameworks": [

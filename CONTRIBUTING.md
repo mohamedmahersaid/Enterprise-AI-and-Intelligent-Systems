@@ -62,21 +62,28 @@ words than an expert one, not fewer.
 
 ### Certification alignment
 
-Each line is `- **Credential** - Official domain: what this leaf teaches for it.`
-The credential must be listed in `data/certifications.json`, and the domain copied
-from that entry, so a reader can check the claim against the vendor's own study
-guide. Frameworks that are not credentials take the label `Vendor-neutral`. A
-leaf that genuinely maps to no domain of a credential should not cite it - fewer
+Each line is `- **Label** - Official domain: what this leaf teaches for it.`
+The label must be a `label` from `data/certifications.json`, copied exactly. Where
+that entry records `domains`, the line must open with one of them, as the vendor's
+study guide names it, followed by a colon, so a reader can check the claim at the
+source. Where the entry's `domains` is empty (none could be read), the coverage is
+free text. Frameworks that are not credentials take the label `Vendor-neutral`. A
+leaf that genuinely maps to no domain of a credential should not cite it: fewer
 honest lines beat a padded list.
 
-To cite a credential that is not registered, add it with its vendor source and an
-`evidence` value that says how its status was confirmed: `read` (the vendor page
-was fetched and read), `search-extract` (only search extracts of the vendor's
-pages could be read) or `unverified`. When a vendor retires an exam, move it to
-`retired` with its successor; `validate:content` then fails on every leaf that
-still names it. The same file records the OWASP GenAI LLM Top 10 edition in use:
-cite its IDs with their year, as `LLM03:2026 Excessive Agency`, because OWASP
-renumbers the list between editions.
+To cite a credential that is not registered, add an entry to `credentials` with
+`id`, `vendor`, `credential`, `label`, `status`, `domains` (may be `[]`), `source`
+and `evidence`. `evidence` says how its status was confirmed: `read` (the vendor
+page was fetched and read), `search-extract` (only search-engine extracts of the
+vendor's pages could be read) or `unverified`. When a vendor retires an exam, add
+it to `retired` with `code`, `names` (may be `[]`), the `retired` date, its
+`successor` (a credential `id`), `source` and `evidence`; `validate:content` then
+fails on every leaf that still names it, in any spelling. After editing the file,
+run `npm run regen`: ASSUMPTIONS.md summarises it.
+
+The same file records the OWASP GenAI LLM Top 10 edition in use. Cite its IDs with
+their year, as `LLM03:2026 Excessive Agency`, because OWASP renumbers the list
+between editions; a bare `LLM08` fails.
 
 If you edit `data/catalog.json` directly — renaming a branch, changing a level —
 run `npm run regen` to rewrite the derived files, rather than editing them.

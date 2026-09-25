@@ -14,10 +14,12 @@
  * document says so plainly rather than implying a validation that never
  * happened. A false "verified" is worse than an honest "unverified".
  *
- * Everything here is extracted, never hand-maintained, so it cannot drift from
- * the content the way a hand-written list would. `npm run regen` writes the
- * document; validate-content asserts it is in step, the same contract PATHS.md
- * has.
+ * The pinned artefacts and tools are extracted, never hand-maintained, so they
+ * cannot drift from the content the way a hand-written list would. The one
+ * hand-maintained input is data/certifications.json, whose facts were looked
+ * up and which records, per entry, how well; its section says so. `npm run
+ * regen` writes the document; validate-content asserts it is in step, the same
+ * contract PATHS.md has.
  */
 import fs from 'node:fs';
 import { citations, loadRegistry } from './certifications.mjs';
@@ -164,6 +166,7 @@ export function deriveAssumptions(catalog) {
         ...r,
         successorName:
           registry.credentials.find((c) => c.id === r.successor)?.credential ?? r.successor,
+        evidence: r.evidence,
       })),
       frameworks: registry.frameworks,
     },
@@ -194,11 +197,13 @@ export function renderAssumptionsMd(data) {
   );
   lines.push('');
   lines.push(
-    'Nothing here has been checked against a vendor. Confirming that a model ' +
-    'tag still exists, or that an API version has not been withdrawn, means ' +
-    'asking the vendor - which no check in this repository can do. Treat every ' +
-    'row below as **unverified**, and verify the ones you depend on before ' +
-    'relying on them in production.'
+    'The pinned artefacts and tools below have not been checked against a ' +
+    'vendor. Confirming that a model tag still exists, or that an API version ' +
+    'has not been withdrawn, means asking the vendor - which no check in this ' +
+    'repository can do. Treat those rows as **unverified**, and verify the ones ' +
+    'you depend on before relying on them in production. The certifications ' +
+    'section is the exception: it comes from a hand-maintained registry whose ' +
+    'entries were looked up, and it states how well for each one.'
   );
   lines.push('');
   lines.push(
@@ -252,10 +257,10 @@ export function renderAssumptionsMd(data) {
   lines.push('');
   lines.push('No leaf may cite these; validate-content fails if one does.');
   lines.push('');
-  lines.push('| Retired exam | Retired | Replaced by |');
-  lines.push('| --- | --- | --- |');
+  lines.push('| Retired exam | Retired | Replaced by | Evidence |');
+  lines.push('| --- | --- | --- | --- |');
   for (const r of data.certifications.retired) {
-    lines.push(`| [${r.code}](${r.source}) | ${r.retired} | ${r.successorName} |`);
+    lines.push(`| [${r.code}](${r.source}) | ${r.retired} | ${r.successorName} | ${r.evidence} |`);
   }
   lines.push('');
   lines.push(
