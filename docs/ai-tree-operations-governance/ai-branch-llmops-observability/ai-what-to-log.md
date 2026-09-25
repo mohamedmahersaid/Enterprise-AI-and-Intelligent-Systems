@@ -52,7 +52,7 @@ that decision plus everything that came out of it. In practice that is:
 - **The model and version string**, exactly as the provider reports it. Model
   behaviour changes between versions, and "we were on the latest" is not a
   version.
-- **The parameters** — temperature, max tokens, any tool definitions passed.
+- **The parameters** — temperature or reasoning effort, the token cap, any tool definitions passed.
 - **The full response**, including the parts you discarded.
 - **Token counts for input and output**, which are your cost and your capacity.
 - **A correlation identifier** linking this row to the user-visible interaction.
@@ -328,9 +328,9 @@ from, then prove it does not silently hold personal data or secrets.
 
 ### Scenario 2: The same prompt produces different answers on different days.
 
-**Likely cause:** Either a non-zero temperature, or the provider moved you to a new model version. Both are invisible without logging.
+**Likely cause:** Either a sampling setting changed - a non-zero temperature, or a different reasoning effort on a reasoning model - or the provider moved you to a new model version. All are invisible without logging.
 
-**Resolution:** Compare the logged model version string across the two dates and check the temperature parameter. If the version changed, that is the answer; if not, pin temperature to zero for the comparison and re-test.
+**Resolution:** Compare the logged model version string across the two dates and check the logged sampling parameters. If the version changed, that is the answer; if not, fix them for the comparison - temperature to zero where the model accepts it, the reasoning effort where it does not - and re-test.
 
 ### Scenario 3: Log volume and storage cost grew far faster than traffic.
 
@@ -379,7 +379,7 @@ That it removes most of the value while keeping most of the cost. The response i
 ## References
 
 - OpenTelemetry. *Semantic Conventions for Generative AI Systems.*
-- Microsoft. *Azure AI Foundry Documentation: Monitoring, Diagnostics and Logging.*
+- Microsoft. *Microsoft Foundry Documentation: Monitoring, Diagnostics and Logging.*
 - Google Cloud. *Vertex AI Documentation: Request-Response Logging.*
 - NIST. *AI Risk Management Framework (AI RMF 1.0), Measure and Manage functions.*
 - European Data Protection Board. *Guidelines on Data Protection by Design and by Default.*

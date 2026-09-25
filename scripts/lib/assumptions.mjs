@@ -83,10 +83,31 @@ const PINNED = [
     },
   },
   {
+    id: 'azure-openai-v1',
+    label: 'Azure OpenAI API surface',
+    note:
+      'The v1 API carries no date version: calls go to /openai/v1/ and name ' +
+      'the deployment in the body. It follows the service lifecycle rather ' +
+      'than a pinned date, so a breaking change arrives as a new path.',
+    pattern: /\/openai\/(v1)\//g,
+    format: () => 'Azure OpenAI v1',
+  },
+  {
+    id: 'azure-model-version',
+    label: 'Azure OpenAI model versions pinned by deployment commands',
+    note:
+      'These are what the Microsoft Foundry model retirement schedule is keyed ' +
+      'on. A version listed as Deprecated there can no longer be deployed by a ' +
+      'new subscription, and a Retired one answers every request with 410 Gone.',
+    pattern: /--model-name\s+(\S+)\s+--model-version\s+(\S+)/g,
+    format: (m) => `${m[1]} ${m[2]}`,
+  },
+  {
     id: 'azure-model',
     label: 'Azure OpenAI model names',
     note: 'Deployment names are chosen locally; these are the underlying models.',
-    pattern: /\b(gpt-4o(?:-mini)?|text-embedding-3(?:-[a-z]+)?)\b/g,
+    pattern:
+      /\b(gpt-(?:4o|4\.1|5(?:\.\d+)?)(?:-(?:mini|nano|pro|chat|codex))?|text-embedding-3(?:-[a-z]+)?)\b/g,
   },
   {
     id: 'ollama-model',

@@ -56,10 +56,10 @@ az cognitiveservices account deployment list -g rg-ai -n aoai-prod -o table
 
 ### Command 2
 
-Create a deployment with an explicit tokens-per-minute capacity to cap spend.
+Create a deployment with an explicit tokens-per-minute capacity to cap spend. Newer small models reach Global Standard first; it may process prompts outside the account's region, so use it only where data residency allows.
 
 ```text
-az cognitiveservices account deployment create -g rg-ai -n aoai-prod --deployment-name gpt-4o-mini --model-name gpt-4o-mini --model-version 2024-07-18 --model-format OpenAI --sku-name Standard --sku-capacity 50
+az cognitiveservices account deployment create -g rg-ai -n aoai-prod --deployment-name chat-small --model-name gpt-5.4-mini --model-version 2026-03-17 --model-format OpenAI --sku-name GlobalStandard --sku-capacity 50
 ```
 
 ### Command 3
@@ -88,10 +88,10 @@ ollama run llama3.1:8b --verbose
 
 ### Command 6
 
-Throttle a deployment by lowering provisioned TPM as an emergency cost brake.
+Throttle a deployment by re-applying it at lower TPM capacity as an emergency cost brake. The CLI has no deployment update command; create with the same name, model and SKU replaces the capacity.
 
 ```text
-az cognitiveservices account deployment update -g rg-ai -n aoai-prod --deployment-name gpt-4o --sku-capacity 10
+az cognitiveservices account deployment create -g rg-ai -n aoai-prod --deployment-name chat-small --model-name gpt-5.4-mini --model-version 2026-03-17 --model-format OpenAI --sku-name GlobalStandard --sku-capacity 10
 ```
 
 ### Command 7
@@ -129,17 +129,19 @@ import sys
 import time
 import urllib.request
 
-# Price per 1M tokens (input, output) in USD. Update from the current price sheet.
+# Price per 1M tokens (input, output) in USD, for your region and deployment
+# type. Left blank on purpose: prices change and differ by region, so copy them
+# from the current Azure OpenAI pricing page rather than trusting a number
+# printed in a lesson. Azure keys are deployment names, not model names.
 CANDIDATES = {
     "local:llama3.1:8b": {"price": (0.0, 0.0), "endpoint": "ollama"},
-    "gpt-4o-mini": {"price": (0.15, 0.60), "endpoint": "azure"},
-    "gpt-4o": {"price": (2.50, 10.00), "endpoint": "azure"},
+    "chat-small": {"price": None, "endpoint": "azure"},  # e.g. gpt-5.4-mini
+    "chat-large": {"price": None, "endpoint": "azure"},  # e.g. gpt-5.1
 }
 
 OLLAMA = os.environ.get("OLLAMA_HOST", "http://127.0.0.1:11434")
 AOAI = os.environ.get("AZURE_OPENAI_ENDPOINT", "")
 AOAI_KEY = os.environ.get("AZURE_OPENAI_API_KEY", "")
-API_VERSION = "2024-10-21"
 
 
 def load_evalset(path):
@@ -174,10 +176,12 @@ def call_ollama(model, prompt):
 def call_azure(model, prompt):
     if not AOAI or not AOAI_KEY:
         raise RuntimeError("AZURE_OPENAI_ENDPOINT / _API_KEY not set")
-    url = "%s/openai/deployments/%s/chat/completions?api-version=%s" % (
-        AOAI.rstrip("/"), model, API_VERSION)
-    body = {"messages": [{"role": "user", "content": prompt}],
-            "temperature": 0, "max_tokens": 512}
+    url = "%s/openai/v1/chat/completions" % AOAI.rstrip("/")
+    body = {"model": model, "messages": [{"role": "user", "content": prompt}],
+            # Reasoning models - the GPT-5 family - reject temperature and max_tokens;
+            # the cap is max_completion_tokens, and it counts reasoning tokens too,
+            # so an empty answer means the cap is too low for the effort used.
+            "max_completion_tokens": 512}
     out = post(url, body, {"Content-Type": "application/json",
                            "api-key": AOAI_KEY})
     usage = out.get("usage", {})
@@ -225,6 +229,10 @@ def evaluate(model, cfg, rows):
 def main():
     path = sys.argv[1] if len(sys.argv) > 1 else "evalset.csv"
     rows = load_evalset(path)
+    unpriced = [m for m, cfg in CANDIDATES.items() if cfg["price"] is None]
+    if unpriced:
+        print("ERROR: fill in current prices for: %s" % ", ".join(unpriced))
+        sys.exit(2)
     print("Evaluating %d prompts against %d candidates\n" % (len(rows), len(CANDIDATES)))
 
     results = []
@@ -258,8 +266,8 @@ if __name__ == "__main__":
 ### Steps
 
 1. Collect 50-100 real prompts from one production workload, for example incident summarisation, and write a reference answer for each into evalset.csv with columns prompt and expected.
-2. Deploy a small hosted model and a frontier model in Azure OpenAI with explicit TPM capacity, and pull an 8B model locally with Ollama.
-3. Set AZURE_OPENAI_ENDPOINT and AZURE_OPENAI_API_KEY, then run the comparison harness against the evaluation set.
+2. Deploy a small hosted model as chat-small (Command 2) and a larger one as chat-large - gpt-5.1 2025-11-13 in regional Standard, for example - in Azure OpenAI with explicit TPM capacity, and pull an 8B model locally with Ollama. If you choose other names, rename the CANDIDATES keys to match.
+3. Copy the current per-million-token input and output prices for your region and deployment type from the Azure OpenAI pricing page into CANDIDATES, set AZURE_OPENAI_ENDPOINT and AZURE_OPENAI_API_KEY, then run the comparison harness against the evaluation set.
 4. Record quality, p50 and p95 latency and USD per 1000 requests for each candidate from model-comparison.json.
 5. Compute the crossover point: at what monthly request volume does the amortised GPU cost of the local model beat the hosted per-token cost?
 6. Restructure one prompt so the long static system instructions come first, re-run it, and confirm cached input tokens appear in the usage payload.

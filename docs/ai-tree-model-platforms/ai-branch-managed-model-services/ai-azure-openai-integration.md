@@ -36,7 +36,7 @@ flowchart TD
     end
     A -->|token request| D[Entra ID]
     D -->|RBAC: Cognitive Services\nOpenAI User| C
-    C --> E[Deployment: gpt-4o\nversion pinned + TPM cap]
+    C --> E[Deployment: gpt-5.1\nversion pinned + TPM cap]
     C --> F[Content filter policy]
     C --> G[(Diagnostic logs\nLog Analytics)]
     C --> H[Customer-managed key\nKey Vault]
@@ -82,7 +82,7 @@ az role assignment create --assignee $APP_PRINCIPAL_ID --role "Cognitive Service
 Create a version-pinned deployment with a TPM ceiling.
 
 ```text
-az cognitiveservices account deployment create -g rg-ai -n aoai-prod --deployment-name chat --model-name gpt-4o --model-version 2024-11-20 --model-format OpenAI --sku-name Standard --sku-capacity 30
+az cognitiveservices account deployment create -g rg-ai -n aoai-prod --deployment-name chat --model-name gpt-5.1 --model-version 2025-11-13 --model-format OpenAI --sku-name Standard --sku-capacity 30
 ```
 
 ### Command 6

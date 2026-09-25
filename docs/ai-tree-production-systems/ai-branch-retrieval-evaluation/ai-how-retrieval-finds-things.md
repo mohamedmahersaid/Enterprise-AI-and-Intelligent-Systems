@@ -113,7 +113,7 @@ grep -ril "authentication failure" corpus/ | head; grep -ril "cannot sign in" co
 Run the same question through the semantic index and read the scores, not just the order
 
 ```text
-curl -s "$SEARCH/indexes/docs/docs/search?api-version=2024-07-01" -H "api-key: $KEY" -d "{\"vectorQueries\":[{\"kind\":\"text\",\"text\":\"$Q\",\"fields\":\"embedding\",\"k\":5}]}" | jq -r ".value[] | [.\"@search.score\", .id] | @tsv"
+curl -s "$SEARCH/indexes/docs/docs/search?api-version=2026-04-01" -H "api-key: $KEY" -d "{\"vectorQueries\":[{\"kind\":\"text\",\"text\":\"$Q\",\"fields\":\"embedding\",\"k\":5}]}" | jq -r ".value[] | [.\"@search.score\", .id] | @tsv"
 ```
 
 ### Command 3
@@ -121,7 +121,7 @@ curl -s "$SEARCH/indexes/docs/docs/search?api-version=2024-07-01" -H "api-key: $
 Ask for an identifier that is not in the corpus, and watch five confident results come back anyway
 
 ```text
-curl -s "$SEARCH/indexes/docs/docs/search?api-version=2024-07-01" -H "api-key: $KEY" -d "{\"vectorQueries\":[{\"kind\":\"text\",\"text\":\"ZZ-99999\",\"fields\":\"embedding\",\"k\":5}]}" | jq -r ".value[].\"@search.score\""
+curl -s "$SEARCH/indexes/docs/docs/search?api-version=2026-04-01" -H "api-key: $KEY" -d "{\"vectorQueries\":[{\"kind\":\"text\",\"text\":\"ZZ-99999\",\"fields\":\"embedding\",\"k\":5}]}" | jq -r ".value[].\"@search.score\""
 ```
 
 ### Command 4
@@ -129,7 +129,7 @@ curl -s "$SEARCH/indexes/docs/docs/search?api-version=2024-07-01" -H "api-key: $
 Compare the two modes on the same identifier, which is the clearest demonstration of why both are needed
 
 ```text
-curl -s "$SEARCH/indexes/docs/docs/search?api-version=2024-07-01&search=0x80070005" -H "api-key: $KEY" | jq -r ".value[].id"
+curl -s "$SEARCH/indexes/docs/docs/search?api-version=2026-04-01&search=0x80070005" -H "api-key: $KEY" | jq -r ".value[].id"
 ```
 
 ### Command 5
@@ -186,7 +186,7 @@ def search(endpoint, key, index, mode, query, k):
             {"kind": "text", "text": query, "fields": "embedding", "k": k}
         ]
     response = requests.post(
-        f"{endpoint}/indexes/{index}/docs/search?api-version=2024-07-01",
+        f"{endpoint}/indexes/{index}/docs/search?api-version=2026-04-01",
         headers={"api-key": key, "content-type": "application/json"},
         json=body, timeout=30,
     )

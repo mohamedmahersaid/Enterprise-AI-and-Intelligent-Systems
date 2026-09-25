@@ -117,10 +117,10 @@ jq -r "select(.incident_tag == \"$INC\") | .user_id" trajectory.log | sort -u | 
 
 ### Command 3
 
-Pin the deployment to the last known-good model version as a containment step, before any root cause is known
+Pin the deployment to the last known-good model version as a containment step, before any root cause is known. The CLI has no update command: create with the deployment's existing name, model and SKU re-applies it, and it requires the model name and format
 
 ```text
-az cognitiveservices account deployment create -g "$RG" -n "$ACCOUNT" --deployment-name prod --model-version "$LAST_GOOD" --sku-capacity 50
+az cognitiveservices account deployment create -g "$RG" -n "$ACCOUNT" --deployment-name prod --model-name "$MODEL" --model-version "$LAST_GOOD" --model-format OpenAI --sku-name "$SKU" --sku-capacity 50
 ```
 
 ### Command 4

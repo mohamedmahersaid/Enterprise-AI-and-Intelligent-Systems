@@ -97,7 +97,7 @@ az monitor scheduled-query create -g rg-ai -n refusal-rate-alert --scopes $LAW_I
 Emit an OpenTelemetry span for a completion call, enabling standard trace tooling.
 
 ```text
-otel-cli span --name llm.chat.completion --attrs model=gpt-4o,tokens_in=512,tokens_out=180
+otel-cli span --name llm.chat.completion --attrs model=gpt-5.1,tokens_in=512,tokens_out=180
 ```
 
 ### Command 8

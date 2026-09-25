@@ -21,8 +21,26 @@ Each service versions independently - a date that differs between services is ex
 | Value | Used by |
 | --- | --- |
 | `Azure AI Content Safety 2024-09-01` | `ai-content-safety-guardrails` |
-| `Azure AI Search 2024-07-01` | `ai-how-retrieval-finds-things` |
-| `Azure OpenAI 2024-10-21` | `ai-prompt-engineering-ops` |
+| `Azure AI Search 2026-04-01` | `ai-how-retrieval-finds-things` |
+
+### Azure OpenAI API surface
+
+The v1 API carries no date version: calls go to /openai/v1/ and name the deployment in the body. It follows the service lifecycle rather than a pinned date, so a breaking change arrives as a new path.
+
+| Value | Used by |
+| --- | --- |
+| `Azure OpenAI v1` | `ai-llmops-deployment-lifecycle`, `ai-model-selection-cost`, `ai-prompt-engineering-ops` |
+
+### Azure OpenAI model versions pinned by deployment commands
+
+These are what the Microsoft Foundry model retirement schedule is keyed on. A version listed as Deprecated there can no longer be deployed by a new subscription, and a Retired one answers every request with 410 Gone.
+
+| Value | Used by |
+| --- | --- |
+| `"$MODEL" "$LAST_GOOD"` | `ai-incident-response` |
+| `gpt-5.1 2025-11-13` | `ai-azure-openai-integration` |
+| `gpt-5.4 2026-03-05` | `ai-llmops-deployment-lifecycle` |
+| `gpt-5.4-mini 2026-03-17` | `ai-model-selection-cost` |
 
 ### Azure OpenAI model names
 
@@ -30,8 +48,9 @@ Deployment names are chosen locally; these are the underlying models.
 
 | Value | Used by |
 | --- | --- |
-| `gpt-4o` | `ai-azure-openai-integration`, `ai-llmops-deployment-lifecycle`, `ai-model-selection-cost`, `ai-observability-performance-monitoring`, `ai-prototype-to-production` |
-| `gpt-4o-mini` | `ai-model-selection-cost` |
+| `gpt-5.1` | `ai-azure-openai-integration`, `ai-model-selection-cost`, `ai-observability-performance-monitoring` |
+| `gpt-5.4` | `ai-llmops-deployment-lifecycle` |
+| `gpt-5.4-mini` | `ai-model-selection-cost` |
 | `text-embedding-3` | `ai-rag-architecture` |
 
 ### Ollama model tags
