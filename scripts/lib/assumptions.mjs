@@ -14,12 +14,15 @@
  * document says so plainly rather than implying a validation that never
  * happened. A false "verified" is worse than an honest "unverified".
  *
- * Everything here is extracted, never hand-maintained, so it cannot drift from
- * the content the way a hand-written list would. `npm run regen` writes the
- * document; validate-content asserts it is in step, the same contract PATHS.md
- * has.
+ * The pinned artefacts and tools are extracted, never hand-maintained, so they
+ * cannot drift from the content the way a hand-written list would. The one
+ * hand-maintained input is data/certifications.json, whose facts were looked
+ * up and which records, per entry, how well; its section says so. `npm run
+ * regen` writes the document; validate-content asserts it is in step, the same
+ * contract PATHS.md has.
  */
 import fs from 'node:fs';
+import { citations, loadRegistry } from './certifications.mjs';
 
 /**
  * Leading command tokens worth declaring, mapped to what a reader must obtain.
@@ -153,8 +156,20 @@ export function deriveAssumptions(catalog) {
     }
   }
 
+  const registry = loadRegistry();
   return {
     leaves,
+    certifications: {
+      verified: registry.verified,
+      cited: citations(catalog, registry).filter((c) => c.leaves.length),
+      retired: registry.retired.map((r) => ({
+        ...r,
+        successorName:
+          registry.credentials.find((c) => c.id === r.successor)?.credential ?? r.successor,
+        evidence: r.evidence,
+      })),
+      frameworks: registry.frameworks,
+    },
     pinned: PINNED.map((spec) => ({
       ...spec,
       values: [...pinned.get(spec.id).entries()]
@@ -182,11 +197,13 @@ export function renderAssumptionsMd(data) {
   );
   lines.push('');
   lines.push(
-    'Nothing here has been checked against a vendor. Confirming that a model ' +
-    'tag still exists, or that an API version has not been withdrawn, means ' +
-    'asking the vendor - which no check in this repository can do. Treat every ' +
-    'row below as **unverified**, and verify the ones you depend on before ' +
-    'relying on them in production.'
+    'The pinned artefacts and tools below have not been checked against a ' +
+    'vendor. Confirming that a model tag still exists, or that an API version ' +
+    'has not been withdrawn, means asking the vendor - which no check in this ' +
+    'repository can do. Treat those rows as **unverified**, and verify the ones ' +
+    'you depend on before relying on them in production. The certifications ' +
+    'section is the exception: it comes from a hand-maintained registry whose ' +
+    'entries were looked up, and it states how well for each one.'
   );
   lines.push('');
   lines.push(
@@ -217,6 +234,46 @@ export function renderAssumptionsMd(data) {
     }
     lines.push('');
   }
+
+  lines.push('## Certifications cited');
+  lines.push('');
+  lines.push(
+    `From \`data/certifications.json\`, last checked against vendor sources on ` +
+    `${data.certifications.verified}. Unlike the rows above, these were looked up - ` +
+    'but only as well as the evidence column says. **read**: the vendor page was ' +
+    'fetched and read. **search-extract**: the vendor blocked the checker, and the ' +
+    "facts come from search-engine extracts of the vendor's own pages. " +
+    '**unverified**: no vendor text could be read; the citation is kept as written.'
+  );
+  lines.push('');
+  lines.push('| Credential | Status | Evidence | Cited by |');
+  lines.push('| --- | --- | --- | --- |');
+  for (const c of data.certifications.cited) {
+    lines.push(
+      `| [${c.credential}](${c.source}) | ${c.status} | ${c.evidence} | ` +
+      `${c.leaves.map((id) => `\`${id}\``).join(', ')} |`
+    );
+  }
+  lines.push('');
+  lines.push('No leaf may cite these; validate-content fails if one does.');
+  lines.push('');
+  lines.push('| Retired exam | Retired | Replaced by | Evidence |');
+  lines.push('| --- | --- | --- | --- |');
+  for (const r of data.certifications.retired) {
+    lines.push(`| [${r.code}](${r.source}) | ${r.retired} | ${r.successorName} | ${r.evidence} |`);
+  }
+  lines.push('');
+  lines.push(
+    'Numbered frameworks the leaves cite by ID. An ID is only meaningful with its ' +
+    'edition, so validate-content requires both.'
+  );
+  lines.push('');
+  lines.push('| Framework | Edition | Released | Evidence |');
+  lines.push('| --- | --- | --- | --- |');
+  for (const f of data.certifications.frameworks) {
+    lines.push(`| [${f.name}](${f.source}) | ${f.edition} | ${f.released} | ${f.evidence} |`);
+  }
+  lines.push('');
 
   lines.push('## Tools each leaf expects');
   lines.push('');

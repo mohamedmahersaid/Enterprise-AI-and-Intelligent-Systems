@@ -261,10 +261,10 @@ The most common failure is at the portfolio level rather than the technical leve
 
 ## Certification alignment
 
-- AI-900 Azure AI Fundamentals - Identify common AI workloads and their business scenarios
-- AI-102 Azure AI Engineer Associate - Plan an Azure AI solution aligned to business requirements
-- Vendor-neutral - PMI/Agile portfolio prioritisation practice applied to AI initiative selection
-- Vendor-neutral - NIST AI RMF GOVERN function: organisational accountability and risk tolerance for AI adoption
+- **Microsoft Certified: Azure AI Fundamentals (AI-901)** - Identify AI concepts and capabilities: judging whether a candidate use case is within current model capability at an acceptable cost as part of feasibility scoring.
+- **Microsoft Certified: Azure AI Apps and Agents Developer Associate (AI-103)** - Plan and manage an Azure AI solution: inventorying AI resources, tagging them with adoption stage and business owner, and tracking usage per use case and spend by adoption stage.
+- **Vendor-neutral** - PMI/Agile portfolio prioritisation practice: applied to AI initiative selection.
+- **Vendor-neutral** - NIST AI RMF GOVERN function: organisational accountability and risk tolerance for AI adoption.
 
 ## References
 

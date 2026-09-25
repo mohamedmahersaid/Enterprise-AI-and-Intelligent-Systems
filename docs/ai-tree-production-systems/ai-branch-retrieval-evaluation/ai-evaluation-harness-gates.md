@@ -314,11 +314,10 @@ It has to grow from production, not stay as assembled. Every real failure - a wr
 
 ## Certification alignment
 
-- AI-102 Azure AI Engineer Associate - evaluate and monitor generative AI solutions
-- AI-102 Azure AI Engineer Associate - implement responsible AI practices including content safety evaluation
-- Google Professional Machine Learning Engineer - model evaluation, monitoring and continuous improvement
-- ISO/IEC 42001 - AI management system requirements: performance evaluation and continual improvement
-- Vendor-neutral - NIST AI RMF MEASURE function: documented, repeatable evaluation of AI system behaviour
+- **Microsoft Certified: Azure AI Apps and Agents Developer Associate (AI-103)** - Implement generative AI and agentic solutions: evaluating a generative AI and RAG system against a golden set with deterministic checks, retrieval metrics and a calibrated LLM-as-judge, behind a regression gate.
+- **Google Cloud Professional Machine Learning Engineer** - model evaluation, monitoring and continuous improvement.
+- **Vendor-neutral** - ISO/IEC 42001: AI management system requirements for performance evaluation and continual improvement.
+- **Vendor-neutral** - NIST AI RMF MEASURE function: documented, repeatable evaluation of AI system behaviour.
 
 ## References
 

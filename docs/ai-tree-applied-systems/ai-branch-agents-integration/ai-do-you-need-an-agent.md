@@ -353,8 +353,8 @@ When the traces show it has stopped being an agent in practice. If I look at a m
 
 ## Certification alignment
 
-- **Microsoft Azure AI Engineer Associate (AI-102)** - designing agent and orchestration solutions on managed services.
-- **AWS Certified Machine Learning Engineer - Associate (MLA-C01)** - selecting appropriate inference and orchestration patterns.
+- **Microsoft Certified: Azure AI Apps and Agents Developer Associate (AI-103)** - Implement generative AI and agentic solutions: choosing between a single call with tools, a fixed workflow and an agent loop, and bounding a loop with iteration caps, token budgets and wall-clock timeouts.
+- **AWS Certified Machine Learning Engineer - Associate** - selecting appropriate inference and orchestration patterns.
 - **Google Cloud Professional Machine Learning Engineer** - designing ML systems with appropriate automation boundaries.
 - **PMI Agile Certified Practitioner (PMI-ACP)** - vendor-neutral incremental delivery and deferring irreversible complexity.
 - **ISACA Certified in Risk and Information Systems Control (CRISC)** - control design for autonomous and semi-autonomous processes.

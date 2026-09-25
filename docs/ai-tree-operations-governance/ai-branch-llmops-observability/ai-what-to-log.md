@@ -370,11 +370,11 @@ That it removes most of the value while keeping most of the cost. The response i
 
 ## Certification alignment
 
-- **Microsoft Azure AI Engineer Associate (AI-102)** - monitoring and logging for deployed AI solutions.
-- **AWS Certified Machine Learning Engineer - Associate (MLA-C01)** - model monitoring, logging and data capture.
-- **Google Cloud Professional Machine Learning Engineer** - production model observability and performance tracking.
-- **ISACA Certified Information Systems Auditor (CISA)** - logging controls, retention and evidence quality.
-- **Linux Foundation Prometheus Certified Associate (PCA)** - vendor-neutral metric instrumentation and percentile aggregation.
+- **Microsoft Certified: Azure AI Apps and Agents Developer Associate (AI-103)** - Plan and manage an Azure AI solution: logging the rendered prompt, model version, parameters, full response, token counts and a correlation identifier for each deployed call, and choosing redaction, retention and store separation for that data.
+- **AWS Certified Machine Learning Engineer - Associate** - Model monitoring, logging and data capture.
+- **Google Cloud Professional Machine Learning Engineer** - Production model observability and performance tracking.
+- **ISACA Certified Information Systems Auditor (CISA)** - Logging controls, retention and evidence quality.
+- **Prometheus Certified Associate (PCA)** - Vendor-neutral metric instrumentation and percentile aggregation.
 
 ## References
 

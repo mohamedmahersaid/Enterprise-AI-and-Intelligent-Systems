@@ -281,11 +281,10 @@ The device plugin advertises the same physical GPU as multiple allocatable resou
 
 ## Certification alignment
 
-- NVIDIA Certified Associate: AI Infrastructure and Operations - MIG, GPU management and telemetry
-- NVIDIA Deep Learning Institute - model optimisation, quantisation and inference deployment
-- AI-102 Azure AI Engineer Associate - deploy and configure model endpoints with appropriate sizing
-- CKA Certified Kubernetes Administrator - device plugins, extended resources and node management
-- Vendor-neutral - numerical precision fundamentals: post-training quantisation, calibration and accuracy evaluation
+- **NVIDIA-Certified Associate: AI Infrastructure and Operations** - MIG, GPU management and telemetry.
+- **Microsoft Certified: Azure AI Apps and Agents Developer Associate (AI-103)** - Plan and manage an Azure AI solution: sizing a model deployment for weights, KV cache and headroom at worst-case context and concurrency before it is deployed.
+- **Certified Kubernetes Administrator (CKA)** - Workloads & Scheduling: how the GPU device plugin advertises time-sliced replicas as allocatable resources, so pods schedule onto oversubscribed hardware, and keeping latency-sensitive workloads off time-sliced nodes.
+- **Vendor-neutral** - Numerical precision fundamentals: post-training quantisation (GPTQ and AWQ), calibration and per-capability accuracy evaluation.
 
 ## References
 

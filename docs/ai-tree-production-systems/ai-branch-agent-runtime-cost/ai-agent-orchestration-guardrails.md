@@ -335,16 +335,16 @@ From the trace, which has to exist before the incident. I want every prompt, eve
 
 ## Certification alignment
 
-- AI-102 Azure AI Engineer Associate - implement agent and orchestration patterns for generative AI solutions
-- AI-102 Azure AI Engineer Associate - apply responsible AI and content safety controls to agent workflows
-- OWASP Top 10 for LLM Applications - LLM01 prompt injection and LLM08 excessive agency
-- CISSP Domain 3 Security Architecture and Engineering - authorisation models and the confused deputy problem
-- Vendor-neutral - NIST AI RMF MANAGE function: bounding autonomy and documenting human oversight points
+- **Microsoft Certified: Azure AI Apps and Agents Developer Associate (AI-103)** - Implement generative AI and agentic solutions: building a LangGraph state graph with router, tool and generate nodes, persisted state for resume and replay, and a hard step ceiling and per-run token budget on the transition edge.
+- **Microsoft Certified: Multi-Agent AI Solutions Expert (AI-500, beta)** - Secure, govern, and deploy multi-agent solutions: tools that execute with the invoking user's authority rather than a shared service account, and a human approval node scoped to irreversible actions.
+- **Vendor-neutral** - OWASP GenAI LLM Top 10 2026: LLM01:2026 Prompt Injection and LLM03:2026 Excessive Agency.
+- **ISC2 Certified Information Systems Security Professional (CISSP)** - Domain 3 Security Architecture and Engineering: authorisation models and the confused deputy problem.
+- **Vendor-neutral** - NIST AI RMF MANAGE function: bounding autonomy and documenting human oversight points.
 
 ## References
 
 - LangGraph documentation - state graphs, checkpointing, persistence and human-in-the-loop patterns
-- OWASP Top 10 for LLM Applications - LLM01 prompt injection, LLM08 excessive agency
+- OWASP GenAI LLM Top 10 2026 - LLM01:2026 Prompt Injection, LLM03:2026 Excessive Agency
 - Model Context Protocol specification - tool exposure and authorisation boundaries
 - Microsoft Learn - Azure AI Agent Service, tool calling and identity-scoped access
 - NIST AI Risk Management Framework - MANAGE function guidance on autonomy and oversight

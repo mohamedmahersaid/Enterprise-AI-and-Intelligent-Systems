@@ -346,11 +346,11 @@ By writing down real queries paired with the documents that should be found, the
 
 ## Certification alignment
 
-- AI-900 Azure AI Fundamentals - core search and language concepts underpinning retrieval
-- AI-102 Azure AI Engineer Associate - implementing search solutions, indexing and retrieval-augmented generation
-- AWS Certified AI Practitioner - retrieval basics, embeddings and grounding generative applications
-- Google Professional Machine Learning Engineer - vector search, embeddings and retrieval evaluation
-- Vendor-neutral - classical information retrieval: precision, recall and relevance judgements
+- **Microsoft Certified: Azure AI Fundamentals (AI-901)** - Identify AI concepts and capabilities: how keyword search matches literal words, how embeddings turn text into coordinates for semantic search, and why each one misses different queries.
+- **Microsoft Certified: Azure AI Apps and Agents Developer Associate (AI-103)** - Implement generative AI and agentic solutions: grounding a model on passages retrieved through Azure AI Search keyword, vector and hybrid queries, with a similarity threshold and an instruction to say when the passages do not contain the answer.
+- **AWS Certified AI Practitioner** - Domain 3: Applications of Foundation Models: embeddings, similarity scores and grounding generative answers in retrieved passages rather than treating a high score as confidence.
+- **Google Cloud Professional Machine Learning Engineer** - Vector search, embeddings and retrieval evaluation.
+- **Vendor-neutral** - Classical information retrieval: precision, recall and relevance judgements.
 
 ## References
 

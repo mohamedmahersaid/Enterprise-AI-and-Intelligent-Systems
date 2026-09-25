@@ -313,11 +313,11 @@ Six, and each exists because of a specific failure I want to make impossible. Re
 
 ## Certification alignment
 
-- AI-102 Azure AI Engineer Associate - manage, deploy and monitor models across the lifecycle
-- DP-100 Designing and Implementing a Data Science Solution on Azure - MLflow tracking, model registration and deployment
-- AWS Certified Machine Learning - Specialty - MLOps, model governance and deployment strategies
-- Databricks Certified Machine Learning Professional - MLflow tracking, registry and promotion workflows
-- Vendor-neutral - ISO/IEC 42001 AI management system requirements for model lifecycle governance and records
+- **Microsoft Certified: Machine Learning Operations Engineer Associate (AI-300)** - Implement machine learning model lifecycle and operations: MLflow tracking with a logged dataset version, gated registry promotion against the champion, and rollback by re-promoting a prior registry version.
+- **Microsoft Certified: Machine Learning Operations Engineer Associate (AI-300)** - Design and implement an MLOps infrastructure: running the MLflow tracking server on PostgreSQL and object storage instead of the SQLite default, with the promotion gate enforced in CI.
+- **AWS Certified Machine Learning Engineer - Associate** - MLOps, model governance and deployment strategies.
+- **Databricks Certified Machine Learning Professional** - MLflow tracking, registry and promotion workflows.
+- **Vendor-neutral** - ISO/IEC 42001: AI management system requirements for model lifecycle governance and records.
 
 ## References
 

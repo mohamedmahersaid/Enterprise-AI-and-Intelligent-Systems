@@ -379,11 +379,10 @@ When comparison crosses people rather than days. By hand - a run record written 
 
 ## Certification alignment
 
-- DP-100 Designing and Implementing a Data Science Solution on Azure - reproducible experiments, environments and run tracking
-- AI-900 Azure AI Fundamentals - core machine learning workflow concepts and the training lifecycle
-- AWS Certified Machine Learning - Specialty - experiment management, data versioning and training job configuration
-- Google Professional Machine Learning Engineer - ML workflow orchestration, experiment tracking and artifact management
-- Vendor-neutral - ACM Artifact Review and Badging: the repeatability, reproducibility and replicability distinctions used here
+- **Microsoft Certified: Machine Learning Operations Engineer Associate (AI-300)** - Implement machine learning model lifecycle and operations: capturing the code commit, environment lock, data hash, seed and parameters as a run record stored with the model artifact, and graduating to a tracker such as MLflow.
+- **AWS Certified Machine Learning Engineer - Associate** - experiment management, data versioning and training job configuration.
+- **Google Cloud Professional Machine Learning Engineer** - ML workflow orchestration, experiment tracking and artifact management.
+- **Vendor-neutral** - ACM Artifact Review and Badging: the repeatability, reproducibility and replicability distinctions used here.
 
 ## References
 

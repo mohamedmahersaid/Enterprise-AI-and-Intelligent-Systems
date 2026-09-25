@@ -259,16 +259,16 @@ Governance has to be embedded in the same workflow teams already use, or it gets
 
 ## Certification alignment
 
-- AI-102 Azure AI Engineer Associate - Implement responsible AI, security and content safety for AI solutions
-- AI-900 Azure AI Fundamentals - Describe considerations for responsible generative AI
-- AZ-305 Designing Microsoft Azure Infrastructure Solutions - Design a solution for governance, security and compliance
-- Vendor-neutral - OWASP Top 10 for LLM Applications: LLM01 Prompt Injection, LLM08 Excessive Agency
-- Vendor-neutral - NIST AI RMF (all four functions) and ISO/IEC 42001 AI management systems
+- **Microsoft Certified: Azure AI Apps and Agents Developer Associate (AI-103)** - Implement generative AI and agentic solutions: connecting an agent to MCP servers for tool discovery and calls, and tightening the content-filter policy on an Azure OpenAI deployment as one guardrail layer.
+- **Microsoft Certified: Multi-Agent AI Solutions Expert (AI-500, beta)** - Secure, govern, and deploy multi-agent solutions: least-privilege scoping of MCP servers, treating tool results as untrusted data, and human approval gates for destructive tool calls.
+- **Microsoft Certified: Azure Solutions Architect Expert (AZ-305)** - Design identity, governance, and monitoring solutions: full-trajectory audit logging to a retained, access-controlled log store and governance approval workflows for new agent capabilities.
+- **Vendor-neutral** - OWASP GenAI LLM Top 10 2026: LLM01:2026 Prompt Injection through MCP tool results and LLM03:2026 Excessive Agency bounded by least-privilege tool scoping and approval gates.
+- **Vendor-neutral** - NIST AI RMF and ISO/IEC 42001 AI management systems: a model/agent inventory, risk classification, approval workflows and audit logging sufficient to reconstruct automated decisions.
 
 ## References
 
 - Model Context Protocol specification and reference SDKs (modelcontextprotocol.io)
-- OWASP - Top 10 for Large Language Model Applications
+- OWASP - GenAI LLM Top 10 2026
 - Microsoft Learn - Azure AI Content Safety and responsible AI guidance
 - NIST AI 100-1 - AI Risk Management Framework
 - ISO/IEC 42001 - Artificial intelligence management systems standard

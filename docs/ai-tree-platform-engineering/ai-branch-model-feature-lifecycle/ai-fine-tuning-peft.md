@@ -333,11 +333,11 @@ Rank sets adapter capacity, and I start low deliberately: r=8 to 16 is enough fo
 
 ## Certification alignment
 
-- AI-102 Azure AI Engineer Associate - customise and fine-tune generative AI models, including when customisation is appropriate
-- DP-100 Designing and Implementing a Data Science Solution on Azure - training workloads, experiment tracking and model registration
-- AWS Certified Machine Learning - Specialty - model training, hyperparameter selection and evaluation strategy
-- Google Professional Machine Learning Engineer - model customisation, evaluation and the build-versus-adapt decision
-- Vendor-neutral - NIST AI RMF MEASURE function: documenting capability changes, including regressions, introduced by model customisation
+- **Microsoft Certified: Azure AI Apps and Agents Developer Associate (AI-103)** - Implement generative AI and agentic solutions: deciding when fine-tuning a generative model is appropriate versus prompting and retrieval, and customising it with LoRA or QLoRA adapters.
+- **Microsoft Certified: Machine Learning Operations Engineer Associate (AI-300)** - Implement machine learning model lifecycle and operations: gating the dataset in CI, versioning adapters as registered model artifacts with base model version, rank and dataset hash, and pinning the base model at serve time.
+- **AWS Certified Machine Learning Engineer - Associate** - model training, hyperparameter selection and evaluation strategy.
+- **Google Cloud Professional Machine Learning Engineer** - model customisation, evaluation and the build-versus-adapt decision.
+- **Vendor-neutral** - NIST AI RMF MEASURE function: documenting capability changes, including regressions, introduced by model customisation.
 
 ## References
 

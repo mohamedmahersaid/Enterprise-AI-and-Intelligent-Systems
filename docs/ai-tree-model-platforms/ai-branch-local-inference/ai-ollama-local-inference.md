@@ -313,11 +313,11 @@ Work down the stack. First confirm the model is actually on the GPU - ollama ps 
 
 ## Certification alignment
 
-- AI-900 Azure AI Fundamentals - Describe fundamental principles of machine learning and AI workloads
-- AI-102 Azure AI Engineer Associate - Plan and manage an Azure AI solution, including deployment and consumption options
-- AZ-305 Designing Microsoft Azure Infrastructure Solutions - Design a compute solution, including GPU-backed VM sizing
-- Vendor-neutral - CNCF and Linux Foundation AI infrastructure practice: GPU scheduling, model artifact supply chain
-- Vendor-neutral - NIST AI Risk Management Framework, MAP function: document model provenance and deployment context
+- **Microsoft Certified: Azure AI Fundamentals (AI-901)** - Identify AI concepts and capabilities: what open-weight models, quantisation and GGUF model files are, and how a small local model's capability compares with a hosted frontier model.
+- **Microsoft Certified: Azure AI Apps and Agents Developer Associate (AI-103)** - Plan and manage an Azure AI solution: choosing between local and hosted inference with a router pattern, and consuming models through an OpenAI-compatible endpoint.
+- **Microsoft Certified: Azure Solutions Architect Expert (AZ-305)** - Design infrastructure solutions: sizing GPU-backed hosts by quantisation level, VRAM and KV cache growth at the target context length.
+- **Vendor-neutral** - CNCF and Linux Foundation AI infrastructure practice: GPU scheduling and model artifact supply chain.
+- **Vendor-neutral** - NIST AI Risk Management Framework, MAP function: documenting model provenance and deployment context.
 
 ## References
 

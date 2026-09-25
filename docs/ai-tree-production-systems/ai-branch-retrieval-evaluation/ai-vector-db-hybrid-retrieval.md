@@ -315,11 +315,9 @@ Reranking, in almost every case, and the reasoning is about where the error actu
 
 ## Certification alignment
 
-- AI-102 Azure AI Engineer Associate - implement knowledge mining with Azure AI Search, vector and hybrid retrieval
-- AI-102 Azure AI Engineer Associate - implement generative AI solutions using retrieval-augmented generation
-- AWS Certified Machine Learning - Specialty - retrieval, embedding architectures and semantic search design
-- Google Professional Machine Learning Engineer - Vertex AI Search and vector store design
-- Vendor-neutral - information retrieval fundamentals: BM25, rank fusion and cross-encoder reranking
+- **Microsoft Certified: Azure AI Apps and Agents Developer Associate (AI-103)** - Implement generative AI and agentic solutions: grounding retrieval-augmented generation in hybrid dense and BM25 retrieval, reciprocal rank fusion and cross-encoder reranking, so the right passages reach the LLM.
+- **Google Cloud Professional Machine Learning Engineer** - Vertex AI Search and vector store design.
+- **Vendor-neutral** - Information retrieval fundamentals: BM25, rank fusion and cross-encoder reranking.
 
 ## References
 

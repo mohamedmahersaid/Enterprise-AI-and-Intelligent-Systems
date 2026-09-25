@@ -340,11 +340,11 @@ Not into training - into allocated GPUs doing nothing. You are billed for wall-c
 
 ## Certification alignment
 
-- AI-900 Azure AI Fundamentals - core workloads and where training fits relative to prompting and retrieval
-- DP-100 Designing and Implementing a Data Science Solution on Azure - compute targets, training jobs and cost control
-- AWS Certified Machine Learning - Specialty - training instance selection, spot capacity and checkpointing
-- Google Professional Machine Learning Engineer - training infrastructure, resource selection and job orchestration
-- Vendor-neutral - FinOps Foundation practices: allocation, utilisation and showback for shared accelerated compute
+- **Microsoft Certified: Azure AI Fundamentals (AI-901)** - Identify AI concepts and capabilities: deciding whether a task needs training at all, or can be met by prompting, retrieval or adapter-based fine-tuning.
+- **Microsoft Certified: Machine Learning Operations Engineer Associate (AI-300)** - Design and implement an MLOps infrastructure: sizing GPU requests and time limits for scheduled training jobs, interval checkpointing for preemptible capacity, and idle timeouts that stop allocated GPUs billing for nothing.
+- **AWS Certified Machine Learning Engineer - Associate** - training instance selection, spot capacity and checkpointing.
+- **Google Cloud Professional Machine Learning Engineer** - training infrastructure, resource selection and job orchestration.
+- **Vendor-neutral** - FinOps Foundation practices: allocation, utilisation and showback for shared accelerated compute.
 
 ## References
 

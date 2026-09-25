@@ -60,6 +60,31 @@ before a point can land; an Advanced reader already has it and wants the
 trade-off. Write to the level, and expect an introductory leaf to cost more
 words than an expert one, not fewer.
 
+### Certification alignment
+
+Each line is `- **Label** - Official domain: what this leaf teaches for it.`
+The label must be a `label` from `data/certifications.json`, copied exactly. Where
+that entry records `domains`, the line must open with one of them, as the vendor's
+study guide names it, followed by a colon, so a reader can check the claim at the
+source. Where the entry's `domains` is empty (none could be read), the coverage is
+free text. Frameworks that are not credentials take the label `Vendor-neutral`. A
+leaf that genuinely maps to no domain of a credential should not cite it: fewer
+honest lines beat a padded list.
+
+To cite a credential that is not registered, add an entry to `credentials` with
+`id`, `vendor`, `credential`, `label`, `status`, `domains` (may be `[]`), `source`
+and `evidence`. `evidence` says how its status was confirmed: `read` (the vendor
+page was fetched and read), `search-extract` (only search-engine extracts of the
+vendor's pages could be read) or `unverified`. When a vendor retires an exam, add
+it to `retired` with `code`, `names` (may be `[]`), the `retired` date, its
+`successor` (a credential `id`), `source` and `evidence`; `validate:content` then
+fails on every leaf that still names it, in any spelling. After editing the file,
+run `npm run regen`: ASSUMPTIONS.md summarises it.
+
+The same file records the OWASP GenAI LLM Top 10 edition in use. Cite its IDs with
+their year, as `LLM03:2026 Excessive Agency`, because OWASP renumbers the list
+between editions; a bare `LLM08` fails.
+
 If you edit `data/catalog.json` directly — renaming a branch, changing a level —
 run `npm run regen` to rewrite the derived files, rather than editing them.
 
@@ -67,7 +92,7 @@ run `npm run regen` to rewrite the derived files, rather than editing them.
 
 | Command | What it enforces |
 | --- | --- |
-| `npm run validate:content` | Heading hierarchy, required sections, frontmatter and catalog agreement, catalog self-consistency, unresolved TODOs, link resolution, CATALOG.md coverage, README figures |
+| `npm run validate:content` | Heading hierarchy, required sections, frontmatter and catalog agreement, catalog self-consistency, unresolved TODOs, link resolution, CATALOG.md coverage, README figures, certifications and OWASP IDs against `data/certifications.json` |
 | `npm run validate:mermaid` | Every mermaid diagram parses |
 | `npm run validate:python` | Every python block in a leaf compiles, and every third-party module it imports is named by a `pip install` in the same leaf (parsed, never executed) |
 | `npm run validate:scripts` | Every python block, run with no arguments in an empty directory, completes or stops with its own message rather than a traceback |

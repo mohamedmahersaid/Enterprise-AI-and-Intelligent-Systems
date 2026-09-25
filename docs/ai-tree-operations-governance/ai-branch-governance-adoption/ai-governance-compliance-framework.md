@@ -282,11 +282,10 @@ Auditors under ISO 42001 are specifically looking for a functioning management s
 
 ## Certification alignment
 
-- AI-900 Azure AI Fundamentals - Describe considerations for responsible AI and compliance
-- AI-102 Azure AI Engineer Associate - Implement responsible AI and content safety for AI solutions
-- Vendor-neutral - ISO/IEC 42001 Artificial Intelligence Management Systems - lead implementer / lead auditor practice
-- Vendor-neutral - EU AI Act practitioner certification and risk-classification methodology
-- Vendor-neutral - IAPP AI Governance Professional (AIGP)
+- **Microsoft Certified: Azure AI Apps and Agents Developer Associate (AI-103)** - Plan and manage an Azure AI solution: provisioning Azure OpenAI in an EU data-boundary region, routing diagnostic logs to an EU-region Log Analytics workspace and restricting AI resource creation to approved regions with Azure Policy.
+- **Vendor-neutral** - ISO/IEC 42001 Artificial Intelligence Management Systems: implementation and audit practice, from the AI system inventory and lifecycle controls to dated evidence mapped to each clause.
+- **Vendor-neutral** - EU AI Act: risk classification across the unacceptable, high, limited and minimal tiers, including Annex III high-risk categories and conformity-assessment evidence.
+- **IAPP Artificial Intelligence Governance Professional (AIGP)** - AI governance practice.
 
 ## References
 

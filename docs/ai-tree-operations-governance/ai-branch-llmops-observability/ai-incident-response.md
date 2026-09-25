@@ -356,11 +356,11 @@ That the fix bypassed every control the organisation has, and that speed is prec
 
 ## Certification alignment
 
-- AI-102 Azure AI Engineer Associate - monitoring, logging and troubleshooting generative AI solutions in production
-- SC-200 Microsoft Security Operations Analyst - incident triage, investigation and response workflow applied to AI workloads
-- AWS Certified Machine Learning - Specialty - model monitoring, production troubleshooting and operational response
-- Google Professional Machine Learning Engineer - ML solution monitoring, incident handling and continuous evaluation
-- Vendor-neutral - NIST AI RMF MANAGE function and NIST SP 800-61 incident handling, adapted for non-deterministic systems
+- **Microsoft Certified: Azure AI Apps and Agents Developer Associate (AI-103)** - Plan and manage an Azure AI solution: pinning a deployment to the last known-good model version as containment, and logging model and filter versions per request so an incident can be investigated.
+- **Microsoft Certified: Security Operations Analyst Associate (SC-200)** - Respond to security incidents: triage, severity grading, containment, blast-radius scoping and postmortem workflow applied to AI workloads.
+- **AWS Certified Machine Learning Engineer - Associate** - Model monitoring, production troubleshooting and operational response.
+- **Google Cloud Professional Machine Learning Engineer** - ML solution monitoring, incident handling and continuous evaluation.
+- **Vendor-neutral** - NIST AI RMF and NIST SP 800-61: the MANAGE function and the incident handling lifecycle, adapted for non-deterministic systems.
 
 ## References
 

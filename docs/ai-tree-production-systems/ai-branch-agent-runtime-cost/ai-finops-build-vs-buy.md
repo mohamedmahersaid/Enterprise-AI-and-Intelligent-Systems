@@ -293,11 +293,11 @@ Idle GPU-hours, expressed in currency rather than percent. An idle H100 costs ex
 
 ## Certification alignment
 
-- FinOps Certified Practitioner - cloud cost allocation, showback and chargeback models
-- FinOps Certified Practitioner - the Inform, Optimize and Operate phases applied to variable AI spend
-- NVIDIA Certified Associate: AI Infrastructure and Operations - GPU telemetry, monitoring and utilisation measurement
-- AZ-305 Designing Microsoft Azure Infrastructure Solutions - design for cost optimisation and capacity planning
-- Vendor-neutral - FinOps Foundation Cloud Cost Allocation and unit-economics practice applied to tokens and GPU-hours
+- **FinOps Certified Practitioner** - cloud cost allocation, showback and chargeback models.
+- **FinOps Certified Practitioner** - the Inform, Optimize and Operate phases applied to variable AI spend.
+- **NVIDIA-Certified Associate: AI Infrastructure and Operations** - GPU telemetry, monitoring and utilisation measurement.
+- **Microsoft Certified: Azure Solutions Architect Expert (AZ-305)** - Design infrastructure solutions: choosing between self-hosted GPU serving and pay-per-token APIs from measured throughput and utilisation, and sizing GPU capacity against idle GPU-hours.
+- **Vendor-neutral** - FinOps Foundation Cloud Cost Allocation and unit-economics practice: applied to tokens and GPU-hours.
 
 ## References
 
