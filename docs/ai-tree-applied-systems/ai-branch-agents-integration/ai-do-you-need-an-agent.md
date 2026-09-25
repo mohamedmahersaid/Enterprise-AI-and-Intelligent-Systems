@@ -361,11 +361,12 @@ When the traces show it has stopped being an agent in practice. If I look at a m
 
 ## References
 
-- Anthropic. *Building Effective Agents.*
-- Anthropic. *Claude Documentation: Tool Use.*
-- Model Context Protocol. *Specification: Tools, Resources and Prompts.*
-- Yao et al. *ReAct: Synergizing Reasoning and Acting in Language Models.* arXiv:2210.03629.
-- OpenTelemetry. *Semantic Conventions for Generative AI Agent Spans.*
+- [Anthropic: Building Effective AI Agents](https://www.anthropic.com/engineering/building-effective-agents) - Workflow vs agent distinction and advice to start simple and add agentic complexity only when needed.
+- [Anthropic (Claude Platform Docs): Tool use with Claude](https://platform.claude.com/docs/en/agents-and-tools/tool-use/overview) - How a tool call works: the model picks a function and its arguments, and your code runs it.
+- [Model Context Protocol: Specification (2026-07-28)](https://modelcontextprotocol.io/specification/2026-07-28) - Current MCP specification, which defines the server features tools, resources and prompts.
+- [Model Context Protocol: Tools](https://modelcontextprotocol.io/specification/2025-06-18/server/tools) - MCP definition of model-controlled tools that servers expose for models to invoke.
+- [arXiv (Yao et al., ICLR 2023): ReAct: Synergizing Reasoning and Acting in Language Models](https://arxiv.org/abs/2210.03629) - Reason-act-observe loop pattern that underlies agent loops.
+- [OpenTelemetry (open-telemetry/semantic-conventions-genai on GitHub): Semantic Conventions for GenAI agent and framework spans](https://github.com/open-telemetry/semantic-conventions-genai/blob/main/docs/gen-ai/gen-ai-agent-spans.md) - Standard span conventions for tracing agent runs and tool calls, used to log full traces.
 
 ## Suggested video search
 

@@ -315,10 +315,12 @@ Track them on the same timeline but as genuinely separate axes, because optimisi
 
 ## References
 
-- Microsoft Learn - Azure Monitor and Application Insights for AI workloads
-- OpenTelemetry documentation - semantic conventions for generative AI systems
-- Google SRE Workbook - monitoring distributed systems, adapted for AI-specific signals
-- NIST AI 100-1 - AI Risk Management Framework, MEASURE function
+- [Microsoft Learn: Monitor Azure OpenAI](https://learn.microsoft.com/azure/ai-foundry/openai/how-to/monitor-openai) - Azure Monitor metrics, Log Analytics queries and alerts for Azure OpenAI workloads.
+- [Microsoft Learn: Observability in generative AI](https://learn.microsoft.com/azure/foundry/concepts/observability) - Application Insights-based monitoring, tracing and sampled quality evaluation for AI workloads.
+- [OpenTelemetry: Semantic conventions for generative AI systems (open-telemetry/semantic-conventions-genai)](https://github.com/open-telemetry/semantic-conventions-genai) - OpenTelemetry semantic conventions for generative AI spans, metrics and events.
+- [Google SRE (Site Reliability Engineering book): Monitoring Distributed Systems](https://sre.google/sre-book/monitoring-distributed-systems/) - Golden-signal monitoring and alerting principles for distributed systems.
+- [Google SRE (The Site Reliability Workbook): Monitoring (The Site Reliability Workbook, Chapter 4)](https://sre.google/workbook/monitoring/) - Practical monitoring guidance (metrics, structured logs, alerting) adapted to AI-specific signals.
+- [National Institute of Standards and Technology (NIST): Artificial Intelligence Risk Management Framework (AI RMF 1.0)](https://www.nist.gov/publications/artificial-intelligence-risk-management-framework-ai-rmf-10) - AI RMF MEASURE function: ongoing performance and impact monitoring.
 
 ## Suggested video search
 

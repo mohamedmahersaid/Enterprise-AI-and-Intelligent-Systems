@@ -288,11 +288,15 @@ The device plugin advertises the same physical GPU as multiple allocatable resou
 
 ## References
 
-- vLLM documentation - quantisation support, paged KV cache and GPU memory management
-- NVIDIA MIG user guide - profiles, isolation properties and reconfiguration procedure
-- NVIDIA GPU Operator documentation - MIG management and time-slicing configuration on Kubernetes
-- AWQ - activation-aware weight quantisation method and published accuracy results
-- GPTQ - post-training quantisation method and published accuracy results
+- [vLLM project: Quantization - vLLM](https://docs.vllm.ai/en/latest/features/quantization/index.html) - Quantisation methods and hardware support in vLLM.
+- [vLLM project: Optimization and Tuning - vLLM](https://docs.vllm.ai/en/stable/configuration/optimization/) - GPU memory management and KV cache space (gpu_memory_utilization).
+- [arXiv (Kwon et al., vLLM authors; SOSP 2023): Efficient Memory Management for Large Language Model Serving with PagedAttention](https://arxiv.org/abs/2309.06180) - The PagedAttention paged KV cache design behind vLLM.
+- [NVIDIA Multi-Instance GPU User Guide](https://docs.nvidia.com/datacenter/tesla/mig-user-guide/latest/) - MIG isolation properties and the reconfiguration procedure.
+- [NVIDIA: Supported MIG Profiles — NVIDIA Multi-Instance GPU User Guide](https://docs.nvidia.com/datacenter/tesla/mig-user-guide/supported-mig-profiles.html) - MIG profiles for each supported GPU.
+- [NVIDIA: GPU Operator with MIG](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/gpu-operator-mig.html) - MIG management on Kubernetes with the GPU Operator (MIG Manager).
+- [NVIDIA: Time-Slicing GPUs in Kubernetes — NVIDIA GPU Operator](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/gpu-sharing.html) - Time-slicing configuration on Kubernetes with the GPU Operator.
+- [arXiv (Lin et al.): AWQ: Activation-aware Weight Quantization for LLM Compression and Acceleration](https://arxiv.org/abs/2306.00978) - The AWQ quantisation method and its published accuracy results.
+- [arXiv (Frantar et al.; ICLR 2023): GPTQ: Accurate Post-Training Quantization for Generative Pre-trained Transformers](https://arxiv.org/abs/2210.17323) - The GPTQ post-training quantisation method and its published accuracy results.
 
 ## Suggested video search
 

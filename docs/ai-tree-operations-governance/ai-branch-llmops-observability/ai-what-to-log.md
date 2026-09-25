@@ -378,11 +378,12 @@ That it removes most of the value while keeping most of the cost. The response i
 
 ## References
 
-- OpenTelemetry. *Semantic Conventions for Generative AI Systems.*
-- Microsoft. *Microsoft Foundry Documentation: Monitoring, Diagnostics and Logging.*
-- Google Cloud. *Vertex AI Documentation: Request-Response Logging.*
-- NIST. *AI Risk Management Framework (AI RMF 1.0), Measure and Manage functions.*
-- European Data Protection Board. *Guidelines on Data Protection by Design and by Default.*
+- [OpenTelemetry: Semantic conventions for generative AI systems](https://github.com/open-telemetry/semantic-conventions-genai/blob/main/docs/gen-ai/README.md) - Standard attributes for recording GenAI calls: model, token usage, parameters and opt-in prompt/response content.
+- [Microsoft: Monitor model deployments in Microsoft Foundry Models](https://learn.microsoft.com/azure/foundry/foundry-models/how-to/monitor-models) - Monitoring, diagnostic settings and request/response logging for deployed model calls.
+- [Microsoft: Tracing and data handling](https://learn.microsoft.com/azure/foundry/observability/concepts/trace-data) - Handling personal data in logged prompts and responses: redaction, access control and retention.
+- [Google Cloud: Log requests and responses | Generative AI on Vertex AI](https://docs.cloud.google.com/vertex-ai/generative-ai/docs/multimodal/request-response-logging) - Provider-side request-response logging with sampling for generative models.
+- [National Institute of Standards and Technology: Artificial Intelligence Risk Management Framework (AI RMF 1.0) (NIST AI 100-1)](https://doi.org/10.6028/NIST.AI.100-1) - Measure and Manage functions: ongoing monitoring and management of deployed AI system risks.
+- [European Data Protection Board: Guidelines 4/2019 on Article 25 Data Protection by Design and by Default](https://www.edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-42019-article-25-data-protection-design-and_en) - Data minimisation, retention and default-protective handling of personal data captured in prompt logs.
 
 ## Suggested video search
 

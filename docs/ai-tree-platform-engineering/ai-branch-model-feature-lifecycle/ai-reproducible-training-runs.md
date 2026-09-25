@@ -386,11 +386,14 @@ When comparison crosses people rather than days. By hand - a run record written 
 
 ## References
 
-- MLflow documentation - tracking runs, parameters, metrics and artifacts, and the model registry
-- Python packaging user guide - pinning dependencies, lockfiles and hash-checking installs
-- PyTorch reproducibility notes - seeding, deterministic algorithms and the limits of both on GPU
-- scikit-learn documentation - `random_state`, cross-validation and controlling randomness in estimators
-- ACM Artifact Review and Badging policy - the vendor-neutral definitions of repeatable, reproducible and replicable
+- [MLflow: ML Experiment Tracking](https://mlflow.org/docs/latest/ml/tracking/) - Tracking runs, parameters, metrics and artifacts.
+- [MLflow: ML Model Registry](https://mlflow.org/docs/latest/ml/model-registry/) - The model registry as the promotion path for tracked models.
+- [Python Packaging Authority (pip documentation): Repeatable Installs](https://pip.pypa.io/en/stable/topics/repeatable-installs/) - Pinning every dependency (e.g. via pip freeze) so installs repeat.
+- [Python Packaging Authority (pip documentation): Secure installs](https://pip.pypa.io/en/stable/topics/secure-installs/) - Hash-checking installs with --require-hashes.
+- [Python Packaging Authority (Python Packaging User Guide): pylock.toml Specification](https://packaging.python.org/en/latest/specifications/pylock-toml/) - Standard lockfile format for reproducible Python environments.
+- [PyTorch: Reproducibility](https://docs.pytorch.org/docs/main/notes/randomness.html) - Seeding, deterministic algorithms and their limits on GPU.
+- [scikit-learn: Common pitfalls and recommended practices](https://scikit-learn.org/stable/common_pitfalls.html) - Random_state, cross-validation and controlling randomness in estimators.
+- [Association for Computing Machinery (ACM): Artifact Review and Badging - Current](https://www.acm.org/publications/policies/artifact-review-and-badging-current) - Vendor-neutral definitions of repeatability, reproducibility and replicability.
 
 ## Suggested video search
 

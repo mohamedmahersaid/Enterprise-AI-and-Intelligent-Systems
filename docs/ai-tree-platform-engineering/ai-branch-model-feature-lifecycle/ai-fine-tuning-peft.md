@@ -341,11 +341,11 @@ Rank sets adapter capacity, and I start low deliberately: r=8 to 16 is enough fo
 
 ## References
 
-- LoRA - low-rank adaptation of large language models, the originating method and results
-- QLoRA - 4-bit quantised base weights for single-GPU fine-tuning
-- Hugging Face PEFT documentation - adapter configuration, target modules and merging
-- Hugging Face TRL documentation - supervised fine-tuning workflow and chat templates
-- vLLM documentation - multi-LoRA serving and adapter selection per request
+- [arXiv (Hu et al., Microsoft): LoRA: Low-Rank Adaptation of Large Language Models](https://arxiv.org/abs/2106.09685) - The originating LoRA method: frozen base weights with trainable low-rank matrices, and its results.
+- [arXiv (Dettmers et al.): QLoRA: Efficient Finetuning of Quantized LLMs](https://arxiv.org/abs/2305.14314) - QLoRA: 4-bit quantised frozen base with LoRA adapters for single-GPU fine-tuning.
+- [Hugging Face: LoRA (PEFT developer guide)](https://huggingface.co/docs/peft/main/en/developer_guides/lora) - PEFT LoRA adapter configuration, target modules and merging adapters into base weights.
+- [Hugging Face: SFT Trainer](https://huggingface.co/docs/trl/en/sft_trainer) - TRL supervised fine-tuning workflow and chat template handling.
+- [vLLM project: LoRA Adapters](https://docs.vllm.ai/en/latest/features/lora/) - Serving multiple LoRA adapters on one base model and selecting an adapter per request.
 
 ## Suggested video search
 

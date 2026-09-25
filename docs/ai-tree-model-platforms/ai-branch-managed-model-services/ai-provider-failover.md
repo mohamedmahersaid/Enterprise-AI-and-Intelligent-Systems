@@ -364,11 +364,17 @@ Sometimes, but I would not treat it as free insurance, because the premium is re
 
 ## References
 
-- Azure OpenAI documentation - model retirement and deprecation schedules, quota and provisioned throughput
-- Anthropic documentation - rate limits, error codes and recommended retry behaviour
-- Azure Architecture Center - Circuit Breaker and Retry patterns, including when each applies
-- Google SRE Book - handling overload, load shedding and graceful degradation
-- AWS Well-Architected Framework, Reliability Pillar - dependency failure modes and mitigation
+- [Microsoft Learn: Microsoft Foundry Models lifecycle and support policy](https://learn.microsoft.com/azure/ai-foundry/openai/concepts/model-retirements) - Model deprecation and retirement lifecycle, notification timelines and schedules.
+- [Microsoft Learn: Azure OpenAI in Microsoft Foundry Models quotas and limits](https://learn.microsoft.com/azure/foundry/openai/quotas-limits) - Quota, rate limits and capacity for Azure OpenAI deployments.
+- [Microsoft Learn: What is provisioned throughput?](https://learn.microsoft.com/azure/ai-foundry/openai/concepts/provisioned-throughput) - Provisioned throughput (PTU) capacity.
+- [Anthropic (Claude Platform Docs): Rate limits](https://platform.claude.com/docs/en/api/rate-limits) - API rate limits and rate-limit headroom.
+- [Anthropic (Claude Platform Docs): Claude API errors](https://platform.claude.com/docs/en/api/errors) - Error codes and recommended retry behaviour.
+- [Microsoft Learn (Azure Architecture Center): Circuit Breaker pattern](https://learn.microsoft.com/azure/architecture/patterns/circuit-breaker) - Circuit Breaker pattern and when it applies.
+- [Microsoft Learn (Azure Architecture Center): Retry pattern](https://learn.microsoft.com/azure/architecture/patterns/retry) - Retry pattern and when it applies.
+- [Google (sre.google): Handling Overload (Site Reliability Engineering, Chapter 21)](https://sre.google/sre-book/handling-overload/) - Handling overload and degraded responses.
+- [Google (sre.google): Addressing Cascading Failures (Site Reliability Engineering, Chapter 22)](https://sre.google/sre-book/addressing-cascading-failures/) - Load shedding and graceful degradation.
+- [Amazon Web Services (AWS Well-Architected Framework, Reliability Pillar): Design interactions in a distributed system to mitigate or withstand failures](https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/design-interactions-in-a-distributed-system-to-mitigate-or-withstand-failures.html) - Dependency failure modes and mitigation.
+- [Amazon Web Services (AWS Well-Architected Framework, Reliability Pillar): REL05-BP01 Implement graceful degradation to transform applicable hard dependencies into soft dependencies](https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/rel_mitigate_interaction_failure_graceful_degradation.html) - Graceful degradation when a dependency fails.
 
 ## Suggested video search
 

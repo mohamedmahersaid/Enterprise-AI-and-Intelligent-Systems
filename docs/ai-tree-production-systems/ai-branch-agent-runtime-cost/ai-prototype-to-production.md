@@ -354,11 +354,14 @@ Unbounded spend, and it is almost never malicious. The usual shape is a retry lo
 
 ## References
 
-- LiteLLM documentation - proxy configuration, virtual keys, budgets and rate limits
-- Microsoft Learn - Azure API Management as a gateway for Azure OpenAI, including token limit policies
-- OpenTelemetry documentation - trace and span conventions for correlating requests across services
-- OWASP GenAI LLM Top 10 2026 - LLM06:2026 Unbounded Consumption and LLM02:2026 Sensitive Information Disclosure
-- NIST AI Risk Management Framework - GOVERN and MANAGE function guidance on pre-deployment controls
+- [LiteLLM (BerriAI): Budgets, Rate Limits](https://docs.litellm.ai/docs/proxy/users) - Configuring per-user and per-team budgets, budget durations and rate limits on the LiteLLM proxy.
+- [LiteLLM (BerriAI): Virtual Keys](https://docs.litellm.ai/docs/proxy/virtual_keys) - Issuing virtual keys through the LiteLLM proxy for authenticated, attributable access and spend tracking.
+- [Microsoft Learn: AI gateway in Azure API Management](https://learn.microsoft.com/en-us/azure/api-management/genai-gateway-capabilities) - Using Azure API Management as the AI gateway in front of Azure OpenAI: authentication, limits, logging and routing.
+- [Microsoft Learn: Limit large language model API token usage](https://learn.microsoft.com/azure/api-management/llm-token-limit-policy) - Token limit policies (TPM rate limits and token quotas) enforced at the API Management gateway.
+- [OpenTelemetry: Traces](https://opentelemetry.io/docs/concepts/signals/traces/) - Trace and span concepts (trace and span IDs, parent spans) for correlating a request across services.
+- [OWASP GenAI Security Project: OWASP GenAI LLM Top 10 2026](https://genai.owasp.org/resource/owasp-genai-llm-top-10-2026/) - The current OWASP GenAI LLM Top 10 (2026) publication for LLM06:2026 Unbounded Consumption and LLM02:2026 Sensitive Information Disclosure.
+- [OWASP GenAI Security Project (GitHub): GenAI-LLM-Top10 - 2026/final (canonical source)](https://github.com/GenAI-Security-Project/GenAI-LLM-Top10/tree/main/2026/final) - LLM06:2026 Unbounded Consumption (spend and rate caps) and LLM02:2026 Sensitive Information Disclosure (logged prompts).
+- [National Institute of Standards and Technology (NIST AI 100-1): Artificial Intelligence Risk Management Framework (AI RMF 1.0)](https://doi.org/10.6028/NIST.AI.100-1) - GOVERN and MANAGE function guidance on documented controls and oversight before deployment.
 
 ## Suggested video search
 

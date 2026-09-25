@@ -343,11 +343,13 @@ From the trace, which has to exist before the incident. I want every prompt, eve
 
 ## References
 
-- LangGraph documentation - state graphs, checkpointing, persistence and human-in-the-loop patterns
-- OWASP GenAI LLM Top 10 2026 - LLM01:2026 Prompt Injection, LLM03:2026 Excessive Agency
-- Model Context Protocol specification - tool exposure and authorisation boundaries
-- Microsoft Learn - Azure AI Agent Service, tool calling and identity-scoped access
-- NIST AI Risk Management Framework - MANAGE function guidance on autonomy and oversight
+- [LangChain (LangGraph documentation): Persistence](https://docs.langchain.com/oss/python/langgraph/persistence) - LangGraph state graphs, checkpointing and persistence for resume and replay.
+- [LangChain (LangGraph documentation): Interrupts](https://docs.langchain.com/oss/python/langgraph/interrupts) - Human-in-the-loop approval patterns in LangGraph.
+- [OWASP Gen AI Security Project: OWASP GenAI LLM Top 10 2026](https://genai.owasp.org/resource/owasp-genai-llm-top-10-2026/) - LLM01:2026 Prompt Injection and Excessive Agency risks for tool-using agents.
+- [Model Context Protocol: Authorization - Model Context Protocol](https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization) - MCP authorisation boundaries for tools exposed to agents.
+- [Microsoft Learn: How toolbox authentication works in Microsoft Foundry](https://learn.microsoft.com/azure/foundry/agents/how-to/tools/tool-authentication) - Agent tool calling with identity-scoped (per-user) access instead of a shared service account.
+- [Microsoft Learn: Agent identity concepts in Microsoft Foundry](https://learn.microsoft.com/azure/foundry/agents/concepts/agent-identity) - Identity-scoped access for agents via the on-behalf-of flow.
+- [National Institute of Standards and Technology (NIST AI 100-1): Artificial Intelligence Risk Management Framework (AI RMF 1.0)](https://doi.org/10.6028/NIST.AI.100-1) - MANAGE function guidance on bounding autonomy and human oversight.
 
 ## Suggested video search
 

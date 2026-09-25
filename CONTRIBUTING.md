@@ -60,6 +60,23 @@ before a point can land; an Advanced reader already has it and wants the
 trade-off. Write to the level, and expect an introductory leaf to cost more
 words than an expert one, not fewer.
 
+### References
+
+Each reference links the source it names:
+`- [Publisher: Title](https://...) - what this leaf uses it for.` Link the most
+specific page that supports the claim - the quotas page, not the product home -
+from the publisher itself: the vendor, standards body or project, never a blog or
+mirror. Use the title the source gives itself. `validate:content` rejects an entry
+that is not a link to an `https` URL, or that repeats a URL in the same leaf.
+
+Whether a link still answers is checked separately, because a pull-request check
+should not fail on someone else's outage. `.github/workflows/links.yml` runs
+`scripts/check-links.mjs` on pull requests that change a link, every Monday, and
+on demand. It fails only on a link that is gone (404, 410, no DNS); a host that
+refuses automated clients is reported as unconfirmed. A scheduled failure opens
+or updates a "Broken reference links" issue. Run it locally with
+`node scripts/check-links.mjs`.
+
 ### Certification alignment
 
 Each line is `- **Label** - Official domain: what this leaf teaches for it.`
@@ -92,7 +109,7 @@ run `npm run regen` to rewrite the derived files, rather than editing them.
 
 | Command | What it enforces |
 | --- | --- |
-| `npm run validate:content` | Heading hierarchy, required sections, frontmatter and catalog agreement, catalog self-consistency, unresolved TODOs, link resolution, CATALOG.md coverage, README figures, certifications and OWASP IDs against `data/certifications.json` |
+| `npm run validate:content` | Heading hierarchy, required sections, frontmatter and catalog agreement, catalog self-consistency, unresolved TODOs, relative link resolution, CATALOG.md coverage, README figures, certifications and OWASP IDs against `data/certifications.json`, every reference linking its source |
 | `npm run validate:mermaid` | Every mermaid diagram parses |
 | `npm run validate:python` | Every python block in a leaf compiles, and every third-party module it imports is named by a `pip install` in the same leaf (parsed, never executed) |
 | `npm run validate:scripts` | Every python block, run with no arguments in an empty directory, completes or stops with its own message rather than a traceback |

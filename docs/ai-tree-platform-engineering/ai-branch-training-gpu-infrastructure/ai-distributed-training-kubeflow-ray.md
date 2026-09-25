@@ -290,11 +290,22 @@ First whether the job is data-loading bound rather than compute bound, because t
 
 ## References
 
-- Kubeflow documentation - Pipelines, training operators and Katib hyperparameter tuning
-- Ray documentation - Ray Train, Ray Tune, and cluster and object store architecture
-- Kueue documentation - job queueing, quotas and gang admission on Kubernetes
-- Volcano documentation - batch scheduling and gang scheduling for AI workloads
-- NVIDIA documentation - NCCL collective communication, GPUDirect RDMA and multi-node topology
+- [Kubeflow: Overview | Kubeflow (Kubeflow Pipelines)](https://www.kubeflow.org/docs/components/pipelines/overview/) - Kubeflow Pipelines DAG orchestration of containerised training workflow steps.
+- [Kubeflow: PyTorch Training (PyTorchJob) | Kubeflow](https://www.kubeflow.org/docs/components/trainer/legacy-v1/user-guides/pytorch/) - Training operator PyTorchJob custom resource for distributed training on Kubernetes.
+- [Kubeflow Trainer](https://trainer.kubeflow.org/en/latest/) - Current Kubeflow training operator (Trainer v2) for distributed training.
+- [Kubeflow: An overview for Katib](https://www.kubeflow.org/docs/components/katib/overview/) - Katib hyperparameter tuning with early stopping.
+- [Ray (Anyscale / Ray project): Ray Train Overview](https://docs.ray.io/en/latest/train/overview.html) - Ray Train distributed training concepts (training function, ScalingConfig, Trainer).
+- [Ray (Anyscale / Ray project): Saving and Loading Checkpoints](https://docs.ray.io/en/latest/train/user-guides/checkpoints.html) - Ray Train checkpointing to shared storage and resuming after worker loss.
+- [Ray (Anyscale / Ray project): Tune Trial Schedulers (tune.schedulers)](https://docs.ray.io/en/latest/tune/api/schedulers.html) - Ray Tune early stopping of losing hyperparameter trials.
+- [Ray (Anyscale / Ray project): Key Concepts (Ray Clusters)](https://docs.ray.io/en/latest/cluster/key-concepts.html) - Ray cluster architecture (head and worker nodes).
+- [Ray (Anyscale / Ray project): Objects](https://docs.ray.io/en/latest/ray-core/objects.html) - Ray shared object store architecture.
+- [Kubernetes SIGs (Kueue project): Cluster Queue | Kueue](https://kueue.sigs.k8s.io/docs/concepts/cluster_queue/) - Kueue job queueing and per-team GPU quotas.
+- [Kubernetes SIGs (Kueue project): All-or-nothing Scheduling | Kueue](https://kueue.sigs.k8s.io/docs/concepts/all_or_nothing/) - Gang admission so distributed jobs are admitted as a unit.
+- [Volcano (CNCF project): Introduction | Volcano](https://volcano.sh/en/docs/) - Volcano batch scheduling for AI workloads.
+- [Volcano (CNCF project): Gang | Volcano](https://volcano.sh/docs/scheduler/plugins/gang/) - Volcano gang scheduling for distributed training.
+- [NVIDIA: Overview of NCCL](https://docs.nvidia.com/deeplearning/nccl/user-guide/docs/overview.html) - NCCL collective communication (all-reduce) and multi-node topology.
+- [NVIDIA: GPUDirect RDMA (1. Overview)](https://docs.nvidia.com/cuda/gpudirect-rdma/index.html) - GPUDirect RDMA for direct GPU-to-NIC data transfer in multi-node training.
+- [NVIDIA: GPUDirect RDMA and GPUDirect Storage — NVIDIA GPU Operator](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/gpu-operator-rdma.html) - Enabling GPUDirect RDMA on Kubernetes GPU nodes.
 
 ## Suggested video search
 

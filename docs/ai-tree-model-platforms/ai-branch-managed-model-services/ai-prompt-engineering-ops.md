@@ -422,11 +422,11 @@ Prompts live in Git in the application repository with the same branch protectio
 
 ## References
 
-- Microsoft Learn - Prompt engineering techniques for Azure OpenAI
-- Microsoft Learn - Structured outputs and JSON mode in Azure OpenAI
-- OWASP - OWASP GenAI LLM Top 10 2026
-- Ollama documentation - JSON format mode and structured output options
-- NIST AI 100-1 - AI Risk Management Framework, MEASURE function
+- [Microsoft Learn: Prompt engineering techniques](https://learn.microsoft.com/azure/ai-foundry/openai/concepts/prompt-engineering) - Prompt structure, few-shot examples, grounding and refusal-path techniques for Azure OpenAI.
+- [Microsoft Learn: Structured outputs](https://learn.microsoft.com/azure/foundry/openai/how-to/structured-outputs) - Enforcing a strict JSON schema through structured output (vs JSON mode) on Azure OpenAI.
+- [OWASP Gen AI Security Project: OWASP GenAI LLM Top 10 2026](https://genai.owasp.org/resource/owasp-genai-llm-top-10-2026/) - LLM01:2026 Prompt Injection and LLM10:2026 Improper Output Handling.
+- [Ollama: Structured Outputs](https://docs.ollama.com/capabilities/structured-outputs) - JSON format mode and schema-constrained output from a local Ollama model.
+- [NIST: Artificial Intelligence Risk Management Framework (AI RMF 1.0) (NIST AI 100-1)](https://doi.org/10.6028/NIST.AI.100-1) - MEASURE function: test, evaluate, verify and validate AI system outputs.
 
 ## Suggested video search
 

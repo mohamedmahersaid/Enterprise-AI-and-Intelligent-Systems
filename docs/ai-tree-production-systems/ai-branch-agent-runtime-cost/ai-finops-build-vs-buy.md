@@ -301,11 +301,14 @@ Idle GPU-hours, expressed in currency rather than percent. An idle H100 costs ex
 
 ## References
 
-- FinOps Foundation - cloud cost allocation, showback and chargeback practices
-- FinOps Foundation - unit economics and the Inform/Optimize/Operate lifecycle
-- NVIDIA DCGM documentation - GPU telemetry, SM occupancy and utilisation metrics
-- Kubecost and OpenCost documentation - GPU cost allocation and namespace attribution in Kubernetes
-- Microsoft Learn - Azure OpenAI provisioned throughput units versus pay-as-you-go token billing
+- [FinOps Foundation: Cost Allocation (Metadata & Hierarchy)](https://github.com/finopsfoundation/framework/blob/main/_capabilities/cost-allocation.md) - Cloud cost allocation practices: attributing spend to teams, including shared-cost models.
+- [FinOps Foundation: Chargeback & Finance Integration](https://github.com/finopsfoundation/framework/blob/main/_capabilities/chargeback.md) - Showback versus chargeback models.
+- [FinOps Foundation: Measuring Unit Costs](https://github.com/finopsfoundation/framework/blob/main/_capabilities/measure-unit-costs.md) - Unit economics practice.
+- [FinOps Foundation: FinOps Phases](https://github.com/finopsfoundation/framework/blob/main/_pages/framework/phases.md) - The Inform/Optimize/Operate lifecycle.
+- [NVIDIA (NVIDIA/dcgm-exporter GitHub repository): dcp-metrics-included.csv (DCGM Exporter metric definitions)](https://github.com/NVIDIA/dcgm-exporter/blob/main/etc/dcp-metrics-included.csv) - DCGM GPU telemetry: SM occupancy/activity versus GPU utilisation and memory-used metrics exported to Prometheus.
+- [OpenCost (CNCF project, opencost/opencost-website repository): OpenCost Specification](https://github.com/opencost/opencost-website/blob/main/docs/specification.md) - GPU cost allocation to workloads and namespace attribution in Kubernetes (OpenCost).
+- [Kubecost (kubecost/kubectl-cost GitHub repository): kubectl-cost](https://github.com/kubecost/kubectl-cost/blob/main/README.md) - Kubecost namespace cost breakdown including GPU over a time window.
+- [Microsoft Learn: Provisioned throughput billing and cost management](https://learn.microsoft.com/azure/foundry/openai/concepts/provisioned-throughput-billing) - Azure OpenAI provisioned throughput units (fixed capacity cost) versus pay-per-token billing.
 
 ## Suggested video search
 

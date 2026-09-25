@@ -321,11 +321,13 @@ It has to grow from production, not stay as assembled. Every real failure - a wr
 
 ## References
 
-- RAGAS documentation - faithfulness, answer relevancy and context precision metrics
-- Promptfoo documentation - declarative evaluation configuration and CI integration
-- DeepEval documentation - unit-test style assertions for LLM outputs
-- Research literature on LLM-as-judge position, verbosity and self-preference bias and mitigations
-- NIST AI Risk Management Framework - MEASURE function guidance on evaluation practice
+- [Ragas (vibrantlabs / explodinggradients project docs): List of available metrics - Ragas](https://docs.ragas.io/en/stable/concepts/metrics/available_metrics/) - Faithfulness, answer relevancy and context precision metrics for RAG evaluation.
+- [Promptfoo: Configuration Overview - Getting Started with Promptfoo](https://www.promptfoo.dev/docs/configuration/guide/) - Declarative promptfooconfig.yaml evaluation configuration with prompts, tests and assertions.
+- [Promptfoo: CI/CD Integration for LLM Eval and Security](https://www.promptfoo.dev/docs/integrations/ci-cd/) - Running Promptfoo evaluations in CI as a quality gate.
+- [Confident AI (DeepEval): Unit Testing in CI/CD | DeepEval - The LLM Evaluation Framework](https://deepeval.com/docs/evaluation-unit-testing-in-ci-cd) - Unit-test style assertions for LLM outputs run via deepeval test run in CI.
+- [arXiv (Zheng et al.): Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena](https://arxiv.org/abs/2306.05685) - Position, verbosity and self-preference (self-enhancement) biases of LLM-as-judge and their mitigations.
+- [NIST: Artificial Intelligence Risk Management Framework (AI RMF 1.0) (NIST AI 100-1)](https://doi.org/10.6028/NIST.AI.100-1) - NIST AI RMF and its MEASURE function.
+- [NIST Trustworthy and Responsible AI Resource Center: Measure - AIRC (NIST AI RMF Playbook)](https://airc.nist.gov/airmf-resources/playbook/measure/) - MEASURE function guidance on documented, repeatable evaluation practice.
 
 ## Suggested video search
 

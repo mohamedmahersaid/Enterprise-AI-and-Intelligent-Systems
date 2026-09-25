@@ -308,11 +308,12 @@ Because freshness is a property of what the feature means, not of the infrastruc
 
 ## References
 
-- Feast documentation - feature views, point-in-time joins and materialisation
-- Google - Rules of Machine Learning, training-serving skew guidance
-- TensorFlow Data Validation - schema and skew detection between training and serving
-- Uber Michelangelo - the origin case study for production feature stores
-- Airbnb Zipline - point-in-time correct feature generation at scale
+- [Feast (the Open Source Feature Store): Point-in-time joins](https://docs.feast.dev/getting-started/concepts/point-in-time-joins) - Point-in-time correct joins via get_historical_features to prevent label leakage.
+- [Feast (the Open Source Feature Store): Feature view](https://docs.feast.dev/getting-started/concepts/feature-view) - Feature views, per-feature TTL and materialisation to the online store.
+- [Google for Developers: Rules of Machine Learning](https://developers.google.com/machine-learning/guides/rules-of-ml) - Training-serving skew guidance and keeping training and serving pipelines consistent.
+- [TensorFlow (TFX): TensorFlow Data Validation: Checking and analyzing your data](https://www.tensorflow.org/tfx/guide/tfdv) - Schema validation and skew detection between training and serving data.
+- [Uber Engineering Blog: Meet Michelangelo: Uber's Machine Learning Platform](https://www.uber.com/us/en/blog/michelangelo-machine-learning-platform/) - Origin case study for production feature stores (Michelangelo feature store).
+- [Airbnb (GitHub): Chronon: A Data Platform for AI/ML (airbnb/chronon)](https://github.com/airbnb/chronon) - Point-in-time correct feature backfills at scale with online/offline consistency (Zipline, now open-sourced as Chronon).
 
 ## Suggested video search
 

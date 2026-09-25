@@ -289,11 +289,13 @@ Auditors under ISO 42001 are specifically looking for a functioning management s
 
 ## References
 
-- ISO/IEC 42001:2023 - Artificial intelligence management systems standard
-- Regulation (EU) 2024/1689 - the EU Artificial Intelligence Act, full text and Annex III high-risk categories
-- NIST AI 100-1 - AI Risk Management Framework, GOVERN function
-- Microsoft Learn - Responsible AI and Azure OpenAI data, privacy and security documentation
-- European Commission - guidance and FAQ on the EU AI Act phased application timeline
+- [International Organization for Standardization (ISO): ISO/IEC 42001:2023 - AI management systems](https://www.iso.org/standard/42001) - ISO/IEC 42001 AI management system requirements (Clauses 4-10, Annex A controls) as the certifiable governance standard.
+- [EUR-Lex, Publications Office of the European Union: Regulation (EU) 2024/1689 of the European Parliament and of the Council (Artificial Intelligence Act)](https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=OJ%3AL_202401689) - Full legal text of the EU AI Act, including risk tiers and the Annex III high-risk categories.
+- [National Institute of Standards and Technology (NIST): Artificial Intelligence Risk Management Framework (AI RMF 1.0), NIST AI 100-1](https://doi.org/10.6028/NIST.AI.100-1) - AI RMF GOVERN function for organizational AI oversight and accountability.
+- [Microsoft Learn: Overview of responsible AI practices for Azure OpenAI models](https://learn.microsoft.com/azure/foundry/responsible-ai/openai/overview) - Microsoft responsible AI guidance for governing Azure OpenAI deployments.
+- [Microsoft Learn: Data, privacy, and security for Models sold by Azure in Microsoft Foundry](https://learn.microsoft.com/en-us/azure/ai-foundry/responsible-ai/openai/data-privacy) - Azure OpenAI data handling, processing location and residency (EU data zone) commitments.
+- [European Commission, AI Act Service Desk: Timeline for the Implementation of the EU AI Act](https://ai-act-service-desk.ec.europa.eu/en/ai-act/timeline/timeline-implementation-eu-ai-act) - Phased application dates of the EU AI Act.
+- [European Commission, Shaping Europe's digital future: Navigating the AI Act](https://digital-strategy.ec.europa.eu/en/faqs/navigating-ai-act) - Commission FAQ guidance on the AI Act's obligations and application.
 
 ## Suggested video search
 

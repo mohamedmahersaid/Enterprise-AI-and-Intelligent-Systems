@@ -354,11 +354,14 @@ By writing down real queries paired with the documents that should be found, the
 
 ## References
 
-- Azure AI Search documentation - full-text search, vector search and how hybrid queries combine them
-- OpenAI documentation - embeddings, similarity and their appropriate uses
-- Okapi BM25 - the ranking function behind most lexical search implementations
-- TREC evaluation methodology - relevance judgements, recall and precision as an evaluation discipline
-- Elasticsearch documentation - analysers, tokenisation and why exact-term matching behaves as it does
+- [Microsoft Learn: Hybrid search using vectors and full-text search in Azure AI Search](https://learn.microsoft.com/azure/search/hybrid-search-overview) - Full-text search, vector search and how hybrid queries combine them.
+- [Microsoft Learn: Relevance scoring in hybrid search using Reciprocal Rank Fusion (RRF)](https://learn.microsoft.com/azure/search/hybrid-search-ranking) - How hybrid query result sets are fused into one ranking.
+- [OpenAI: Vector embeddings](https://developers.openai.com/api/docs/guides/embeddings) - Embeddings, similarity and their appropriate uses.
+- [now publishers (Foundations and Trends in Information Retrieval; Robertson and Zaragoza, 2009): The Probabilistic Relevance Framework: BM25 and Beyond](https://www.nowpublishers.com/article/Details/INR-019) - The BM25 ranking function behind lexical search.
+- [NIST Text REtrieval Conference (TREC): Common Evaluation Measures](https://trec.nist.gov/pubs/trec16/appendices/measures.pdf) - Recall and precision as TREC evaluation measures.
+- [NIST Text REtrieval Conference (TREC): Overview of TREC 2024](https://trec.nist.gov/pubs/trec33/papers/overview_33.pdf) - Relevance judgements and test collections as an evaluation discipline.
+- [Elastic: Text analysis](https://www.elastic.co/docs/manage-data/data-store/text-analysis) - Tokenisation and why exact-term matching behaves as it does.
+- [Elastic: Anatomy of an analyzer](https://www.elastic.co/docs/manage-data/data-store/text-analysis/anatomy-of-an-analyzer) - What analysers are made of.
 
 ## Suggested video search
 
