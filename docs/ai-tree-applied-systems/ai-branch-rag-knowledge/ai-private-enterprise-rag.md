@@ -260,11 +260,11 @@ I never trust the architecture diagram alone, because 'local' components frequen
 
 ## Certification alignment
 
-- AI-102 Azure AI Engineer Associate - Implement security for AI solutions, including data protection and access control
-- AI-900 Azure AI Fundamentals - Describe responsible AI principles including privacy and security
-- AZ-305 Designing Microsoft Azure Infrastructure Solutions - Design a solution for data protection, identity and access
-- Vendor-neutral - NIST AI RMF GOVERN and MANAGE functions: data governance and access control for AI systems
-- Vendor-neutral - ISO/IEC 27001 aligned - information classification and access control applied to AI knowledge bases
+- **Microsoft Certified: Azure AI Apps and Agents Developer Associate (AI-103)** - Plan and manage an Azure AI solution: choosing between a fully offline local RAG stack and managed Azure AI Search, and building an index with filterable ACL group fields for document-level security trimming.
+- **Microsoft Certified: Azure AI Fundamentals (AI-901)** - Identify AI concepts and capabilities: how a RAG system grounds answers in a private corpus and why that makes it a potential data exfiltration path.
+- **Microsoft Certified: Azure Solutions Architect Expert (AZ-305)** - Design identity, governance, and monitoring solutions: resolving caller group membership for security-trimmed retrieval and auditing each query's identity, ACL filter and contributing sources.
+- **Vendor-neutral** - NIST AI RMF GOVERN and MANAGE functions: data governance and access control for AI systems.
+- **Vendor-neutral** - ISO/IEC 27001: information classification and access control applied to AI knowledge bases.
 
 ## References
 
@@ -272,7 +272,7 @@ I never trust the architecture diagram alone, because 'local' components frequen
 - Microsoft Learn - Responsible AI and data protection guidance for Azure AI solutions
 - Ollama documentation - fully offline deployment guidance
 - NIST AI 100-1 - AI Risk Management Framework, GOVERN function
-- OWASP - Top 10 for Large Language Model Applications, LLM06 Sensitive Information Disclosure
+- OWASP - GenAI LLM Top 10 2026, LLM02:2026 Sensitive Information Disclosure
 
 ## Suggested video search
 

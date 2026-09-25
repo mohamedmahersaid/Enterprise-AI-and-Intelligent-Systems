@@ -288,11 +288,11 @@ Vector search with a bi-encoder embeds the query and every chunk independently, 
 
 ## Certification alignment
 
-- AI-102 Azure AI Engineer Associate - Implement knowledge mining and document intelligence solutions, including Azure AI Search
-- AI-102 Azure AI Engineer Associate - Implement generative AI solutions: retrieval-augmented generation patterns
-- AI-900 Azure AI Fundamentals - Identify features of generative AI solutions
-- AZ-305 Designing Microsoft Azure Infrastructure Solutions - Design a data storage solution for non-relational and search data
-- Vendor-neutral - NIST AI RMF MAP function: document data provenance for retrieval-grounded systems
+- **Microsoft Certified: Azure AI Apps and Agents Developer Associate (AI-103)** - Implement generative AI and agentic solutions: retrieval-augmented generation grounded on an Azure AI Search hybrid vector and keyword index with semantic re-ranking and chunk citations.
+- **Microsoft Certified: Azure AI Apps and Agents Developer Associate (AI-103)** - Plan and manage an Azure AI solution: choosing between a local embedding model (nomic-embed-text via Ollama) and a hosted one (Azure OpenAI text-embedding-3) on quality and data residency, and pinning the embedding model version.
+- **Microsoft Certified: Azure AI Fundamentals (AI-901)** - Identify AI concepts and capabilities: how retrieval-augmented generation lets a model reason over retrieved passages it was never trained on.
+- **Microsoft Certified: Azure Solutions Architect Expert (AZ-305)** - Design data storage solutions: sizing an Azure AI Search service with partitions and replicas and defining an index schema of vector, text and metadata filter fields.
+- **Vendor-neutral** - NIST AI RMF MAP function: document data provenance for retrieval-grounded systems.
 
 ## References
 

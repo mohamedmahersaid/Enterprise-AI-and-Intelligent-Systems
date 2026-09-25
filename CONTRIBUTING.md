@@ -60,6 +60,24 @@ before a point can land; an Advanced reader already has it and wants the
 trade-off. Write to the level, and expect an introductory leaf to cost more
 words than an expert one, not fewer.
 
+### Certification alignment
+
+Each line is `- **Credential** - Official domain: what this leaf teaches for it.`
+The credential must be listed in `data/certifications.json`, and the domain copied
+from that entry, so a reader can check the claim against the vendor's own study
+guide. Frameworks that are not credentials take the label `Vendor-neutral`. A
+leaf that genuinely maps to no domain of a credential should not cite it - fewer
+honest lines beat a padded list.
+
+To cite a credential that is not registered, add it with its vendor source and an
+`evidence` value that says how its status was confirmed: `read` (the vendor page
+was fetched and read), `search-extract` (only search extracts of the vendor's
+pages could be read) or `unverified`. When a vendor retires an exam, move it to
+`retired` with its successor; `validate:content` then fails on every leaf that
+still names it. The same file records the OWASP GenAI LLM Top 10 edition in use:
+cite its IDs with their year, as `LLM03:2026 Excessive Agency`, because OWASP
+renumbers the list between editions.
+
 If you edit `data/catalog.json` directly — renaming a branch, changing a level —
 run `npm run regen` to rewrite the derived files, rather than editing them.
 
@@ -67,7 +85,7 @@ run `npm run regen` to rewrite the derived files, rather than editing them.
 
 | Command | What it enforces |
 | --- | --- |
-| `npm run validate:content` | Heading hierarchy, required sections, frontmatter and catalog agreement, catalog self-consistency, unresolved TODOs, link resolution, CATALOG.md coverage, README figures |
+| `npm run validate:content` | Heading hierarchy, required sections, frontmatter and catalog agreement, catalog self-consistency, unresolved TODOs, link resolution, CATALOG.md coverage, README figures, certifications and OWASP IDs against `data/certifications.json` |
 | `npm run validate:mermaid` | Every mermaid diagram parses |
 | `npm run validate:python` | Every python block in a leaf compiles, and every third-party module it imports is named by a `pip install` in the same leaf (parsed, never executed) |
 | `npm run validate:scripts` | Every python block, run with no arguments in an empty directory, completes or stops with its own message rather than a traceback |

@@ -160,7 +160,12 @@ export function deriveAssumptions(catalog) {
     certifications: {
       verified: registry.verified,
       cited: citations(catalog, registry).filter((c) => c.leaves.length),
-      retired: registry.retired,
+      retired: registry.retired.map((r) => ({
+        ...r,
+        successorName:
+          registry.credentials.find((c) => c.id === r.successor)?.credential ?? r.successor,
+      })),
+      frameworks: registry.frameworks,
     },
     pinned: PINNED.map((spec) => ({
       ...spec,
@@ -250,8 +255,18 @@ export function renderAssumptionsMd(data) {
   lines.push('| Retired exam | Retired | Replaced by |');
   lines.push('| --- | --- | --- |');
   for (const r of data.certifications.retired) {
-    const successor = data.certifications.cited.find((c) => c.id === r.successor);
-    lines.push(`| [${r.code}](${r.source}) | ${r.retired} | ${successor?.credential ?? r.successor} |`);
+    lines.push(`| [${r.code}](${r.source}) | ${r.retired} | ${r.successorName} |`);
+  }
+  lines.push('');
+  lines.push(
+    'Numbered frameworks the leaves cite by ID. An ID is only meaningful with its ' +
+    'edition, so validate-content requires both.'
+  );
+  lines.push('');
+  lines.push('| Framework | Edition | Released | Evidence |');
+  lines.push('| --- | --- | --- | --- |');
+  for (const f of data.certifications.frameworks) {
+    lines.push(`| [${f.name}](${f.source}) | ${f.edition} | ${f.released} | ${f.evidence} |`);
   }
   lines.push('');
 

@@ -362,12 +362,11 @@ Treat it as a planned migration with an evaluation gate, not a config change. Fi
 
 ## Certification alignment
 
-- AI-102 Azure AI Engineer Associate - Plan and manage an Azure AI solution: create, secure and monitor AI services
-- AI-102 Azure AI Engineer Associate - Implement generative AI solutions with Azure OpenAI Service
-- AI-900 Azure AI Fundamentals - Describe responsible AI and Azure AI service capabilities
-- AZ-305 Designing Microsoft Azure Infrastructure Solutions - Design identity, governance and monitoring solutions; design network security
-- SC-100 Microsoft Cybersecurity Architect - Design a strategy for securing PaaS services and data
-- Vendor-neutral - ISO/IEC 42001 AI management system controls for third-party AI service governance
+- **Microsoft Certified: Azure AI Apps and Agents Developer Associate (AI-103)** - Plan and manage an Azure AI solution: creating the Azure OpenAI account, securing it with managed identity and private endpoints, choosing between Standard and Provisioned Throughput capacity, and monitoring it through diagnostic logs.
+- **Microsoft Certified: Azure AI Apps and Agents Developer Associate (AI-103)** - Implement generative AI and agentic solutions: version-pinned model deployments with TPM ceilings, deployment-name indirection for upgrades and rollback, and content filter policies tuned to the domain.
+- **Microsoft Certified: Azure Solutions Architect Expert (AZ-305)** - Design identity, governance, and monitoring solutions: managed identity with the Cognitive Services OpenAI User role, Azure Policy deny rules for public access, and diagnostic settings streaming to Log Analytics.
+- **Microsoft Certified: Cybersecurity Architect Expert (SC-100)** - Design security solutions for infrastructure: securing the Azure OpenAI PaaS endpoint with disabled public network access, private endpoints and private DNS, disabled local authentication and customer-managed keys in Key Vault.
+- **Vendor-neutral** - ISO/IEC 42001: AI management system controls for third-party AI service governance.
 
 ## References
 
@@ -379,7 +378,7 @@ Treat it as a planned migration with an evaluation gate, not a config change. Fi
 
 ## Suggested video search
 
-Azure OpenAI private endpoint managed identity enterprise architecture AI-102
+Azure OpenAI private endpoint managed identity enterprise architecture AI-103
 
 ---
 

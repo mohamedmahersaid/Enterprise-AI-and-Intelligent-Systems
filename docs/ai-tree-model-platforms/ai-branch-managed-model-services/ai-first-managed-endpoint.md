@@ -386,10 +386,10 @@ Three things, consistently. First, the system prompt is charged on every call ra
 
 ## Certification alignment
 
-- **Microsoft Azure AI Engineer Associate (AI-102)** - provisioning, securing and consuming Azure OpenAI endpoints.
-- **AWS Certified Machine Learning Engineer - Associate (MLA-C01)** - managed inference endpoints, throttling and cost control.
+- **Microsoft Certified: Azure AI Apps and Agents Developer Associate (AI-103)** - Plan and manage an Azure AI solution: keeping endpoint keys server-side in a secret manager with separate keys per environment, and planning around request and token rate limits.
+- **AWS Certified Machine Learning Engineer - Associate** - managed inference endpoints, throttling and cost control.
 - **Google Cloud Professional Machine Learning Engineer** - serving predictions through managed APIs with quota management.
-- **Microsoft Certified: Security, Compliance, and Identity Fundamentals (SC-900)** - secret management and credential handling concepts.
+- **Microsoft Certified: Security, Compliance, and Identity Fundamentals (SC-900)** - Describe the concepts of security, compliance, and identity: treating an API key as a bearer credential, and why rotation rather than deletion is the remedy for a leaked key.
 - **CompTIA Security+** - vendor-neutral key management, rotation and secure API authentication.
 
 ## References
@@ -397,7 +397,7 @@ Three things, consistently. First, the system prompt is charged on every call ra
 - Microsoft. *Azure OpenAI Service Documentation: Quotas, Limits and Provisioned Throughput.*
 - OpenAI. *API Reference: Rate Limits, Structured Outputs and Error Handling.*
 - Anthropic. *Claude API Documentation: Rate Limits and Errors.*
-- OWASP. *Top 10 for Large Language Model Applications.*
+- OWASP. *OWASP GenAI LLM Top 10 2026.*
 - Amazon Web Services. *Architecture Blog: Exponential Backoff and Jitter.*
 
 ## Suggested video search

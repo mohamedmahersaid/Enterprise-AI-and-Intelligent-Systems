@@ -283,11 +283,10 @@ First whether the job is data-loading bound rather than compute bound, because t
 
 ## Certification alignment
 
-- CKA Certified Kubernetes Administrator - scheduling, resource management and cluster operations
-- CKAD Certified Kubernetes Application Developer - workload definition, jobs and resource requests
-- NVIDIA Certified Associate: AI Infrastructure and Operations - GPU cluster operations and monitoring
-- AWS Certified Machine Learning - Specialty - distributed training strategy and spot capacity management
-- Vendor-neutral - distributed systems fundamentals: gang scheduling, checkpoint-restart and collective communication
+- **Certified Kubernetes Administrator (CKA)** - Workloads & Scheduling: gang scheduling with Kueue, Volcano or the coscheduling plugin so distributed jobs are admitted as units, with per-team GPU quotas instead of first-come allocation.
+- **Certified Kubernetes Application Developer (CKAD)** - Application Design and Build: defining distributed training as PyTorchJob and RayJob custom resources with GPU resource requests, and Kubeflow Pipelines compiled from code and version-controlled.
+- **NVIDIA-Certified Associate: AI Infrastructure and Operations** - GPU cluster operations and monitoring.
+- **Vendor-neutral** - distributed systems fundamentals: gang scheduling, checkpoint-restart and collective communication.
 
 ## References
 

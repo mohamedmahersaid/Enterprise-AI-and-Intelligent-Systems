@@ -302,10 +302,10 @@ A system prompt directly determines model behaviour with the same blast radius a
 
 ## Certification alignment
 
-- AI-102 Azure AI Engineer Associate - Plan and manage an Azure AI solution: monitor and deploy Azure AI solutions
-- AZ-400 Designing and Implementing Microsoft DevOps Solutions - Design and implement a release strategy, including progressive exposure
-- Vendor-neutral - CNCF Progressive Delivery practice: canary analysis and automated rollback with Argo Rollouts
-- Vendor-neutral - NIST AI RMF MEASURE function: continuous monitoring of deployed AI system performance
+- **Microsoft Certified: Azure AI Apps and Agents Developer Associate (AI-103)** - Plan and manage an Azure AI solution: pinning Azure OpenAI deployments to explicit model versions, standing up a low-capacity canary deployment beside production, and alerting on drift with an Azure Monitor scheduled query.
+- **Microsoft Certified: DevOps Engineer Expert (AZ-400)** - Design and implement build and release pipelines: gating merges on a golden-set evaluation check and progressing releases through shadow, canary and automatic rollback before full promotion.
+- **Vendor-neutral** - CNCF Progressive Delivery practice: canary analysis and automated rollback with Argo Rollouts.
+- **Vendor-neutral** - NIST AI RMF MEASURE function: continuous monitoring of deployed AI system performance.
 
 ## References
 

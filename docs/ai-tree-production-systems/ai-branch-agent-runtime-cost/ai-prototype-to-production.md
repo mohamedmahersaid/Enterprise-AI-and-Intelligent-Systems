@@ -346,18 +346,18 @@ Unbounded spend, and it is almost never malicious. The usual shape is a retry lo
 
 ## Certification alignment
 
-- AI-102 Azure AI Engineer Associate - secure and monitor generative AI solutions, including managing access to endpoints
-- AZ-104 Microsoft Azure Administrator - API Management, authentication and monitoring fundamentals
-- AWS Certified AI Practitioner - responsible deployment, guardrails and operational controls for AI services
-- FinOps Certified Practitioner - showback, budget alerting and per-team cost attribution
-- Vendor-neutral - NIST AI RMF GOVERN and MANAGE functions: documented controls and oversight before deployment
+- **Microsoft Certified: Azure AI Apps and Agents Developer Associate (AI-103)** - Plan and manage an Azure AI solution: managing access to model endpoints through an authenticated gateway, pinning model versions and keeping the previous version routable for rollback.
+- **Microsoft Certified: Azure Administrator Associate (AZ-104)** - Monitor and maintain Azure resources: API Management as the gateway, logging request id, identity, token counts and latency, and alerting on budget thresholds before the hard stop.
+- **AWS Certified AI Practitioner** - Domain 5: Security, Compliance, and Governance for AI Solutions: requiring authentication at the gateway, forwarding end-user identity, and setting log retention and redaction for logged prompts.
+- **FinOps Certified Practitioner** - showback, budget alerting and per-team cost attribution.
+- **Vendor-neutral** - NIST AI RMF GOVERN and MANAGE functions: documented controls and oversight before deployment.
 
 ## References
 
 - LiteLLM documentation - proxy configuration, virtual keys, budgets and rate limits
 - Microsoft Learn - Azure API Management as a gateway for Azure OpenAI, including token limit policies
 - OpenTelemetry documentation - trace and span conventions for correlating requests across services
-- OWASP Top 10 for LLM Applications - LLM10 unbounded consumption and LLM02 sensitive information disclosure
+- OWASP GenAI LLM Top 10 2026 - LLM06:2026 Unbounded Consumption and LLM02:2026 Sensitive Information Disclosure
 - NIST AI Risk Management Framework - GOVERN and MANAGE function guidance on pre-deployment controls
 
 ## Suggested video search

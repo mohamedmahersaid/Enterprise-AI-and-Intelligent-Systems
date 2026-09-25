@@ -340,11 +340,11 @@ Memory first, then throughput. Memory is weights plus KV cache plus overhead. We
 
 ## Certification alignment
 
-- AI-102 Azure AI Engineer Associate - Plan and manage an Azure AI solution: select the appropriate service and pricing tier
-- AI-900 Azure AI Fundamentals - Describe features of generative AI workloads on Azure
-- AZ-305 Designing Microsoft Azure Infrastructure Solutions - Design a cost optimization and governance solution
-- Vendor-neutral - FinOps Foundation certified practitioner: allocation, showback and unit economics applied to AI workloads
-- Vendor-neutral - ISO/IEC 42001 AI management systems: resource planning and performance evaluation clauses
+- **Microsoft Certified: Azure AI Apps and Agents Developer Associate (AI-103)** - Plan and manage an Azure AI solution: choosing between local and hosted deployment, and creating Azure OpenAI deployments with explicit tokens-per-minute capacity to cap spend.
+- **Microsoft Certified: Azure AI Fundamentals (AI-901)** - Identify AI concepts and capabilities: matching extraction, summarisation and reasoning workloads to small or frontier models, and how hosted models bill per input and output token.
+- **Microsoft Certified: Azure Solutions Architect Expert (AZ-305)** - Design identity, governance, and monitoring solutions: request-level diagnostic logs to Log Analytics, budget alerts and per-application spend attribution.
+- **FinOps Certified Practitioner** - Allocation, showback and unit economics applied to AI workloads.
+- **Vendor-neutral** - ISO/IEC 42001 AI management systems: resource planning and performance evaluation clauses.
 
 ## References
 

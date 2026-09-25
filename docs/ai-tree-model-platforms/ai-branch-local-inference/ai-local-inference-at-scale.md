@@ -375,11 +375,10 @@ Continuous batching, and the difference is large enough that static batching sho
 
 ## Certification alignment
 
-- **NVIDIA Certified Associate: AI Infrastructure and Operations** - GPU memory management and inference serving characteristics.
-- **Microsoft Azure AI Engineer Associate (AI-102)** - selecting and operating model hosting options against latency and throughput requirements.
-- **AWS Certified Machine Learning Engineer - Associate (MLA-C01)** - model deployment, inference optimisation and cost-aware instance selection.
-- **Google Cloud Professional Machine Learning Engineer** - serving infrastructure design and scaling of online prediction.
-- **Linux Foundation Certified Kubernetes Administrator (CKA)** - vendor-neutral resource requests, limits and scheduling for accelerator workloads.
+- **NVIDIA-Certified Associate: AI Infrastructure and Operations** - GPU memory management and inference serving characteristics.
+- **Microsoft Certified: Azure AI Apps and Agents Developer Associate (AI-103)** - Plan and manage an Azure AI solution: choosing between self-hosted and API-hosted models on measured utilisation, and sizing endpoint capacity against a latency budget.
+- **AWS Certified Machine Learning Engineer - Associate** - Model deployment, inference optimisation and cost-aware instance selection.
+- **Google Cloud Professional Machine Learning Engineer** - Serving infrastructure design and scaling of online prediction.
 
 ## References
 

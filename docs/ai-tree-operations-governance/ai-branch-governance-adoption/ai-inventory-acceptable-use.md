@@ -340,11 +340,10 @@ The owner, and specifically a named person rather than a team. An unapproved sys
 
 ## Certification alignment
 
-- AI-900 Azure AI Fundamentals - responsible AI principles and the organisational practices around them
-- SC-900 Microsoft Security, Compliance and Identity Fundamentals - governance, risk and compliance concepts
-- AWS Certified AI Practitioner - responsible AI, governance and acceptable use of generative AI services
-- Google Cloud Digital Leader - AI adoption, governance and organisational readiness
-- Vendor-neutral - NIST AI RMF GOVERN function: accountability structures, roles and organisational policy
+- **Microsoft Certified: Security, Compliance, and Identity Fundamentals (SC-900)** - Describe the concepts of security, compliance, and identity: decision rights recorded per system (approver, owner, who can switch it off) and acceptable use expressed as classes of data that may leave, and to where.
+- **AWS Certified AI Practitioner** - Domain 5: Security, Compliance, and Governance for AI Solutions: building an AI inventory from observed usage, tiering use cases by consequence, and keeping registration current through procurement and deployment.
+- **Google Cloud Digital Leader** - AI adoption, governance and organisational readiness.
+- **Vendor-neutral** - NIST AI RMF GOVERN function: accountability structures, roles and organisational policy.
 
 ## References
 

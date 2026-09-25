@@ -344,16 +344,15 @@ That people stop using the system, which makes the estate less safe while the da
 
 ## Certification alignment
 
-- AI-102 Azure AI Engineer Associate - implement content moderation and responsible AI safeguards in generative AI solutions
-- SC-100 Microsoft Cybersecurity Architect - designing security controls and threat protection for AI workloads
-- AWS Certified Machine Learning - Specialty - responsible AI, model monitoring and guardrail design for generative applications
-- Google Professional Machine Learning Engineer - responsible AI practices, safety evaluation and production monitoring
-- Vendor-neutral - OWASP Top 10 for LLM Applications: LLM01 prompt injection and LLM02 insecure output handling, mapped to NIST AI RMF MANAGE
+- **Microsoft Certified: Azure AI Apps and Agents Developer Associate (AI-103)** - Implement generative AI and agentic solutions: layering input filtering, Prompt Shields for user prompts and retrieved documents, and output filtering around a RAG assistant, with severity thresholds set per application tier.
+- **Microsoft Certified: Cybersecurity Architect Expert (SC-100)** - Design security solutions for applications and data: treating retrieved documents as untrusted input, filtering every source of model-visible text, and logging filter decisions without the blocked content.
+- **Google Cloud Professional Machine Learning Engineer** - responsible AI practices, safety evaluation and production monitoring.
+- **Vendor-neutral** - OWASP GenAI LLM Top 10 2026: LLM01:2026 Prompt Injection and LLM10:2026 Improper Output Handling, mapped to NIST AI RMF MANAGE.
 
 ## References
 
 - Azure AI Content Safety documentation - harm categories, severity levels and Prompt Shields for user prompts and documents
-- OWASP Top 10 for Large Language Model Applications - prompt injection, insecure output handling and the associated mitigations
+- OWASP GenAI LLM Top 10 2026 - LLM01:2026 Prompt Injection, LLM10:2026 Improper Output Handling and the associated mitigations
 - NIST AI Risk Management Framework (AI 100-1) - MEASURE and MANAGE functions for operational safeguards
 - ISO/IEC 42001 - AI management system requirements covering operational controls and incident handling
 - EU AI Act - transparency and risk-management obligations for general-purpose and high-risk AI systems

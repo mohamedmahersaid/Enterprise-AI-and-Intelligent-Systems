@@ -340,11 +340,11 @@ When something simpler already answers the question. If a user wants "the invoic
 
 ## Certification alignment
 
-- AI-900 Azure AI Fundamentals - generative AI concepts, grounding and the role of enterprise data
-- AI-102 Azure AI Engineer Associate - implementing retrieval-augmented generation and grounding solutions
-- AWS Certified AI Practitioner - foundation model capabilities, prompt context and retrieval basics
-- Google Professional Machine Learning Engineer - grounding generative applications on enterprise data sources
-- Vendor-neutral - NIST AI RMF MAP function: framing the problem and establishing whether AI is the right approach
+- **Microsoft Certified: Azure AI Fundamentals (AI-901)** - Identify AI concepts and capabilities: grounding as reading rather than learning, context windows, and why a model cannot answer from content it was never given.
+- **Microsoft Certified: Azure AI Apps and Agents Developer Associate (AI-103)** - Implement generative AI and agentic solutions: grounding answers on your own content by pasting the corpus or retrieving passages, and chunking so the answer-bearing passage arrives intact.
+- **AWS Certified AI Practitioner** - Domain 3: Applications of Foundation Models: choosing between pasting content into the prompt, retrieval and tuning, and pricing pasting against retrieval at real query volume.
+- **Google Cloud Professional Machine Learning Engineer** - grounding generative applications on enterprise data sources.
+- **Vendor-neutral** - NIST AI RMF MAP function: framing the problem and establishing whether AI is the right approach.
 
 ## References
 

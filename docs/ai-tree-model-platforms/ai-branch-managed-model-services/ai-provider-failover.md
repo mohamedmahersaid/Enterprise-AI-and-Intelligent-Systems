@@ -356,11 +356,11 @@ Sometimes, but I would not treat it as free insurance, because the premium is re
 
 ## Certification alignment
 
-- AI-102 Azure AI Engineer Associate - provisioning, monitoring and managing Azure AI service deployments and model versions
-- AZ-305 Designing Microsoft Azure Infrastructure Solutions - high availability, business continuity and dependency design
-- AWS Certified Solutions Architect - Associate - resilience patterns, throttling and graceful degradation for managed services
-- Google Professional Cloud Architect - reliability design, failure modes and dependency management
-- Vendor-neutral - Google SRE practice: circuit breaking, load shedding and graceful degradation under overload
+- **Microsoft Certified: Azure AI Apps and Agents Developer Associate (AI-103)** - Plan and manage an Azure AI solution: listing Azure AI deployments and their pinned model versions, tracking each version's retirement date as a dated task with an owner, and evaluating the successor before the deadline.
+- **Microsoft Certified: Azure Solutions Architect Expert (AZ-305)** - Design business continuity solutions: fallback tiers to a smaller model or second region, testing whether that region is genuinely independent, and degrading to the pre-AI path.
+- **AWS Certified Solutions Architect - Associate** - Domain 2: Design Resilient Architectures: circuit breakers instead of retry-only handling, separating rate limiting from genuine outage, and graceful degradation for a managed model dependency.
+- **Google Cloud Professional Cloud Architect** - reliability design, failure modes and dependency management.
+- **Vendor-neutral** - Google SRE practice: circuit breaking, load shedding and graceful degradation under overload.
 
 ## References
 

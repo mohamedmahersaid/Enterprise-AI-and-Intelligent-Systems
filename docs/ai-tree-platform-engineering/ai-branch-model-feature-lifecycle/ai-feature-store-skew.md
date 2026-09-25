@@ -300,11 +300,11 @@ Because freshness is a property of what the feature means, not of the infrastruc
 
 ## Certification alignment
 
-- DP-100 Designing and Implementing a Data Science Solution on Azure - feature engineering and data preparation
-- AWS Certified Machine Learning - Specialty - feature engineering, data pipelines and SageMaker Feature Store
-- Databricks Certified Machine Learning Professional - feature store workflows and point-in-time lookups
-- Google Professional Machine Learning Engineer - ML pipeline design, data validation and skew detection
-- Vendor-neutral - data engineering fundamentals: temporal joins, slowly changing dimensions and lineage
+- **Microsoft Certified: Machine Learning Operations Engineer Associate (AI-300)** - Implement machine learning model lifecycle and operations: versioning feature definitions with the models that consume them, so adopting a new definition requires retraining and re-promotion.
+- **AWS Certified Machine Learning Engineer - Associate** - Feature engineering and data pipelines.
+- **Databricks Certified Machine Learning Professional** - Feature store workflows and point-in-time lookups.
+- **Google Cloud Professional Machine Learning Engineer** - ML pipeline design, data validation and skew detection.
+- **Vendor-neutral** - Data engineering fundamentals: temporal joins, slowly changing dimensions and lineage.
 
 ## References
 

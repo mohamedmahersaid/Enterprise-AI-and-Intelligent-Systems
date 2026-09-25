@@ -413,17 +413,16 @@ Prompts live in Git in the application repository with the same branch protectio
 
 ## Certification alignment
 
-- AI-102 Azure AI Engineer Associate - Implement generative AI solutions: apply prompt engineering and structured output
-- AI-900 Azure AI Fundamentals - Describe features of generative AI workloads and responsible AI considerations
-- AI-102 Azure AI Engineer Associate - Implement content moderation and responsible AI practices
-- Vendor-neutral - OWASP Top 10 for LLM Applications: LLM01 Prompt Injection, LLM05 Improper Output Handling
-- Vendor-neutral - NIST AI RMF MEASURE function: test, evaluate, verify and validate AI system outputs
+- **Microsoft Certified: Azure AI Apps and Agents Developer Associate (AI-103)** - Implement generative AI and agentic solutions: applying the five-part prompt structure and enforcing a strict JSON schema through structured output on Azure OpenAI.
+- **Microsoft Certified: Azure AI Fundamentals (AI-901)** - Identify AI concepts and capabilities: grounding a model in supplied context, why a model hallucinates a root cause, and using temperature near zero for deterministic tasks.
+- **Vendor-neutral** - OWASP GenAI LLM Top 10 2026: LLM01:2026 Prompt Injection and LLM10:2026 Improper Output Handling.
+- **Vendor-neutral** - NIST AI RMF MEASURE function: test, evaluate, verify and validate AI system outputs.
 
 ## References
 
 - Microsoft Learn - Prompt engineering techniques for Azure OpenAI
 - Microsoft Learn - Structured outputs and JSON mode in Azure OpenAI
-- OWASP - Top 10 for Large Language Model Applications
+- OWASP - OWASP GenAI LLM Top 10 2026
 - Ollama documentation - JSON format mode and structured output options
 - NIST AI 100-1 - AI Risk Management Framework, MEASURE function
 

@@ -309,10 +309,9 @@ Track them on the same timeline but as genuinely separate axes, because optimisi
 
 ## Certification alignment
 
-- AI-102 Azure AI Engineer Associate - Monitor Azure AI solutions to ensure operational reliability
-- AZ-500 Microsoft Azure Security Technologies - Implement monitoring by using Azure Monitor and Log Analytics
-- Vendor-neutral - OpenTelemetry certified practice: distributed tracing for AI and agentic workloads
-- Vendor-neutral - NIST AI RMF MEASURE function: ongoing performance and impact monitoring
+- **Microsoft Certified: Azure AI Apps and Agents Developer Associate (AI-103)** - Plan and manage an Azure AI solution: provisioning Application Insights, pulling latency, error and token metrics from the Azure OpenAI resource with Azure Monitor, and alerting on refusal and tool-error rates through Log Analytics scheduled queries.
+- **Vendor-neutral** - OpenTelemetry practice: emitting spans for completion calls and distributed tracing for AI and agentic workloads.
+- **Vendor-neutral** - NIST AI RMF MEASURE function: ongoing performance and impact monitoring.
 
 ## References
 

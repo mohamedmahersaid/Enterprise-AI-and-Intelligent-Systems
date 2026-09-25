@@ -287,18 +287,19 @@ Five things I do not consider optional. First, a hard maximum step count and wal
 
 ## Certification alignment
 
-- AI-102 Azure AI Engineer Associate - Implement generative AI solutions: orchestrate function/tool calling
-- AI-900 Azure AI Fundamentals - Identify capabilities of Azure AI services for building intelligent applications
-- AZ-305 Designing Microsoft Azure Infrastructure Solutions - Design an application architecture with distributed processing
-- Vendor-neutral - NIST AI RMF MANAGE function: monitor deployed AI systems and their autonomy boundaries
-- Vendor-neutral - OWASP Top 10 for LLM Applications: LLM08 Excessive Agency
+- **Microsoft Certified: Azure AI Apps and Agents Developer Associate (AI-103)** - Implement generative AI and agentic solutions: tool calling in a bounded agent loop, LangGraph and Semantic Kernel orchestration, and human-in-the-loop checkpoints before irreversible tool calls.
+- **Microsoft Certified: Azure AI Fundamentals (AI-901)** - Identify AI concepts and capabilities: what distinguishes an agent loop that calls tools from a single-shot model call.
+- **Microsoft Certified: Azure Solutions Architect Expert (AZ-305)** - Design identity, governance, and monitoring solutions: Application Insights tracing of each agent step for debugging and audit.
+- **Microsoft Certified: Multi-Agent AI Solutions Expert (AI-500, beta)** - Architect multi-agent solutions: deciding when to decompose a task across specialised agents versus a single agent, and adding verification steps between agent handoffs.
+- **Vendor-neutral** - NIST AI RMF MANAGE function: monitor deployed AI systems and their autonomy boundaries.
+- **Vendor-neutral** - OWASP GenAI LLM Top 10 2026: LLM03:2026 Excessive Agency and LLM06:2026 Unbounded Consumption, through step limits, argument validation and approval checkpoints.
 
 ## References
 
 - LangChain / LangGraph documentation - agent and state graph orchestration
 - Microsoft Learn - Semantic Kernel agent and planner documentation
 - Microsoft Learn - Azure OpenAI function calling and tool use
-- OWASP - Top 10 for Large Language Model Applications, LLM08 Excessive Agency
+- OWASP GenAI LLM Top 10 2026 - LLM03:2026 Excessive Agency
 - NIST AI 100-1 - AI Risk Management Framework, MANAGE function
 
 ## Suggested video search
