@@ -69,7 +69,13 @@ async function probe(url) {
       const res = await fetch(url, {
         redirect: 'follow',
         signal: controller.signal,
-        headers: { 'user-agent': USER_AGENT, accept: 'text/html,application/pdf;q=0.9,*/*;q=0.8' },
+        // Without a language, some hosts redirect to a locale guessed from the
+        // runner's region, and the recorded title is then in another language.
+        headers: {
+          'user-agent': USER_AGENT,
+          accept: 'text/html,application/pdf;q=0.9,*/*;q=0.8',
+          'accept-language': 'en',
+        },
       });
       let title = '';
       const type = res.headers.get('content-type') ?? '';
