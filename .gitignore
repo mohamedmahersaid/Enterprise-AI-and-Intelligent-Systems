@@ -1,4 +1,7 @@
 node_modules/
+
+# Local interpreter for the leaf scripts; see CONTRIBUTING.md.
+.venv/
 .DS_Store
 Thumbs.db
 *.log

@@ -7,14 +7,22 @@
  * same blocks with the same line numbers, so the extraction lives here once.
  */
 import fs from 'node:fs';
+import path from 'node:path';
 
 /**
  * The interpreter leaf code is compiled and run with. LEAF_PYTHON wins;
  * otherwise the name Python's own installer puts on PATH - `python3` on Linux
  * and macOS, `python` on Windows, where `python3` is at best a Store shim.
  */
-export const PYTHON =
-  process.env.LEAF_PYTHON || (process.platform === 'win32' ? 'python' : 'python3');
+export const PYTHON = interpreter(process.env.LEAF_PYTHON);
+
+function interpreter(configured) {
+  if (!configured) return process.platform === 'win32' ? 'python' : 'python3';
+  // A relative path such as `.venv/bin/python` is resolved against the child's
+  // working directory, and validate-scripts runs each block in a temporary one.
+  // Anchor it to where the command was typed; a bare name stays a PATH lookup.
+  return /[\\/]/.test(configured) ? path.resolve(configured) : configured;
+}
 
 /**
  * Every python block in catalog order, with the markdown line it starts on so

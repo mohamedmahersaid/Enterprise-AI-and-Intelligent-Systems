@@ -18,5 +18,5 @@
     "MD025": { "front_matter_title": "" }
   },
   "globs": ["**/*.md"],
-  "ignores": ["node_modules/**"]
+  "ignores": ["node_modules/**", ".venv/**"]
 }
