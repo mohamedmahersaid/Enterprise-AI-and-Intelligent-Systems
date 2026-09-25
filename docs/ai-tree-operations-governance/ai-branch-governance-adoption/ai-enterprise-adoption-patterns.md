@@ -268,10 +268,11 @@ The most common failure is at the portfolio level rather than the technical leve
 
 ## References
 
-- NIST AI 100-1 - AI Risk Management Framework, GOVERN and MAP functions
-- Microsoft Learn - Cloud Adoption Framework, AI adoption guidance
-- McKinsey and Gartner enterprise AI adoption surveys - human-in-the-loop maturity models
-- ISO/IEC 42001 - Artificial intelligence management systems standard, Annex A controls on lifecycle stages
+- [National Institute of Standards and Technology (NIST): Artificial Intelligence Risk Management Framework (AI RMF 1.0)](https://www.nist.gov/publications/artificial-intelligence-risk-management-framework-ai-rmf-10) - GOVERN and MAP functions for organisational accountability, risk tolerance and context mapping of AI use cases.
+- [Microsoft Learn: Plan for AI adoption](https://learn.microsoft.com/azure/cloud-adoption-framework/ai/plan) - Cloud Adoption Framework AI adoption guidance on use-case prioritisation by value and feasibility and staged adoption.
+- [McKinsey & Company: The State of AI: Global Survey 2025](https://www.mckinsey.com/capabilities/quantumblack/our-insights/the-state-of-ai) - Enterprise AI adoption survey data on how far organisations have scaled AI from pilots to enterprise use.
+- [Gartner Survey Finds 45% of Organizations With High AI Maturity Keep AI Projects Operational for at Least Three Years](https://www.gartner.com/en/newsroom/press-releases/2025-06-30-gartner-survey-finds-forty-five-percent-of-organizations-with-high-artificial-intelligence-maturity-keep-artificial-intelligence-projects-operational-for-at-least-three-years) - Enterprise AI maturity survey findings linking maturity, business trust and sustained production use.
+- [International Organization for Standardization (ISO): ISO/IEC 42001:2023 - AI management systems](https://www.iso.org/standard/42001) - AI management system standard and its Annex A controls covering the AI system lifecycle.
 
 ## Suggested video search
 

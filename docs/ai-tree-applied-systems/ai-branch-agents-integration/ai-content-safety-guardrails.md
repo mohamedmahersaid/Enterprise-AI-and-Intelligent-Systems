@@ -351,11 +351,12 @@ That people stop using the system, which makes the estate less safe while the da
 
 ## References
 
-- Azure AI Content Safety documentation - harm categories, severity levels and Prompt Shields for user prompts and documents
-- OWASP GenAI LLM Top 10 2026 - LLM01:2026 Prompt Injection, LLM10:2026 Improper Output Handling and the associated mitigations
-- NIST AI Risk Management Framework (AI 100-1) - MEASURE and MANAGE functions for operational safeguards
-- ISO/IEC 42001 - AI management system requirements covering operational controls and incident handling
-- EU AI Act - transparency and risk-management obligations for general-purpose and high-risk AI systems
+- [Microsoft Learn: Harm categories and severity levels](https://learn.microsoft.com/azure/ai-services/content-safety/concepts/harm-categories) - Harm categories and per-category severity levels used for threshold tuning.
+- [Microsoft Learn: Prompt Shields](https://learn.microsoft.com/azure/ai-services/content-safety/concepts/jailbreak-detection) - Prompt Shields for user prompts and retrieved documents.
+- [OWASP Gen AI Security Project: OWASP GenAI LLM Top 10 2026](https://genai.owasp.org/resource/owasp-genai-llm-top-10-2026/) - LLM01:2026 Prompt Injection, LLM10:2026 Improper Output Handling and associated mitigations.
+- [National Institute of Standards and Technology (NIST): Artificial Intelligence Risk Management Framework (AI RMF 1.0)](https://doi.org/10.6028/NIST.AI.100-1) - MEASURE and MANAGE functions for operational safeguards.
+- [International Organization for Standardization (ISO): ISO/IEC 42001:2023 - AI management systems](https://www.iso.org/standard/42001) - AI management system requirements covering operational controls and incident handling.
+- [EUR-Lex (Publications Office of the European Union): Regulation (EU) 2024/1689 of the European Parliament and of the Council laying down harmonised rules on artificial intelligence (Artificial Intelligence Act)](https://eur-lex.europa.eu/eli/reg/2024/1689/oj/eng) - Transparency and risk-management obligations for general-purpose and high-risk AI systems.
 
 ## Suggested video search
 

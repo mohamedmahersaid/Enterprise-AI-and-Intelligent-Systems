@@ -296,11 +296,13 @@ Vector search with a bi-encoder embeds the query and every chunk independently, 
 
 ## References
 
-- Microsoft Learn - Azure AI Search vector search and hybrid search overview
-- Microsoft Learn - Chunking and vectorization strategies for RAG in Azure AI Search
-- Ollama documentation - embeddings API reference
-- Hugging Face - sentence-transformers and cross-encoder re-ranking models
-- Pinecone / vector database vendor documentation - HNSW indexing fundamentals
+- [Microsoft Learn: Vector search in Azure AI Search](https://learn.microsoft.com/azure/search/vector-search-overview) - Vector search concepts and indexing/query workflow in Azure AI Search.
+- [Microsoft Learn: Hybrid search using vectors and full-text search in Azure AI Search](https://learn.microsoft.com/azure/search/hybrid-search-overview) - Hybrid (keyword + vector) retrieval and RRF result merging.
+- [Microsoft Learn: Chunk large documents for RAG and vector search in Azure AI Search](https://learn.microsoft.com/azure/search/vector-search-how-to-chunk-documents) - Chunking strategies, chunk size/overlap and vectorization for RAG.
+- [Ollama: Generate embeddings](https://docs.ollama.com/api/embed) - Ollama embeddings API (/api/embed) reference.
+- [Sentence Transformers (SBERT) documentation: Retrieve & Re-Rank](https://sbert.net/examples/sentence_transformer/applications/retrieve_rerank/README.html) - Bi-encoder retrieval followed by cross-encoder re-ranking pipeline.
+- [Sentence Transformers (SBERT) documentation: Usage (Cross Encoder)](https://sbert.net/docs/cross_encoder/usage/usage.html) - Using cross-encoder reranker models.
+- [arXiv (Yu. A. Malkov, D. A. Yashunin): Efficient and robust approximate nearest neighbor search using Hierarchical Navigable Small World graphs](https://arxiv.org/abs/1603.09320) - HNSW indexing fundamentals for approximate nearest neighbor vector search.
 
 ## Suggested video search
 

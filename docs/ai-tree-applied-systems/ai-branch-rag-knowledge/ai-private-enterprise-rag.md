@@ -268,11 +268,13 @@ I never trust the architecture diagram alone, because 'local' components frequen
 
 ## References
 
-- Microsoft Learn - Security trimming and document-level access control in Azure AI Search
-- Microsoft Learn - Responsible AI and data protection guidance for Azure AI solutions
-- Ollama documentation - fully offline deployment guidance
-- NIST AI 100-1 - AI Risk Management Framework, GOVERN function
-- OWASP - GenAI LLM Top 10 2026, LLM02:2026 Sensitive Information Disclosure
+- [Microsoft Learn: Security filters for trimming results in Azure AI Search](https://learn.microsoft.com/azure/search/search-security-trimming-for-azure-search) - Security trimming by applying the caller's group membership as a filter inside the search query, using a filterable ACL field.
+- [Microsoft Learn: Document-level access control in Azure AI Search](https://learn.microsoft.com/azure/search/search-document-level-access-overview) - Document-level access control approaches for RAG, including enforcement at query time and syncing permission metadata.
+- [Microsoft Learn: Data, privacy, and security for Models sold by Azure in Microsoft Foundry](https://learn.microsoft.com/azure/foundry/responsible-ai/openai/data-privacy) - Data protection guidance for managed Azure AI (including 'on your data' grounding), for comparison with a fully offline stack.
+- [Microsoft Learn: Overview of responsible AI practices for Azure OpenAI models](https://learn.microsoft.com/azure/foundry/responsible-ai/openai/overview) - Responsible AI practices for Azure AI solutions.
+- [Ollama: FAQ - Ollama](https://docs.ollama.com/faq) - Running Ollama in local-only mode bound to loopback with cloud features turned off, for an offline RAG stack.
+- [National Institute of Standards and Technology (NIST): Artificial Intelligence Risk Management Framework (AI RMF 1.0)](https://doi.org/10.6028/NIST.AI.100-1) - The AI RMF GOVERN function for data governance and access control of AI systems.
+- [OWASP Gen AI Security Project: OWASP GenAI LLM Top 10 2026](https://genai.owasp.org/resource/owasp-genai-llm-top-10-2026/) - LLM02:2026 Sensitive Information Disclosure: RAG leaking private data across users.
 
 ## Suggested video search
 

@@ -99,7 +99,7 @@ From `data/certifications.json`, last checked against vendor sources on 2026-09-
 | [Databricks Certified Machine Learning Professional](https://www.databricks.com/learn/certification/machine-learning-professional) | unverified | unverified | `ai-feature-store-skew`, `ai-mlops-mlflow-registry` |
 | [IAPP Artificial Intelligence Governance Professional (AIGP)](https://iapp.org/certify/aigp/) | unverified | unverified | `ai-governance-compliance-framework` |
 | [ISC2 Certified Information Systems Security Professional (CISSP)](https://www.isc2.org/certifications/cissp) | unverified | unverified | `ai-agent-orchestration-guardrails` |
-| [FinOps Certified Practitioner](https://learn.finops.org/page/finops-certified-practitioner) | unverified | unverified | `ai-finops-build-vs-buy`, `ai-model-selection-cost`, `ai-prototype-to-production` |
+| [FinOps Certified Practitioner](https://www.finops.org/training-certification/recommended/practitioner/) | unverified | unverified | `ai-finops-build-vs-buy`, `ai-model-selection-cost`, `ai-prototype-to-production` |
 | [PMI Agile Certified Practitioner (PMI-ACP)](https://www.pmi.org/certifications/agile-acp) | unverified | unverified | `ai-do-you-need-an-agent` |
 | [ISACA Certified Information Systems Auditor (CISA)](https://www.isaca.org/credentialing/cisa) | unverified | unverified | `ai-what-to-log` |
 | [ISACA Certified in Risk and Information Systems Control (CRISC)](https://www.isaca.org/credentialing/crisc) | unverified | unverified | `ai-do-you-need-an-agent` |

@@ -394,11 +394,15 @@ Three things, consistently. First, the system prompt is charged on every call ra
 
 ## References
 
-- Microsoft. *Azure OpenAI Service Documentation: Quotas, Limits and Provisioned Throughput.*
-- OpenAI. *API Reference: Rate Limits, Structured Outputs and Error Handling.*
-- Anthropic. *Claude API Documentation: Rate Limits and Errors.*
-- OWASP. *OWASP GenAI LLM Top 10 2026.*
-- Amazon Web Services. *Architecture Blog: Exponential Backoff and Jitter.*
+- [Microsoft Learn: Azure OpenAI in Microsoft Foundry Models quotas and limits](https://learn.microsoft.com/azure/foundry/openai/quotas-limits) - Request-per-minute and token-per-minute quotas and rate limits on Azure OpenAI deployments.
+- [Microsoft Learn: What is provisioned throughput for Foundry Models?](https://learn.microsoft.com/azure/foundry/openai/concepts/provisioned-throughput) - Provisioned throughput capacity and 429 behavior with retry-after headers.
+- [OpenAI: Rate limits | OpenAI API](https://developers.openai.com/api/docs/guides/rate-limits) - Request and token rate limits, rate-limit headers, and handling 429s.
+- [OpenAI: Structured model outputs | OpenAI API](https://developers.openai.com/api/docs/guides/structured-outputs) - JSON mode and schema-constrained structured output.
+- [OpenAI: Error codes | OpenAI API](https://developers.openai.com/api/docs/guides/error-codes) - API error handling, including 401 and 429 responses.
+- [Anthropic: Rate limits - Claude Platform Docs](https://platform.claude.com/docs/en/api/rate-limits) - Request and token rate limits and the retry-after header.
+- [Anthropic: Claude API errors - Claude Platform Docs](https://platform.claude.com/docs/en/api/errors) - API error types and how to handle them, including 429 and overloaded responses.
+- [OWASP Gen AI Security Project: OWASP GenAI LLM Top 10 2026](https://genai.owasp.org/resource/owasp-genai-llm-top-10-2026/) - LLM application security risks, such as trusting model output unchecked and unbounded consumption.
+- [Amazon Web Services (AWS Architecture Blog): Exponential Backoff And Jitter](https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/) - Exponential backoff with jitter to avoid synchronized retry bursts.
 
 ## Suggested video search
 

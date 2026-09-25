@@ -370,11 +370,15 @@ Treat it as a planned migration with an evaluation gate, not a config change. Fi
 
 ## References
 
-- Microsoft Learn - Azure OpenAI Service documentation: networking, identity and content filtering
-- Microsoft Learn - Configure Azure OpenAI with managed identity and disable local authentication
-- Microsoft Learn - Azure Private Link and private DNS zone configuration for Cognitive Services
-- Azure Architecture Center - Baseline OpenAI end-to-end chat reference architecture
-- Microsoft Learn - Azure OpenAI model deprecations and retirement schedule
+- [Microsoft Learn: Configure Azure OpenAI networking (classic)](https://learn.microsoft.com/azure/ai-foundry/openai/how-to/network) - Azure OpenAI network isolation with public network access disabled and private endpoints.
+- [Microsoft Learn: Configure content filters (classic)](https://learn.microsoft.com/azure/ai-foundry/openai/how-to/content-filters) - Configuring custom content filter policies and severity thresholds for Azure OpenAI deployments.
+- [Microsoft Learn: How to configure Azure OpenAI in Microsoft Foundry Models with Microsoft Entra ID authentication (classic)](https://learn.microsoft.com/azure/ai-foundry/openai/how-to/managed-identity) - Keyless Entra ID authentication for Azure OpenAI using managed identity and the Cognitive Services OpenAI User role.
+- [Microsoft Learn: Disable local authentication in Foundry Tools](https://learn.microsoft.com/azure/ai-services/disable-local-auth) - Disabling key-based (local) authentication on the Azure OpenAI account.
+- [Microsoft Learn: Configure Foundry Tools virtual networks](https://learn.microsoft.com/azure/ai-services/cognitive-services-virtual-networks) - Private endpoint and DNS configuration for Cognitive Services / Azure OpenAI accounts.
+- [Microsoft Learn: Azure Private Endpoint private DNS zone values](https://learn.microsoft.com/azure/private-link/private-endpoint-dns) - The privatelink.openai.azure.com private DNS zone required for Azure OpenAI private endpoints.
+- [Microsoft Learn (Azure Architecture Center): Baseline Microsoft Foundry chat reference architecture](https://learn.microsoft.com/azure/architecture/ai-ml/architecture/baseline-microsoft-foundry-chat) - Baseline enterprise reference architecture for a network-isolated, identity-secured Azure OpenAI chat workload.
+- [Microsoft Learn: Microsoft Foundry Models lifecycle and support policy](https://learn.microsoft.com/azure/foundry/openai/concepts/model-retirements) - Azure OpenAI model deprecation and retirement policy and notifications.
+- [Microsoft Learn: Model retirement schedule](https://learn.microsoft.com/azure/foundry/openai/concepts/model-retirement-schedule) - Specific retirement dates and replacement models for Azure OpenAI model versions.
 
 ## Suggested video search
 

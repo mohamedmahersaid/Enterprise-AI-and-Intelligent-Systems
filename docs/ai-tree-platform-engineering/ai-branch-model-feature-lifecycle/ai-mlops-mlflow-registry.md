@@ -321,11 +321,16 @@ Six, and each exists because of a specific failure I want to make impossible. Re
 
 ## References
 
-- MLflow documentation - tracking, model registry, stage transitions and webhooks
-- Microsoft Learn - Azure Machine Learning model registry, endpoints and controlled rollout
-- Google - Rules of Machine Learning and MLOps maturity guidance
-- ISO/IEC 42001 - AI management system requirements for lifecycle governance
-- Delta Lake and Apache Iceberg documentation - table versioning and time travel for dataset snapshots
+- [MLflow (Linux Foundation project): ML Experiment Tracking](https://mlflow.org/docs/latest/ml/tracking/) - MLflow experiment and run tracking.
+- [MLflow (Linux Foundation project): ML Model Registry](https://mlflow.org/docs/latest/ml/model-registry/) - Model registry versioning, lineage and promotion (legacy stage transitions, now aliases).
+- [MLflow (Linux Foundation project): Webhooks](https://mlflow.org/docs/latest/ml/webhooks/) - Model registry webhooks for event-driven promotion automation.
+- [Microsoft Learn: Work with registered models in Azure Machine Learning](https://learn.microsoft.com/azure/machine-learning/how-to-manage-models?view=azureml-api-2) - Azure Machine Learning model registry.
+- [Microsoft Learn: Perform safe rollout of new deployments for real-time inference](https://learn.microsoft.com/azure/machine-learning/how-to-safely-rollout-online-endpoints?view=azureml-api-2) - Online endpoints and controlled (blue-green) rollout.
+- [Google for Developers: Rules of Machine Learning: Best Practices for ML Engineering](https://developers.google.com/machine-learning/guides/rules-of-ml) - Google Rules of Machine Learning engineering practices.
+- [Google Cloud (Cloud Architecture Center): MLOps: Continuous delivery and automation pipelines in machine learning](https://docs.cloud.google.com/architecture/mlops-continuous-delivery-and-automation-pipelines-in-machine-learning) - MLOps maturity levels and pipeline automation guidance.
+- [ISO/IEC 42001:2023 - AI management systems](https://www.iso.org/standard/42001) - AI management system requirements for lifecycle governance.
+- [Delta Lake (Linux Foundation project): Table batch reads and writes](https://docs.delta.io/delta-batch/) - Delta Lake table versioning and time travel for dataset snapshots.
+- [Apache Software Foundation (Apache Iceberg): Spark Queries](https://iceberg.apache.org/docs/latest/spark-queries/) - Apache Iceberg snapshots and time travel for dataset versioning.
 
 ## Suggested video search
 

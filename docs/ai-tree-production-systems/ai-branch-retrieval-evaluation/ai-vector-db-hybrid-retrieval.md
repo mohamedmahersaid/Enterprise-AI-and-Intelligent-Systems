@@ -321,11 +321,13 @@ Reranking, in almost every case, and the reasoning is about where the error actu
 
 ## References
 
-- pgvector documentation - HNSW and IVFFlat indexing, distance operators and filtered queries
-- Qdrant documentation - filterable HNSW, payload indexing and multi-tenant collections
-- Milvus documentation - distributed architecture and index selection at billion scale
-- Reciprocal Rank Fusion (Cormack et al.) - the standard fusion method for hybrid retrieval
-- Hugging Face - sentence-transformers bi-encoder and cross-encoder reranking models
+- [pgvector project (GitHub): pgvector/README.md at master · pgvector/pgvector](https://github.com/pgvector/pgvector/blob/master/README.md) - HNSW and IVFFlat indexing, distance operators, ef_search and filtered queries in pgvector.
+- [Qdrant: Indexing - Qdrant](https://qdrant.tech/documentation/manage-data/indexing/) - Filterable HNSW and payload indexing.
+- [Qdrant: Multitenancy - Qdrant](https://qdrant.tech/documentation/manage-data/multitenancy/) - Multi-tenant collections with payload-based tenant filtering.
+- [Milvus (LF AI & Data): Milvus Architecture Overview](https://milvus.io/docs/architecture_overview.md) - Milvus distributed architecture for large-scale deployments.
+- [Milvus (LF AI & Data): Index Explained](https://milvus.io/docs/index-explained.md) - Vector index selection in Milvus.
+- [ACM (SIGIR '09 Proceedings): Reciprocal rank fusion outperforms condorcet and individual rank learning methods](https://dl.acm.org/doi/abs/10.1145/1571941.1572114) - Original Reciprocal Rank Fusion paper, the fusion method used for hybrid dense+BM25 retrieval.
+- [Sentence Transformers (maintained by Hugging Face): Retrieve & Re-Rank — Sentence Transformers documentation](https://sbert.net/examples/sentence_transformer/applications/retrieve_rerank/README.html) - Bi-encoder retrieval plus cross-encoder reranking with sentence-transformers.
 
 ## Suggested video search
 

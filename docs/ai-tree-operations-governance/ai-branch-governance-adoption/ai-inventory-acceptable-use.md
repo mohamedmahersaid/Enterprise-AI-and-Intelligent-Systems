@@ -347,11 +347,11 @@ The owner, and specifically a named person rather than a team. An unapproved sys
 
 ## References
 
-- NIST AI Risk Management Framework (AI 100-1) - GOVERN function, accountability and organisational policy
-- ISO/IEC 42001 - AI management system requirements, including scope definition and the AI system inventory
-- EU AI Act - risk categories and the obligations that follow from how a system is classified
-- Microsoft Purview documentation - data classification and sensitivity labelling as the basis for acceptable use
-- Cloud Security Alliance AI Controls Matrix - vendor-neutral control set for AI governance and oversight
+- [National Institute of Standards and Technology (NIST): Artificial Intelligence Risk Management Framework (AI RMF 1.0) (NIST AI 100-1)](https://doi.org/10.6028/NIST.AI.100-1) - GOVERN function: accountability structures, roles and organisational policy.
+- [International Organization for Standardization (ISO): ISO/IEC 42001:2023 - AI management systems](https://www.iso.org/standard/42001) - AI management system requirements, including scope definition and documenting the organisation's AI systems and resources.
+- [European Union (EUR-Lex): Regulation (EU) 2024/1689 of the European Parliament and of the Council of 13 June 2024 laying down harmonised rules on artificial intelligence (Artificial Intelligence Act)](https://eur-lex.europa.eu/eli/reg/2024/1689/oj/eng) - Risk categories and the obligations that follow from how an AI system is classified.
+- [Microsoft Learn: Learn about sensitivity labels](https://learn.microsoft.com/purview/sensitivity-labels) - Data classification and sensitivity labelling as the basis for data-class acceptable-use rules.
+- [Cloud Security Alliance: AI Controls Matrix | Framework for Trustworthy AI | CSA](https://cloudsecurityalliance.org/artifacts/ai-controls-matrix-v1-1) - Vendor-neutral control set for AI governance and oversight.
 
 ## Suggested video search
 

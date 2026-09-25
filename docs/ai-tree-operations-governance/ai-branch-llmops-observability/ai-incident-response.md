@@ -364,11 +364,13 @@ That the fix bypassed every control the organisation has, and that speed is prec
 
 ## References
 
-- EU AI Act - serious incident reporting obligations, definitions and notification windows for high-risk systems
-- NIST SP 800-61 Computer Security Incident Handling Guide - the incident lifecycle this adapts from
-- NIST AI Risk Management Framework (AI 100-1) - MANAGE function, including incident response and recovery
-- ISO/IEC 42001 - AI management system requirements for operational control, monitoring and incident handling
-- OpenTelemetry semantic conventions for generative AI - the span and attribute model for trajectory logging
+- [European Union (EUR-Lex, Official Journal): Regulation (EU) 2024/1689 of the European Parliament and of the Council of 13 June 2024 laying down harmonised rules on artificial intelligence (Artificial Intelligence Act)](https://eur-lex.europa.eu/eli/reg/2024/1689/oj/eng) - Legal text of the AI Act, including the definition of 'serious incident' and the high-risk provider obligations.
+- [European Commission (AI Act Service Desk): Article 73: Reporting of serious incidents](https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-73) - Serious-incident reporting obligations and notification windows for high-risk AI systems.
+- [National Institute of Standards and Technology (NIST): Incident Response Recommendations and Considerations for Cybersecurity Risk Management: A CSF 2.0 Community Profile (NIST SP 800-61 Rev. 3)](https://doi.org/10.6028/NIST.SP.800-61r3) - Baseline incident-response lifecycle that AI incident response adapts (current edition).
+- [National Institute of Standards and Technology (NIST): Artificial Intelligence Risk Management Framework (AI RMF 1.0) (NIST AI 100-1)](https://doi.org/10.6028/NIST.AI.100-1) - MANAGE function guidance on AI incident response, recovery and risk treatment.
+- [International Organization for Standardization (ISO) / IEC: ISO/IEC 42001:2023 - Information technology — Artificial intelligence — Management system](https://www.iso.org/standard/42001) - AI management system requirements for operational control, monitoring and incident handling.
+- [OpenTelemetry (open-telemetry/semantic-conventions-genai on GitHub): Semantic conventions for generative client AI spans](https://github.com/open-telemetry/semantic-conventions-genai/blob/main/docs/gen-ai/gen-ai-spans.md) - GenAI span and attribute model used for trajectory logging.
+- [OpenTelemetry (open-telemetry/semantic-conventions-genai on GitHub): Semantic Conventions for GenAI agent and framework spans](https://github.com/open-telemetry/semantic-conventions-genai/blob/main/docs/gen-ai/gen-ai-agent-spans.md) - Agent-level spans for logging multi-step agent trajectories.
 
 ## Suggested video search
 

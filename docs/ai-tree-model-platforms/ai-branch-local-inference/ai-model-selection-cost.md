@@ -356,11 +356,16 @@ Memory first, then throughput. Memory is weights plus KV cache plus overhead. We
 
 ## References
 
-- Microsoft Learn - Azure OpenAI Service quotas, limits and provisioned throughput units
-- Microsoft Learn - Azure OpenAI batch and prompt caching guidance
-- FinOps Foundation - FinOps for AI framework
-- Anthropic and OpenAI API documentation - prompt caching and batch processing semantics
-- Azure Well-Architected Framework - Cost Optimization pillar for AI workloads
+- [Microsoft Learn: Azure OpenAI in Microsoft Foundry Models quotas and limits](https://learn.microsoft.com/azure/foundry/openai/quotas-limits) - TPM quotas and rate limits per deployment, used to cap spend and to explain 429 throttling.
+- [Microsoft Learn: What is provisioned throughput for Foundry Models?](https://learn.microsoft.com/azure/foundry/openai/concepts/provisioned-throughput) - Provisioned throughput units and fixed-capacity versus per-token billing economics.
+- [Microsoft Learn: Getting started with Azure OpenAI batch deployments](https://learn.microsoft.com/azure/foundry/openai/how-to/batch) - Batch processing discount for work that can wait for a delayed completion window.
+- [Microsoft Learn: Prompt caching](https://learn.microsoft.com/azure/foundry/openai/how-to/prompt-caching) - Prompt caching of repeated prefixes, what breaks it, and checking cached tokens in the usage payload.
+- [FinOps Foundation: FinOps for AI - FinOps Framework Technology Category](https://www.finops.org/framework/technology-categories/ai/) - Applying FinOps allocation, showback and unit economics to AI workloads.
+- [Anthropic: Prompt caching - Claude Platform Docs](https://docs.anthropic.com/en/docs/build-with-claude/prompt-caching) - Anthropic prompt caching semantics.
+- [Anthropic: Batch processing - Claude Platform Docs](https://platform.claude.com/docs/en/build-with-claude/batch-processing) - Anthropic batch processing semantics.
+- [OpenAI: Prompt caching | OpenAI API](https://developers.openai.com/api/docs/guides/prompt-caching) - OpenAI prompt caching semantics.
+- [OpenAI: Batch API | OpenAI API](https://developers.openai.com/api/docs/guides/batch) - OpenAI batch processing semantics.
+- [Microsoft Learn: Design principles for AI workloads on Azure](https://learn.microsoft.com/azure/well-architected/ai/design-principles#cost-optimization) - Well-Architected Cost Optimization principles applied to AI workloads.
 
 ## Suggested video search
 

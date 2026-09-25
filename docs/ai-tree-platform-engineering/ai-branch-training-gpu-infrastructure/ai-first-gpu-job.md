@@ -348,11 +348,15 @@ Not into training - into allocated GPUs doing nothing. You are billed for wall-c
 
 ## References
 
-- NVIDIA documentation - `nvidia-smi` query fields, and the distinction between memory and compute utilisation
-- PyTorch documentation - DataLoader workers, prefetching and diagnosing input-bound training
-- Slurm documentation - job submission, pending reasons, time limits and backfill scheduling
-- PyTorch documentation - checkpointing and resuming training state
-- FinOps Foundation - cloud cost allocation and utilisation practices applied to GPU capacity
+- [nvidia-smi](https://docs.nvidia.com/deploy/nvidia-smi/index.html) - Nvidia-smi query fields and the distinction between memory used and GPU compute utilisation.
+- [PyTorch: torch.utils.data](https://docs.pytorch.org/docs/2.14/data.html) - DataLoader worker processes and prefetching.
+- [PyTorch: Data Loading Optimization in PyTorch](https://docs.pytorch.org/tutorials/intermediate/intermediate_data_loading_tutorial.html) - Diagnosing and fixing input-bound (data-loader-starved) training.
+- [SchedMD (Slurm Workload Manager): sbatch](https://slurm.schedmd.com/sbatch.html) - Job submission options including --gres and --time.
+- [SchedMD (Slurm Workload Manager): Job Reason Codes](https://slurm.schedmd.com/job_reason_codes.html) - Pending job reasons reported by squeue.
+- [SchedMD (Slurm Workload Manager): Scheduling Configuration Guide](https://slurm.schedmd.com/sched_config.html) - Backfill scheduling and why honest time limits start jobs sooner.
+- [PyTorch: Saving and Loading Models](https://docs.pytorch.org/tutorials/beginner/saving_loading_models.html) - Checkpointing and resuming training state.
+- [FinOps Foundation: Allocation](https://www.finops.org/framework/capabilities/allocation/) - Cloud cost allocation and showback practices.
+- [FinOps Foundation: FinOps for AI](https://www.finops.org/framework/technology-categories/ai/) - Applying FinOps allocation and utilisation practices to AI/GPU capacity.
 
 ## Suggested video search
 

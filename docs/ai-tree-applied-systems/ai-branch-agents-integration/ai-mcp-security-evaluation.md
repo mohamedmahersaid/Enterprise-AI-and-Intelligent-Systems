@@ -267,11 +267,14 @@ Governance has to be embedded in the same workflow teams already use, or it gets
 
 ## References
 
-- Model Context Protocol specification and reference SDKs (modelcontextprotocol.io)
-- OWASP - GenAI LLM Top 10 2026
-- Microsoft Learn - Azure AI Content Safety and responsible AI guidance
-- NIST AI 100-1 - AI Risk Management Framework
-- ISO/IEC 42001 - Artificial intelligence management systems standard
+- [Model Context Protocol (modelcontextprotocol.io): Specification - Model Context Protocol](https://modelcontextprotocol.io/specification/2026-07-28) - MCP client-server protocol: tools, resources, prompts and transports.
+- [Model Context Protocol (modelcontextprotocol.io): SDKs - Model Context Protocol](https://modelcontextprotocol.io/docs/sdk) - Reference SDKs used to build or audit MCP servers and clients.
+- [Model Context Protocol (modelcontextprotocol.io): Security Best Practices - Model Context Protocol](https://modelcontextprotocol.io/docs/2026-07-28/tutorials/security/security_best_practices) - Security considerations for MCP servers as a trust boundary.
+- [OWASP Gen AI Security Project: OWASP GenAI LLM Top 10 2026](https://genai.owasp.org/resource/owasp-genai-llm-top-10-2026/) - Prompt injection through MCP tool results, and excessive agency limited by least-privilege tool scoping.
+- [Microsoft Learn: What is Azure AI Content Safety?](https://learn.microsoft.com/azure/ai-services/content-safety/overview) - Input and output guardrails: prompt injection detection and harmful content filtering.
+- [Microsoft Learn: Responsible AI for Microsoft Foundry](https://learn.microsoft.com/azure/foundry/responsible-use-of-ai-overview) - Microsoft responsible AI guidance for agents: evaluation, guardrails, governance and monitoring.
+- [National Institute of Standards and Technology (NIST): Artificial Intelligence Risk Management Framework (AI RMF 1.0)](https://doi.org/10.6028/NIST.AI.100-1) - AI governance and risk management: inventory, risk classification, accountability.
+- [International Organization for Standardization (ISO): ISO/IEC 42001:2023 - AI management systems](https://www.iso.org/standard/42001) - AI management system requirements for organisational governance of AI and agents.
 
 ## Suggested video search
 

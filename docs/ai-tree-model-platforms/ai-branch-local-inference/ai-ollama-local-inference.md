@@ -321,11 +321,15 @@ Work down the stack. First confirm the model is actually on the GPU - ollama ps 
 
 ## References
 
-- Ollama documentation - Modelfile reference and API specification
-- llama.cpp repository - GGUF format specification and quantisation types
-- Hugging Face - open-weight model cards, licences and evaluation leaderboards
-- NVIDIA CUDA documentation - GPU memory management and nvidia-smi monitoring
-- NIST AI 100-1 - Artificial Intelligence Risk Management Framework
+- [Ollama: Modelfile Reference](https://docs.ollama.com/modelfile) - Modelfile syntax for pinning a base model, system prompt and parameters (temperature, num_ctx).
+- [Ollama: Introduction (Ollama API)](https://docs.ollama.com/api/introduction) - Local HTTP API specification on port 11434 (/api/tags, /api/generate, /api/pull, timing fields).
+- [Ollama: OpenAI compatibility](https://docs.ollama.com/api/openai-compatibility) - OpenAI-compatible /v1/chat/completions route.
+- [ggml-org (GitHub): GGUF (ggml/docs/gguf.md)](https://github.com/ggml-org/ggml/blob/master/docs/gguf.md) - GGUF model file format specification.
+- [ggml-org / llama.cpp (GitHub): quantize (llama.cpp/tools/quantize/README.md)](https://github.com/ggml-org/llama.cpp/blob/master/tools/quantize/README.md) - Quantisation types (e.g. Q4_K_M, Q8_0) and their size/quality trade-offs.
+- [Hugging Face: Model Cards](https://huggingface.co/docs/hub/model-cards) - Open-weight model cards used for provenance and evaluation information.
+- [Hugging Face: Licenses](https://huggingface.co/docs/hub/en/repositories-licenses) - Model licence metadata and licence obligations for open weights.
+- [nvidia-smi (NVIDIA System Management Interface) Manual](https://docs.nvidia.com/deploy/nvidia-smi/index.html) - Monitoring GPU memory (VRAM) use with nvidia-smi.
+- [National Institute of Standards and Technology (NIST): Artificial Intelligence Risk Management Framework (AI RMF 1.0) (NIST AI 100-1)](https://doi.org/10.6028/NIST.AI.100-1) - AI RMF MAP function: documenting model provenance and deployment context.
 
 ## Suggested video search
 

@@ -348,11 +348,15 @@ When something simpler already answers the question. If a user wants "the invoic
 
 ## References
 
-- Azure AI Search documentation - retrieval-augmented generation patterns, chunking and indexing
-- Anthropic documentation - context windows, long-context prompting and prompt caching
-- OpenAI documentation - retrieval, embeddings and when to use each
-- Original RAG paper (Lewis et al., 2020) - the retrieval-then-generate formulation this all descends from
-- NIST AI Risk Management Framework (AI 100-1) - MAP function, including problem framing and alternatives
+- [Microsoft Learn: Retrieval-augmented generation (RAG) in Azure AI Search](https://learn.microsoft.com/azure/search/retrieval-augmented-generation-overview) - Retrieval-augmented generation patterns and indexing in Azure AI Search.
+- [Microsoft Learn: Chunk large documents for RAG and vector search in Azure AI Search](https://learn.microsoft.com/azure/search/vector-search-how-to-chunk-documents) - Chunking strategies for RAG.
+- [Anthropic (Claude Docs): Context windows](https://docs.claude.com/en/docs/build-with-claude/context-windows) - Context window sizes and what counts toward them.
+- [Anthropic (Claude Platform Docs): Prompting best practices (long context tips)](https://docs.anthropic.com/en/docs/build-with-claude/prompt-engineering/long-context-tips) - Long-context prompting techniques.
+- [Anthropic (Claude Platform Docs): Prompt caching](https://platform.claude.com/docs/en/build-with-claude/prompt-caching) - Prompt caching as an alternative or complement to retrieval.
+- [OpenAI: Retrieval](https://developers.openai.com/api/docs/guides/retrieval) - OpenAI retrieval (vector stores, semantic search).
+- [OpenAI: Vector embeddings](https://developers.openai.com/api/docs/guides/embeddings) - Embeddings and when to use them.
+- [arXiv (Lewis et al., NeurIPS 2020): Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks](https://arxiv.org/abs/2005.11401) - The original retrieval-then-generate RAG formulation.
+- [NIST: Artificial Intelligence Risk Management Framework (AI RMF 1.0), NIST AI 100-1](https://doi.org/10.6028/NIST.AI.100-1) - MAP function: problem framing and considering alternatives.
 
 ## Suggested video search
 

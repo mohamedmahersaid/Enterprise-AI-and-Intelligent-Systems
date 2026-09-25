@@ -328,10 +328,13 @@ A system prompt directly determines model behaviour with the same blast radius a
 
 ## References
 
-- Microsoft Learn - Azure OpenAI deployment management and version lifecycle
-- Argo Rollouts documentation - canary strategies and automated analysis
-- Google - Practitioners guide to MLOps, extended considerations for generative systems
-- NIST AI 100-1 - AI Risk Management Framework, MEASURE function
+- [Microsoft Learn: Working with models](https://learn.microsoft.com/azure/foundry/openai/how-to/working-with-models) - Azure OpenAI deployment management: version pinning, upgrade policies and controlled migration between model versions.
+- [Microsoft Learn: Microsoft Foundry Models lifecycle and support policy](https://learn.microsoft.com/azure/foundry/openai/concepts/model-retirements) - Azure OpenAI model version lifecycle: deprecation, retirement and notification timelines.
+- [Argo Project: Canary Deployment Strategy - Argo Rollouts](https://argo-rollouts.readthedocs.io/en/stable/features/canary/) - Canary rollout strategies with weighted traffic steps.
+- [Argo Project: Analysis & Progressive Delivery - Argo Rollouts](https://argo-rollouts.readthedocs.io/en/stable/features/analysis/) - Automated analysis gating promotion or rollback of a canary.
+- [Google Cloud: Practitioners Guide to Machine Learning Operations (MLOps)](https://cloud.google.com/resources/mlops-whitepaper) - MLOps lifecycle foundations: continuous delivery, monitoring and model management.
+- [Google Cloud (Cloud Architecture Center): Deploy and operate generative AI applications](https://docs.cloud.google.com/architecture/deploy-operate-generative-ai-applications) - Extended MLOps considerations for deploying and operating generative AI systems.
+- [National Institute of Standards and Technology (NIST): Artificial Intelligence Risk Management Framework (AI RMF 1.0)](https://doi.org/10.6028/NIST.AI.100-1) - AI RMF MEASURE function for ongoing measurement and monitoring of deployed AI systems.
 
 ## Suggested video search
 

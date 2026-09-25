@@ -382,11 +382,13 @@ Continuous batching, and the difference is large enough that static batching sho
 
 ## References
 
-- NVIDIA. *TensorRT-LLM Documentation: In-Flight Batching and KV Cache Management.*
-- vLLM Project. *vLLM Documentation: Paged Attention, Continuous Batching and Prefix Caching.*
-- Hugging Face. *Text Generation Inference: Architecture and Performance Tuning.*
-- Ainslie et al. *GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints.* arXiv:2305.13245.
-- NVIDIA. *Data Center GPU Manager (DCGM) Documentation: Profiling and Bandwidth Metrics.*
+- [NVIDIA: Overview — TensorRT LLM](https://nvidia.github.io/TensorRT-LLM/overview.html) - In-flight (continuous) batching in TensorRT-LLM.
+- [NVIDIA: KV Cache System — TensorRT LLM](https://nvidia.github.io/TensorRT-LLM/latest/features/kvcache.html) - KV cache management (paged KV cache, memory fraction for cache) in TensorRT-LLM.
+- [vLLM Project: Paged Attention - vLLM](https://docs.vllm.ai/en/latest/design/paged_attention/) - Paged attention and block-based KV cache management in vLLM.
+- [vLLM Project: Automatic Prefix Caching - vLLM](https://docs.vllm.ai/en/stable/design/prefix_caching/) - Prefix caching of shared prompt prefixes (--enable-prefix-caching).
+- [Hugging Face: Text Generation Inference Architecture](https://huggingface.co/docs/text-generation-inference/en/architecture) - TGI serving architecture and request batching.
+- [arXiv (Ainslie et al.): GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints](https://arxiv.org/abs/2305.13245) - Grouped-query attention sharing K/V heads to shrink the KV cache.
+- [NVIDIA: Profiling — NVIDIA DCGM Documentation](https://docs.nvidia.com/datacenter/dcgm/latest/learn/modules/profiling.html) - Profiling metrics for memory bandwidth versus compute activity.
 
 ## Suggested video search
 

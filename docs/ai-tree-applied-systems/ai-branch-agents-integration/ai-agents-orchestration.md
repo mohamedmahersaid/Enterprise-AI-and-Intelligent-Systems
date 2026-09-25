@@ -296,11 +296,13 @@ Five things I do not consider optional. First, a hard maximum step count and wal
 
 ## References
 
-- LangChain / LangGraph documentation - agent and state graph orchestration
-- Microsoft Learn - Semantic Kernel agent and planner documentation
-- Microsoft Learn - Azure OpenAI function calling and tool use
-- OWASP GenAI LLM Top 10 2026 - LLM03:2026 Excessive Agency
-- NIST AI 100-1 - AI Risk Management Framework, MANAGE function
+- [LangChain: LangGraph overview](https://docs.langchain.com/oss/python/langgraph/overview) - LangGraph state-graph agent orchestration, including branching, cycles and human-in-the-loop checkpoints.
+- [LangChain overview](https://docs.langchain.com/oss/python/langchain/overview) - LangChain agents and tool/integration ecosystem.
+- [Microsoft Learn: Semantic Kernel Agent Framework](https://learn.microsoft.com/semantic-kernel/frameworks/agent/) - Semantic Kernel agent orchestration and multi-agent patterns.
+- [Microsoft Learn: What are Planners in Semantic Kernel](https://learn.microsoft.com/semantic-kernel/concepts/planning) - How Semantic Kernel decides function-call sequences (planning through automatic function calling).
+- [Microsoft Learn: How to use function calling with Microsoft Foundry Models](https://learn.microsoft.com/azure/ai-foundry/openai/how-to/function-calling) - Azure OpenAI function calling and tool use, including validating model-proposed calls.
+- [OWASP Gen AI Security Project: OWASP GenAI LLM Top 10 2026](https://genai.owasp.org/resource/owasp-genai-llm-top-10-2026/) - LLM03:2026 Excessive Agency, limited through step limits, argument validation and approval checkpoints.
+- [National Institute of Standards and Technology (NIST): Artificial Intelligence Risk Management Framework (AI RMF 1.0)](https://doi.org/10.6028/NIST.AI.100-1) - NIST AI RMF MANAGE function: monitoring deployed AI systems and their autonomy boundaries.
 
 ## Suggested video search
 
