@@ -1,10 +1,17 @@
 name: Check reference links
 
-# The network is not something a pull-request check should depend on, so link
-# health is checked on a schedule and on demand instead. validate-content
-# already guarantees every reference has an https URL; this confirms the URL
-# still answers and records the page title it resolves to.
+# validate-content guarantees every reference has an https URL; this confirms
+# the URL still answers and records the page title it resolves to. It runs on
+# pull requests that change a link, weekly to catch links that rot on their
+# own, and on demand. Only a link that is gone fails it: a host that refuses
+# automated clients is reported as unconfirmed, so the check is not flaky.
 on:
+  pull_request:
+    paths:
+      - 'docs/**/*.md'
+      - 'data/certifications.json'
+      - 'scripts/check-links.mjs'
+      - '.github/workflows/links.yml'
   schedule:
     - cron: '0 6 * * 1' # Mondays 06:00 UTC
   workflow_dispatch:
