@@ -110,18 +110,18 @@ sort data/train.jsonl | uniq -d | wc -l
 
 ### Command 3
 
-Report trainable versus total parameters - the number that tells you PEFT is actually engaged. Load the adapter with `is_trainable=True`: `PeftModel.from_pretrained` freezes it by default, and a frozen adapter reports zero trainable parameters whatever its rank
+Before training, report trainable versus total parameters for the LoRA configuration Command 4 will use - the number that tells you PEFT is actually engaged, typically well under one percent
 
 ```text
-python -c "from transformers import AutoModelForCausalLM; from peft import PeftModel; m = PeftModel.from_pretrained(AutoModelForCausalLM.from_pretrained('base-model'), 'adapters/support-classifier', is_trainable=True); m.print_trainable_parameters()"
+python -c "from transformers import AutoModelForCausalLM; from peft import LoraConfig, get_peft_model; m = get_peft_model(AutoModelForCausalLM.from_pretrained('base-model'), LoraConfig(r=16, lora_alpha=32, target_modules=['q_proj', 'k_proj', 'v_proj', 'o_proj'])); m.print_trainable_parameters()"
 ```
 
 ### Command 4
 
-Launch a LoRA run targeting all attention projections rather than a subset
+Launch a LoRA run targeting all attention projections rather than a subset, training on `data/train.jsonl` and writing the adapter where Commands 5 and 6 expect it
 
 ```text
-python -m trl.scripts.sft --model_name_or_path base-model --use_peft --lora_r 16 --lora_alpha 32 --lora_target_modules q_proj k_proj v_proj o_proj
+python -m trl.scripts.sft --model_name_or_path base-model --dataset_name data --use_peft --lora_r 16 --lora_alpha 32 --lora_target_modules q_proj k_proj v_proj o_proj --output_dir adapters/support-classifier
 ```
 
 ### Command 5

@@ -103,7 +103,7 @@ feast get-online-features -e user_id=1001 -f user_stats:tenure_days -f user_stat
 
 ### Command 5
 
-Registered feature views with their sources and TTLs - the freshness contract per feature
+The registered feature views and their entities - `feature-views describe` (Command 6) shows a view's source and TTL, the freshness contract per feature
 
 ```text
 feast feature-views list

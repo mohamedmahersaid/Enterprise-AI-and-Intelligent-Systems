@@ -49,6 +49,12 @@ and `challenger` for what is being evaluated. Serving loads `models:/fraud-model
 promotion moves the alias, and rollback moves it back. Aliases are free-form, so the
 names are a convention the team agrees - pick them once and gate on them.
 
+An alias is resolved **when serving loads the model**, not on every request. Moving
+`champion` changes what the next deployment loads; the process already serving keeps
+the version it started with. Promotion and rollback are therefore *move the alias,
+then redeploy* - which is why the move should trigger the deployment rather than rely
+on someone remembering to.
+
 ### Promotion gates make the registry real
 
 Moving the `champion` alias should require: offline evaluation against the current champion on
@@ -106,7 +112,7 @@ mlflow runs describe --run-id <id>
 
 ### Command 3
 
-Serve whichever version the `champion` alias points at, by registry reference rather than by file path. `--env-manager local` uses the current Python environment; production images are built with `mlflow models build-docker`
+Serve whichever version the `champion` alias points at when the process starts, by registry reference rather than by file path. `--env-manager local` uses the current Python environment; production images are built with `mlflow models build-docker`
 
 ```text
 mlflow models serve -m "models:/fraud-model@champion" -p 5000 --env-manager local
@@ -152,7 +158,6 @@ import os
 import sys
 
 from mlflow import MlflowClient
-from mlflow.exceptions import MlflowException
 
 MODEL = "fraud-model"
 MIN_AUC_UPLIFT = 0.0      # must at least match champion
@@ -168,19 +173,27 @@ client = MlflowClient()
 failures = []
 
 
-def aliased(model, alias):
+# Read every alias in one call. Any registry error - permissions, an outage -
+# propagates and fails the gate; only an alias that is genuinely unset is
+# treated as absent. Catching errors here would skip the champion comparison
+# whenever the registry misbehaved, and promote an unchecked model.
+ALIASES = client.get_registered_model(MODEL).aliases
+
+
+def aliased(alias):
     """The version an alias points at, or None if the alias is not set."""
-    try:
-        return client.get_model_version_by_alias(model, alias)
-    except MlflowException:
-        return None
+    version = ALIASES.get(alias)
+    return client.get_model_version(MODEL, version) if version else None
 
 
-candidate = aliased(MODEL, "challenger")
-champion = aliased(MODEL, "champion")
+candidate = aliased("challenger")
+champion = aliased("champion")
 
 if candidate is None:
     print("no version has the challenger alias - set it on the version to evaluate")
+    sys.exit(2)
+if champion is not None and champion.version == candidate.version:
+    print("challenger already is champion (version %s) - nothing to promote" % candidate.version)
     sys.exit(2)
 
 cand_run = client.get_run(candidate.run_id)
@@ -223,13 +236,17 @@ if failures:
         print("  FAIL " + f)
     sys.exit(1)
 
-# Moving the alias is the promotion. The previous champion stays in the
-# registry untouched, so rollback is pointing the alias back at it.
+# Moving the alias is the promotion; the deployment it triggers is what
+# changes serving. The outgoing champion keeps its version and gains the
+# previous-champion alias, so rollback has a recorded target rather than
+# "one version back", which may be a version the gate blocked.
+if champion is not None:
+    client.set_registered_model_alias(MODEL, "previous-champion", champion.version)
 client.set_registered_model_alias(MODEL, "champion", candidate.version)
 client.delete_registered_model_alias(MODEL, "challenger")
-print("promoted %s version %s to champion" % (MODEL, candidate.version))
+print("promoted %s version %s to champion - redeploy serving to load it" % (MODEL, candidate.version))
 if champion is not None:
-    print("rollback: point champion back at version %s" % champion.version)
+    print("rollback: point champion at previous-champion (version %s) and redeploy" % champion.version)
 sys.exit(0)
 ```
 
@@ -247,7 +264,7 @@ sys.exit(0)
 6. Attempt promotion and confirm the fairness gate blocks it, naming the failing slice.
 7. Remove the dataset hash tag from a run and confirm the reproducibility gate blocks it independently.
 8. Promote a genuinely better model and deploy it shadow, then canary, then full.
-9. Simulate a production regression and roll back by pointing the `champion` alias at the previous version. Measure how long the rollback takes.
+9. Simulate a production regression and roll back by pointing the `champion` alias at the `previous-champion` version and redeploying. Measure how long the rollback takes, from the alias move to the old version answering requests.
 10. Confirm no retraining was required to roll back.
 
 ### Validation
@@ -265,15 +282,17 @@ sys.exit(0)
 
 - **Run the gate script in CI** on every promotion request so promotion is a
   pipeline outcome rather than a console click. A gate the model author can bypass by
-  changing a dropdown is documentation, not a control, and reviewers will assume it is
-  the latter unless the pipeline is the only path.
+  editing the alias in the UI is documentation, not a control, and reviewers will assume
+  it is the latter unless the pipeline is the only path - so grant edit permission on
+  the registered model to the CI identity alone, since moving an alias needs only that.
 - **Log the dataset hash automatically** in the training wrapper rather than relying on
   discipline. Left to convention it is omitted exactly when it matters most - during a
   rushed retrain under incident pressure - which is also the run most likely to end up
   promoted to production.
 - **Webhook the registry to deployment.** Moving the `champion` alias should trigger the
-  shadow deployment automatically - MLflow 3 registry webhooks fire a
-  `model_version_alias.created` event for exactly this - because a manual step here becomes drift between what
+  shadow deployment automatically. MLflow 3 registry webhooks fire a
+  `model_version_alias.created` event when an alias is set - for every alias, so the
+  receiver must act only when the payload names `champion` - because a manual step here becomes drift between what
   the registry claims is running and what is actually serving, and incident response
   will trust the registry.
 - **Reconcile serving version against the `champion` alias** on a schedule and alert on
@@ -308,7 +327,7 @@ sys.exit(0)
 
 ### Scenario 4: The registry's champion alias points at one version but a different model is serving.
 
-**Likely cause:** The alias is moved by hand in the UI while deployment is a separate manual step, so the two drift apart. Serving from a pinned version or file path rather than `models:/fraud-model@champion` produces the same drift.
+**Likely cause:** The alias is moved by hand in the UI while deployment is a separate manual step, so the two drift apart. Moving the alias without redeploying produces the same drift, because serving resolves the alias only when it loads the model.
 
 **Resolution:** Drive deployment from a registry webhook on the alias event so moving `champion` triggers the rollout automatically, and add a reconciliation check that compares the serving model's version against the alias (Command 6) and alerts on mismatch. A registry that describes intent rather than reality is worse than none, because incident response will trust it.
 
@@ -330,7 +349,7 @@ Because without it the run is not reproducible, and reproducibility is the prope
 
 ### 3. How do you roll back a model?
 
-By promoting the previous registry version, which makes rollback a selection rather than a rebuild. Every version that was ever promoted remains in the registry with its artifacts, so the prior known-good model is already sitting there ready to serve. That is the entire argument for routing serving through a registry alias rather than a file path: rollback is moving `champion` back one version. The failure mode is well worn: the serving layer points at a hard-coded artifact path or a container image baked at build time, nobody exercises the rollback path because deployments have been fine, and the gap is discovered during the first bad deployment - at which point rollback means an emergency retrain under incident conditions, with the on-call engineer trying to reconstruct which dataset version the previous model used. I test the rollback path deliberately as part of onboarding a model to production, in the same way one tests a database restore rather than assuming backups work, because an untested rollback is an assumption rather than a capability.
+By pointing the champion alias back at the previously promoted version, which makes rollback a selection rather than a rebuild. Every version that was ever promoted remains in the registry with its artifacts, so the prior known-good model is already sitting there ready to serve. That is the entire argument for routing serving through a registry alias rather than a file path: rollback is pointing `champion` at the previous champion's version - recorded by the gate as `previous-champion`, not assumed to be one version back - and redeploying. The failure mode is well worn: the serving layer points at a hard-coded artifact path or a container image baked at build time, nobody exercises the rollback path because deployments have been fine, and the gap is discovered during the first bad deployment - at which point rollback means an emergency retrain under incident conditions, with the on-call engineer trying to reconstruct which dataset version the previous model used. I test the rollback path deliberately as part of onboarding a model to production, in the same way one tests a database restore rather than assuming backups work, because an untested rollback is an assumption rather than a capability.
 
 ### 4. What gates would you require before a model reaches production?
 
