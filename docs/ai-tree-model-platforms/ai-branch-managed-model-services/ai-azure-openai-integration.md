@@ -323,8 +323,36 @@ exit ([int]($failCount -gt 0))
 3. Confirm the endpoint works from the internet with a key, then disable public network access and confirm the same call now fails.
 4. Create a private endpoint into the application subnet and link the privatelink.openai.azure.com private DNS zone to the VNet.
 5. Deploy a small App Service or container into the VNet with a managed identity and assign it the Cognitive Services OpenAI User role.
-6. Modify the application to acquire an Entra token via DefaultAzureCredential rather than reading an API key, and confirm a successful completion.
-7. Disable local authentication on the account and confirm key-based calls now fail while the managed identity path still succeeds.
+6. Modify the application to acquire an Entra token via DefaultAzureCredential rather than reading an API key, and confirm a successful completion. The change is the client construction below (requires `pip install azure-identity openai`): the token scope is `https://ai.azure.com/.default`, the base URL is the v1 route, and the deployment name goes in `model`.
+
+```python
+"""Lab step 6: call the deployment with an Entra token instead of an API key."""
+import os
+import sys
+
+endpoint = os.environ.get("AZURE_OPENAI_ENDPOINT")  # https://aoai-prod.openai.azure.com
+if not endpoint:
+    sys.exit("set AZURE_OPENAI_ENDPOINT (and AZURE_OPENAI_DEPLOYMENT, default chat) first")
+
+try:
+    from azure.identity import DefaultAzureCredential, get_bearer_token_provider
+    from openai import OpenAI
+except ImportError:
+    sys.exit("pip install azure-identity openai first")
+
+# az login on a laptop, managed identity on App Service or AKS; no key anywhere.
+token_provider = get_bearer_token_provider(
+    DefaultAzureCredential(), "https://ai.azure.com/.default"
+)
+client = OpenAI(base_url=f"{endpoint.rstrip('/')}/openai/v1/", api_key=token_provider)
+response = client.chat.completions.create(
+    model=os.environ.get("AZURE_OPENAI_DEPLOYMENT", "chat"),  # deployment, not model
+    messages=[{"role": "user", "content": "Reply with the word ok."}],
+)
+print(response.choices[0].message.content)
+```
+
+7. Disable local authentication on the account (Command 9) and confirm key-based calls now fail with HTTP 401 (Command 10) while the managed identity path still succeeds; propagation can take several hours, so repeat the key check rather than trusting the first result.
 8. Enable diagnostic settings to a Log Analytics workspace and locate your own request in the RequestResponse table.
 9. Configure a content filter policy and verify a disallowed prompt is blocked with the expected error shape.
 10. Run the PowerShell posture audit and remediate any FAIL rows until it exits zero.
@@ -334,7 +362,7 @@ exit ([int]($failCount -gt 0))
 - A call from the public internet to the account endpoint fails with a network or forbidden error.
 - A call from inside the VNet using managed identity succeeds and returns a completion.
 - nslookup of the account hostname from inside the VNet resolves to a private IP in the private endpoint subnet.
-- An API-key call fails after local authentication is disabled.
+- An API-key call fails with HTTP 401 after local authentication is disabled and has propagated.
 - The RequestResponse table in Log Analytics contains the test request with the calling identity recorded.
 - The posture audit script exits with code 0 and every control reports PASS in aoai-posture.csv.
 
@@ -350,7 +378,7 @@ exit ([int]($failCount -gt 0))
 
 **Continuous posture verification.** Run the audit script on a schedule in Azure Automation or a pipeline, publishing results to a workbook. It exits non-zero on any failure so it can gate a release. This closes the gap between the compliance statement and the running configuration, which is where audit findings actually come from.
 
-**Key elimination as a project.** Enumerate every caller from the diagnostic logs, migrate each to managed identity, then set disableLocalAuth. Regenerating keys first is a useful forcing function - anything that breaks was still using key auth.
+**Key elimination as a project.** Enumerate every caller from the diagnostic logs, migrate each to managed identity, then set disableLocalAuth and keep testing an old key until it gets 401, because the change can take hours to reach every node. Assign the built-in policy "Azure AI Services resources should have key access disabled (disable local authentication)" so an account that drifts back to keys is reported rather than discovered. Regenerating keys first is a useful forcing function - anything that breaks was still using key auth.
 
 ## Troubleshooting
 
@@ -364,7 +392,7 @@ exit ([int]($failCount -gt 0))
 
 **Likely cause:** The wrong scope or role was assigned, the token was requested for the wrong audience, or role assignment propagation has not completed.
 
-**Resolution:** Confirm the role is Cognitive Services OpenAI User assigned at the account scope - Contributor grants control-plane rights but not data-plane inference. Ensure the token audience is `https://cognitiveservices.azure.com`. Allow several minutes for propagation and restart the application so it does not serve a cached negative token.
+**Resolution:** Confirm the role is Cognitive Services OpenAI User assigned at the account scope - Contributor grants control-plane rights but not data-plane inference. Ensure the token is requested for `https://ai.azure.com/.default` (`--resource https://ai.azure.com` from the CLI), which the v1 API expects. Allow up to five minutes for propagation and restart the application so it does not serve a cached negative token.
 
 ### Scenario 3: Requests intermittently return 429 despite provisioned capacity that looks sufficient.
 
