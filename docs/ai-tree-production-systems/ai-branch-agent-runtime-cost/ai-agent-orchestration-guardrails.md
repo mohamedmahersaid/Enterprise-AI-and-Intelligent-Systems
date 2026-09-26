@@ -144,6 +144,10 @@ from langgraph.graph import StateGraph, END
 MAX_STEPS = 12
 MAX_TOKENS = 40000
 IRREVERSIBLE = {"delete_resource", "send_email", "restart_service", "issue_refund"}
+# The most this AGENT may ever do, whoever invokes it. A tool outside the
+# ceiling is denied even for a user who holds its scope, so an administrator's
+# session does not widen what an injected instruction can reach.
+AGENT_TOOL_CEILING = {"search_docs", "read_ticket", "send_email", "restart_service"}
 
 
 class AgentState(TypedDict):
@@ -177,9 +181,11 @@ def authorise(state: AgentState, tool: str) -> bool:
 
     An agent holding one privileged service account is a confused deputy:
     prompt-inject it and the attacker inherits everything it can reach.
+    The effective scope is the agent ceiling intersected with the user's
+    scopes: neither side alone can grant a tool.
     """
-    required = "tool:" + tool
-    return required in state["user_scopes"]
+    user_tools = {s[len("tool:"):] for s in state["user_scopes"] if s.startswith("tool:")}
+    return tool in AGENT_TOOL_CEILING & user_tools
 
 
 def router(state: AgentState) -> AgentState:
@@ -193,8 +199,11 @@ def call_tool(state: AgentState) -> AgentState:
     tool = action.get("tool", "")
 
     if not authorise(state, tool):
-        state["trace"].append({"event": "denied", "tool": tool, "user": state["user_id"]})
-        state["result"] = "Not permitted: your account cannot use %s." % tool
+        reason = "user_scope" if tool in AGENT_TOOL_CEILING else "agent_ceiling"
+        state["trace"].append({"event": "denied", "tool": tool, "user": state["user_id"],
+                               "reason": reason})
+        state["result"] = "Not permitted: %s cannot use %s." % (
+            "your account" if reason == "user_scope" else "this agent", tool)
         return state
 
     # Irreversible actions never execute without explicit human approval.
@@ -246,15 +255,17 @@ app = graph.compile()
 6. Observe the agent execute it - this is the confused deputy, and the agent behaved exactly as designed.
 7. Change tool authorisation to use the invoking user scopes instead of the service account.
 8. Repeat the injection with a user lacking that scope and confirm the tool call is denied and traced.
-9. Add human approval as a node for irreversible actions and confirm the agent halts awaiting approval.
-10. Persist state mid-run, kill the process, and resume from the persisted state.
-11. Retrieve the full trace for a run and walk through every prompt, tool call and routing decision.
+9. Repeat the injection as an administrator who holds `tool:delete_resource`, and confirm it is still denied with reason `agent_ceiling`, because delete_resource is outside `AGENT_TOOL_CEILING` whoever is signed in.
+10. Add human approval as a node for irreversible actions and confirm the agent halts awaiting approval.
+11. Persist state mid-run, kill the process, and resume from the persisted state.
+12. Retrieve the full trace for a run and walk through every prompt, tool call and routing decision.
 
 ### Validation
 
 - Unguarded agent demonstrably loops and burns budget.
 - Guarded version aborts cleanly.
 - Prompt injection succeeds against the service-account model and is denied under user-scoped authorisation.
+- The same injection run as an administrator is denied by the agent tool ceiling, and the trace records reason `agent_ceiling`.
 - Irreversible actions halt for approval.
 - A killed run resumes from persisted state.
 
@@ -271,7 +282,12 @@ app = graph.compile()
   do something it cannot, which is a design signal rather than a capacity one.
 - **Derive tool scopes from the invoking user identity** at request time and never let the
   agent hold a static privileged credential. A successful prompt injection should be
-  bounded by what that user could already have done themselves.
+  bounded by what that user could already have done themselves, and never more than the
+  agent's own tool ceiling allows. When a user is present, call downstream services
+  on-behalf-of that user with a delegated token; when the agent runs unattended, give it
+  its own identity with roles assigned at resource scope (the one index, queue or account
+  it touches) rather than resource group or subscription. Either way use short-lived
+  tokens acquired per run, so a leaked or injected session loses its reach when the run ends.
 - **Scope the human approval node to genuinely irreversible actions** - deleting data,
   spending money, external communication. An over-broad gate produces approval fatigue and
   converts the control into a rubber stamp, which is weaker than a narrow gate people read.
@@ -350,7 +366,8 @@ From the trace, which has to exist before the incident. I want every prompt, eve
 - [OWASP Gen AI Security Project: OWASP GenAI LLM Top 10 2026](https://genai.owasp.org/resource/owasp-genai-llm-top-10-2026/) - LLM01:2026 Prompt Injection and Excessive Agency risks for tool-using agents.
 - [Model Context Protocol: Authorization - Model Context Protocol](https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization) - MCP authorisation boundaries for tools exposed to agents.
 - [Microsoft Learn: How toolbox authentication works in Microsoft Foundry](https://learn.microsoft.com/azure/foundry/agents/how-to/tools/tool-authentication) - Agent tool calling with identity-scoped (per-user) access instead of a shared service account.
-- [Microsoft Learn: Agent identity concepts in Microsoft Foundry](https://learn.microsoft.com/azure/foundry/agents/concepts/agent-identity) - Identity-scoped access for agents via the on-behalf-of flow.
+- [Microsoft Learn: Agent identity concepts in Microsoft Foundry](https://learn.microsoft.com/azure/foundry/agents/concepts/agent-identity) - Identity-scoped access for agents via the on-behalf-of flow, and resource-scoped roles for an agent's own identity instead of subscription-wide access.
+- [Microsoft Learn: Defend against indirect prompt injection attacks](https://learn.microsoft.com/security/zero-trust/sfi/defend-indirect-prompt-injection) - Least privilege with short-lived privileges and human approval as layered defences against injected instructions.
 - [National Institute of Standards and Technology (NIST AI 100-1): Artificial Intelligence Risk Management Framework (AI RMF 1.0)](https://doi.org/10.6028/NIST.AI.100-1) - MANAGE function guidance on bounding autonomy and human oversight.
 
 ## Suggested video search

@@ -323,7 +323,13 @@ exit ([int]($failCount -gt 0))
 3. Confirm the endpoint works from the internet with a key, then disable public network access and confirm the same call now fails.
 4. Create a private endpoint into the application subnet and link the privatelink.openai.azure.com private DNS zone to the VNet.
 5. Deploy a small App Service or container into the VNet with a managed identity and assign it the Cognitive Services OpenAI User role.
-6. Modify the application to acquire an Entra token via DefaultAzureCredential rather than reading an API key, and confirm a successful completion. The change is the client construction below (requires `pip install azure-identity openai`): the token scope is `https://ai.azure.com/.default`, the base URL is the v1 route, and the deployment name goes in `model`.
+6. Modify the application to acquire an Entra token via DefaultAzureCredential rather than reading an API key, and confirm a successful completion. The change is the client construction shown after these steps.
+7. Disable local authentication on the account (Command 9) and confirm key-based calls now fail with HTTP 401 (Command 10) while the managed identity path still succeeds; propagation can take several hours, so repeat the key check rather than trusting the first result.
+8. Enable diagnostic settings to a Log Analytics workspace and locate your own request in the RequestResponse table.
+9. Configure a content filter policy and verify a disallowed prompt is blocked with the expected error shape.
+10. Run the PowerShell posture audit and remediate any FAIL rows until it exits zero.
+
+The client for step 6 requires `pip install azure-identity openai`. The token scope is `https://ai.azure.com/.default`, the base URL is the v1 route with no api-version, and the deployment name goes in `model`.
 
 ```python
 """Lab step 6: call the deployment with an Entra token instead of an API key."""
@@ -351,11 +357,6 @@ response = client.chat.completions.create(
 )
 print(response.choices[0].message.content)
 ```
-
-7. Disable local authentication on the account (Command 9) and confirm key-based calls now fail with HTTP 401 (Command 10) while the managed identity path still succeeds; propagation can take several hours, so repeat the key check rather than trusting the first result.
-8. Enable diagnostic settings to a Log Analytics workspace and locate your own request in the RequestResponse table.
-9. Configure a content filter policy and verify a disallowed prompt is blocked with the expected error shape.
-10. Run the PowerShell posture audit and remediate any FAIL rows until it exits zero.
 
 ### Validation
 

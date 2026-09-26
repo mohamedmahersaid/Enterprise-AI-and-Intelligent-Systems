@@ -26,6 +26,8 @@ A RAG system that answers from private documents is, architecturally, a data exf
 
 **Access control at retrieval time** is the control most RAG implementations get wrong. It is not enough to check access when the user opens the source document library - the RAG system itself must re-check per-chunk access at query time, because a single vector index commonly spans documents with different sensitivity levels for different users. The two dominant patterns are document-level security trimming, where the vector search query is filtered by the querying user's group membership before results are ever ranked, and index segregation, where separate indexes exist per sensitivity tier and the application selects the index set based on the caller's clearance. Filtering must happen inside the search query, not after retrieval, because post-hoc filtering after fetching top-k can return fewer results than requested or - worse - leak a fact via the ranking signal even when the document itself is later excluded.
 
+**Authorized is not trusted.** Security trimming decides which chunks a user may read; it says nothing about who wrote them. A chunk the user is entitled to see can still carry instructions from anyone who can write to the source - a shared wiki page, a supplier contract, an email archived into the library - and the model reads those instructions in the middle of the user's own request. Because this stack is air-gapped, the defence has to run locally: wrap each chunk in explicit delimiters, data-mark it (for example with a random per-request tag on every chunk boundary), and state in the system prompt that text inside those markers is reference material, never instructions. Where the same design runs on the managed Azure variant, add Prompt Shields document scanning in front of the prompt as well; the air-gapped build has no route to it. Log the id of every chunk placed in context, so an answer that followed an injected instruction can be traced back to the document that carried it.
+
 ## Architecture and flow
 
 ```mermaid
@@ -38,7 +40,8 @@ flowchart TD
     G --> H[Search WITH security filter\nACL groups in query, not post-filter]
     E --> H
     H --> I[Filtered top-K chunks]
-    I --> J[Local LLM generation\nno egress]
+    I --> S[Delimit + data-mark chunks\nlog chunk ids in context]
+    S --> J[Local LLM generation\nno egress]
     J --> K[Grounded answer\nonly from authorized chunks]
     B -.air-gapped boundary.-> D
     D -.air-gapped boundary.-> J
@@ -206,7 +209,7 @@ if __name__ == "__main__":
 
 **Air-gapped model and dependency mirroring.** Automate the same artifact-mirroring pattern used for local inference models: pull embedding models, generation models, and any local OCR/parsing tool dependencies once on a connected staging host, sign and publish to an internal mirror, and have air-gapped hosts pull only from there. Pin every component by digest.
 
-**Audit every query.** Log the querying user's identity, the ACL filter applied, and which document sources contributed to the final answer for every RAG interaction. This turns the system's compliance story from an architecture diagram into an auditable trail, and lets a security review reconstruct exactly what data a specific user could have seen at a specific time.
+**Audit every query.** Log the querying user's identity, the ACL filter applied, the ids of the chunks placed in context, and which document sources contributed to the final answer for every RAG interaction. This turns the system's compliance story from an architecture diagram into an auditable trail, and lets a security review reconstruct exactly what data a specific user could have seen at a specific time.
 
 **Automated data classification drift detection.** Periodically re-scan ingested documents for classification markers (e.g. document header labels) and flag any chunk whose stored ACL metadata no longer matches the source document's current classification.
 
@@ -274,6 +277,8 @@ I never trust the architecture diagram alone, because 'local' components frequen
 - [Microsoft Learn: Document-level access control in Azure AI Search](https://learn.microsoft.com/azure/search/search-document-level-access-overview) - Document-level access control approaches for RAG, including enforcement at query time and syncing permission metadata.
 - [Microsoft Learn: Data, privacy, and security for Models sold by Azure in Microsoft Foundry](https://learn.microsoft.com/azure/foundry/responsible-ai/openai/data-privacy) - Data protection guidance for managed Azure AI (including 'on your data' grounding), for comparison with a fully offline stack.
 - [Microsoft Learn: Overview of responsible AI practices for Azure OpenAI models](https://learn.microsoft.com/azure/foundry/responsible-ai/openai/overview) - Responsible AI practices for Azure AI solutions.
+- [Microsoft Learn: Defend against indirect prompt injection attacks](https://learn.microsoft.com/security/zero-trust/sfi/defend-indirect-prompt-injection) - Spotlighting by delimiting and data marking, the local defence for chunks a user is authorized to read but that carry third-party instructions.
+- [Microsoft Learn: Prompt Shields](https://learn.microsoft.com/azure/ai-services/content-safety/concepts/jailbreak-detection) - Document-attack scanning for the managed Azure variant of the same design.
 - [Ollama: FAQ - Ollama](https://docs.ollama.com/faq) - Running Ollama in local-only mode bound to loopback with cloud features turned off, for an offline RAG stack.
 - [National Institute of Standards and Technology (NIST): Artificial Intelligence Risk Management Framework (AI RMF 1.0)](https://doi.org/10.6028/NIST.AI.100-1) - The AI RMF GOVERN function for data governance and access control of AI systems.
 - [OWASP Gen AI Security Project: OWASP GenAI LLM Top 10 2026](https://genai.owasp.org/resource/owasp-genai-llm-top-10-2026/) - LLM02:2026 Sensitive Information Disclosure: RAG leaking private data across users.

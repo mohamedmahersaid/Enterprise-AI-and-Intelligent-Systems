@@ -20,7 +20,7 @@ Each service versions independently - a date that differs between services is ex
 
 | Value | Used by |
 | --- | --- |
-| `Azure AI Content Safety 2024-09-01` | `ai-content-safety-guardrails` |
+| `Azure AI Content Safety 2024-09-01` | `ai-agents-orchestration`, `ai-content-safety-guardrails`, `ai-mcp-security-evaluation` |
 | `Azure AI Search 2026-04-01` | `ai-how-retrieval-finds-things` |
 
 ### Azure OpenAI API surface
@@ -29,7 +29,7 @@ The v1 API carries no date version: calls go to /openai/v1/ and name the deploym
 
 | Value | Used by |
 | --- | --- |
-| `Azure OpenAI v1` | `ai-llmops-deployment-lifecycle`, `ai-model-selection-cost`, `ai-prompt-engineering-ops` |
+| `Azure OpenAI v1` | `ai-azure-openai-integration`, `ai-llmops-deployment-lifecycle`, `ai-model-selection-cost`, `ai-prompt-engineering-ops` |
 
 ### Azure OpenAI model versions pinned by deployment commands
 
@@ -131,16 +131,16 @@ Derived from the leading command in every `text` block. A leaf listing a tool as
 | `ai-ollama-local-inference` | Ollama, curl |
 | `ai-model-selection-cost` | Azure CLI, NVIDIA driver and CUDA runtime, Ollama |
 | `ai-local-inference-at-scale` | NVIDIA driver and CUDA runtime, curl, vLLM |
-| `ai-azure-openai-integration` | Azure CLI |
-| `ai-prompt-engineering-ops` | Ollama, Python 3, curl, git, jq |
+| `ai-azure-openai-integration` | Azure CLI, curl |
+| `ai-prompt-engineering-ops` | Azure CLI, Ollama, Python 3, curl, git, jq |
 | `ai-provider-failover` | Azure CLI, curl, jq |
 | `ai-first-managed-endpoint` | curl, git |
 | `ai-rag-architecture` | Azure CLI, Ollama, Python 3, curl |
 | `ai-private-enterprise-rag` | Azure CLI, curl |
 | `ai-do-you-need-rag` | Python 3, curl, jq |
 | `ai-agents-orchestration` | Azure CLI, Python 3, curl, pip |
-| `ai-mcp-security-evaluation` | Azure CLI, Python 3, pip |
-| `ai-content-safety-guardrails` | curl, jq |
+| `ai-mcp-security-evaluation` | Azure CLI, Python 3, jq, pip |
+| `ai-content-safety-guardrails` | jq |
 | `ai-do-you-need-an-agent` | curl, jq |
 | `ai-llmops-deployment-lifecycle` | Azure CLI, Python 3, git, kubectl |
 | `ai-observability-performance-monitoring` | Azure CLI, NVIDIA driver and CUDA runtime, curl, kubectl |
@@ -158,7 +158,7 @@ Derived from the leading command in every `text` block. A leaf listing a tool as
 | `ai-reproducible-training-runs` | Python 3, git |
 | `ai-vector-db-hybrid-retrieval` | curl, psql (PostgreSQL client) |
 | `ai-evaluation-harness-gates` | Python 3, git, promptfoo |
-| `ai-how-retrieval-finds-things` | curl, jq |
+| `ai-how-retrieval-finds-things` | Azure CLI, curl, jq |
 | `ai-agent-orchestration-guardrails` | Python 3, curl, kubectl, pip |
 | `ai-finops-build-vs-buy` | NVIDIA driver and CUDA runtime, curl, kubectl |
 | `ai-prototype-to-production` | curl |
