@@ -145,9 +145,10 @@ run `npm run regen` to rewrite the derived files, rather than editing them.
 | `npm run validate:mermaid` | Every mermaid diagram parses |
 | `npm run validate:python` | Every python block in a leaf compiles, and every third-party module it imports is named by a `pip install` in the same leaf (parsed, never executed) |
 | `npm run validate:scripts` | Every python block, run with no arguments in an empty directory, completes or stops with its own message rather than a traceback |
-| `npm run validate:commands` | Every command block is free of literal credentials, destructive operations, `curl \| sh`, plaintext `http://` and placeholder drift (textual, never executed) |
+| `npm run validate:commands` | Every command block is free of literal credentials, destructive operations, `curl \| sh`, plaintext `http://`, placeholder drift and any command in `data/command-deny.json` (textual, never executed) |
 | `npm run lint:md` | Markdown style |
-| `npm run validate` | All six, in order |
+| `npm test` | Unit tests for the validators in `scripts/`, on small fixtures in `test/` |
+| `npm run validate` | `npm test`, then the six `validate:*` and `lint:md` checks above, in order |
 
 `validate:content` also re-derives `ASSUMPTIONS.md` and fails if it is out of
 step, so changing a command or a pinned version means running `npm run regen`.
@@ -185,6 +186,25 @@ kept in shell history and visible in the process list.
 `validate:commands` is deliberately not a shell linter. Commands are documented
 with `<angle-bracket>` placeholders and some blocks are SQL, so a shell parser
 rejects correct content; it checks safety and convention invariants instead.
+
+When a command is found to be stale - a command group that does not exist, a
+removed flag - fix every leaf, then add it to `data/command-deny.json` so it
+cannot come back. The file is a JSON array of
+`{"pattern": "<JavaScript regex source>", "reason": "<why, and the replacement>", "source": "<URL checked>"}`.
+Each pattern is matched against every line of every `text` command block, and
+a hit fails with the leaf, line, reason and source. Prose is not checked, so a
+leaf can still say what a command replaced. A pattern that does not compile or
+matches an empty line, or an entry without a reason or a source URL, fails the
+check; with no file, there are no entries.
+
+`npm test` runs `node --test` with no arguments, which runs every `.mjs` file
+under `test/` on Node 20 and on Node 22 (CI runs 22), so a file there is a test
+file, not a shared fixture. The validators are otherwise exercised only against
+the corpus, where a rule that stops firing still passes, so a change to a check
+in `scripts/` or `scripts/lib/` comes with a test: the case it should reject and
+the correct content it must still pass. Tests use small in-memory or
+temporary-directory fixtures and never read the network; the readiness tests
+also resolve workflow paths against the repository itself.
 
 ## Live validation
 

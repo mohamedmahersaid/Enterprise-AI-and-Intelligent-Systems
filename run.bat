@@ -4,7 +4,8 @@ rem  AI & Intelligent Systems curriculum - Windows launcher
 rem
 rem  Double-click for a menu, or name a target from a shell:
 rem
-rem      run.bat validate        all six checks, in the order CI runs them
+rem      run.bat validate        unit tests and all six checks, in the order CI runs them
+rem      run.bat test            unit tests for the validators themselves
 rem      run.bat content         structure, catalog and README figures
 rem      run.bat mermaid         parse every diagram
 rem      run.bat python          compile every python block (needs Python 3)
@@ -56,7 +57,7 @@ echo   AI ^& Intelligent Systems - curriculum toolchain
 echo ===========================================================================
 call :print_context
 echo.
-echo   [1] Validate everything        content + mermaid + python + scripts + commands + lint
+echo   [1] Validate everything        tests + content + mermaid + python + scripts + commands + lint
 echo   [2] Validate content only
 echo   [3] Validate mermaid diagrams
 echo   [4] Lint markdown
@@ -94,6 +95,7 @@ rem ---------------------------------------------------------------------------
 :dispatch
 set "WHAT=%~1"
 if /i "!WHAT!"=="validate"  goto :t_validate
+if /i "!WHAT!"=="test"      goto :t_test
 if /i "!WHAT!"=="content"   goto :t_content
 if /i "!WHAT!"=="mermaid"   goto :t_mermaid
 if /i "!WHAT!"=="python"    goto :t_python
@@ -118,6 +120,8 @@ exit /b 2
 :t_validate
 call :ensure_deps
 if errorlevel 1 exit /b 1
+call :run_step "Testing the validators" test
+if errorlevel 1 exit /b 1
 call :run_step "Validating structure, catalog and README figures" validate:content
 if errorlevel 1 exit /b 1
 call :run_step "Parsing every mermaid diagram" validate:mermaid
@@ -133,6 +137,14 @@ if errorlevel 1 exit /b 1
 echo.
 echo [OK] All checks passed. This is exactly what CI runs.
 exit /b 0
+
+rem Fast and offline: node:test over small fixtures in test\, so a rule that
+rem stops firing is caught even while the corpus still passes.
+:t_test
+call :ensure_deps
+if errorlevel 1 exit /b 1
+call :run_step "Testing the validators" test
+exit /b !ERRORLEVEL!
 
 :t_content
 call :ensure_deps
@@ -376,7 +388,8 @@ exit /b 0
 echo.
 echo   run.bat [target]
 echo.
-echo     validate    all six checks below, in CI order
+echo     validate    the unit tests and all six checks below, in CI order
+echo     test        unit tests for the validators, on small fixtures
 echo     content     heading hierarchy, required sections, frontmatter and catalog
 echo                 agreement, unresolved TODOs, links, README figures
 echo     mermaid     parse every diagram headlessly
