@@ -110,10 +110,10 @@ sort data/train.jsonl | uniq -d | wc -l
 
 ### Command 3
 
-Report trainable versus total parameters - the number that tells you PEFT is actually engaged
+Report trainable versus total parameters - the number that tells you PEFT is actually engaged. Load the adapter with `is_trainable=True`: `PeftModel.from_pretrained` freezes it by default, and a frozen adapter reports zero trainable parameters whatever its rank
 
 ```text
-python -c "from peft import PeftModel; m.print_trainable_parameters()"
+python -c "from transformers import AutoModelForCausalLM; from peft import PeftModel; m = PeftModel.from_pretrained(AutoModelForCausalLM.from_pretrained('base-model'), 'adapters/support-classifier', is_trainable=True); m.print_trainable_parameters()"
 ```
 
 ### Command 4

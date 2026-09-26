@@ -87,18 +87,18 @@ feast materialize-incremental $(date -u +%FT%T)
 
 ### Command 3
 
-Point-in-time correct join for training - this is the command that prevents label leakage
+Point-in-time correct join for training - this is the command that prevents label leakage. The CLI takes the entity rows as JSON and one `-f` per feature; training pipelines pass a whole entity dataframe to `FeatureStore.get_historical_features`, as the script below does
 
 ```text
-feast get-historical-features --entity-df entities.parquet
+feast get-historical-features -d '[{"user_id": 1001, "event_timestamp": "2026-09-01T12:00:00"}]' -f user_stats:tenure_days -f user_stats:txn_count_7d
 ```
 
 ### Command 4
 
-Fetch serving-time features by the same definitions used in training
+Fetch serving-time features for one entity by the same definitions used in training
 
 ```text
-feast get-online-features --features "user:tenure_days,txn:count_1h"
+feast get-online-features -e user_id=1001 -f user_stats:tenure_days -f user_stats:txn_count_7d
 ```
 
 ### Command 5
@@ -111,10 +111,10 @@ feast feature-views list
 
 ### Command 6
 
-List features whose materialisation is lagging their configured TTL - staleness that a failure-based alert never surfaces
+Show a view's TTL beside the end of each materialisation interval - when the latest end is older than the TTL, online values are stale, which a failure-based alert never surfaces
 
 ```text
-feast materialize-incremental $(date -u +%Y-%m-%dT%H:%M:%S) && feast feature-views list
+feast feature-views describe user_stats | grep -E "ttl:|endTime:"
 ```
 
 ## Automation scripts
@@ -129,6 +129,7 @@ Requires `pip install feast pandas`.
 entities. Any material difference is training-serving skew.
 Run on a schedule - skew appears gradually after a one-sided change.
 """
+import os
 import sys
 from datetime import datetime, timezone
 
@@ -143,10 +144,21 @@ FEATURES = [
 TOLERANCE = 0.01          # 1 percent relative difference
 SAMPLE_SIZE = 500
 
-store = FeatureStore(repo_path=".")
+REPO = os.environ.get("FEAST_REPO_PATH", ".")
+ENTITIES = os.environ.get("SKEW_ENTITIES", "sample_entities.parquet")
+
+# Both inputs are the reader's own; say which is missing rather than crash.
+if not os.path.exists(os.path.join(REPO, "feature_store.yaml")):
+    sys.exit("no feature_store.yaml in %s - run from the feature repository, "
+             "or set FEAST_REPO_PATH" % os.path.abspath(REPO))
+if not os.path.exists(ENTITIES):
+    sys.exit("no %s - export a parquet file of user_id values to compare, "
+             "or set SKEW_ENTITIES to one" % ENTITIES)
+
+store = FeatureStore(repo_path=REPO)
 
 # Sample entities to compare.
-entities = pd.read_parquet("sample_entities.parquet").head(SAMPLE_SIZE)
+entities = pd.read_parquet(ENTITIES).head(SAMPLE_SIZE)
 entities["event_timestamp"] = datetime.now(timezone.utc)
 
 # Offline path - what training would see.

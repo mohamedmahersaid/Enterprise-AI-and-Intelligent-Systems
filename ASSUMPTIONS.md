@@ -149,7 +149,7 @@ Derived from the leading command in every `text` block. A leaf listing a tool as
 | `ai-governance-compliance-framework` | Azure CLI |
 | `ai-enterprise-adoption-patterns` | Azure CLI |
 | `ai-inventory-acceptable-use` | jq |
-| `ai-mlops-mlflow-registry` | MLflow |
+| `ai-mlops-mlflow-registry` | MLflow, curl |
 | `ai-distributed-training-kubeflow-ray` | NVIDIA driver and CUDA runtime, Ray, kubectl |
 | `ai-quantisation-gpu-sharing` | NVIDIA driver and CUDA runtime, Python 3, vLLM |
 | `ai-first-gpu-job` | NVIDIA driver and CUDA runtime |

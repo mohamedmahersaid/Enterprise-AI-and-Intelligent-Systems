@@ -38,9 +38,20 @@ backfill rewrites history - and the run can never be re-created. **Log a dataset
 or a table snapshot identifier alongside the parameters**, or the tracking record is
 a description rather than a reproduction.
 
+### Aliases, not stages
+
+Older material promotes a model by moving it between the fixed stages `Staging`,
+`Production` and `Archived`. **MLflow deprecated stages in 2.9.0 and will remove them
+in a future major release**; `transition_model_version_stage`, `get_latest_versions`
+and `models:/name/Production` URIs all belong to that model. Use **aliases**
+instead: a named, movable pointer to one version, such as `champion` for what serves
+and `challenger` for what is being evaluated. Serving loads `models:/fraud-model@champion`,
+promotion moves the alias, and rollback moves it back. Aliases are free-form, so the
+names are a convention the team agrees - pick them once and gate on them.
+
 ### Promotion gates make the registry real
 
-A stage transition should require: offline evaluation against the current champion on
+Moving the `champion` alias should require: offline evaluation against the current champion on
 a held-out set, fairness checks on the slices that matter, latency and cost at target
 load, an explainability artefact where regulation demands one, and a recorded human
 approval. Without gates the registry is a naming convention.
@@ -68,7 +79,7 @@ flowchart TD
     G --> I
     H --> I
     I -->|no| J[Blocked with failing gate named]
-    I -->|yes| K[Stage: Production]
+    I -->|yes| K[Alias champion -> version N]
     K --> L[Shadow -> canary -> full]
     L --> M[Monitor drift + business KPI]
     M -->|regression| N[Roll back to previous<br/>registry version - no retraining]
@@ -95,10 +106,10 @@ mlflow runs describe --run-id <id>
 
 ### Command 3
 
-Serve the current Production-stage model by registry reference rather than by file path
+Serve whichever version the `champion` alias points at, by registry reference rather than by file path. `--env-manager local` uses the current Python environment; production images are built with `mlflow models build-docker`
 
 ```text
-mlflow models serve -m models:/fraud-model/Production -p 5000
+mlflow models serve -m "models:/fraud-model@champion" -p 5000 --env-manager local
 ```
 
 ### Command 4
@@ -111,18 +122,18 @@ mlflow artifacts download --artifact-uri runs:/<id>/model
 
 ### Command 5
 
-Promote a version - this call is what the promotion gates must wrap
+Promote a version by pointing the `champion` alias at it - this call is what the promotion gates must wrap. The MLflow CLI has no alias command, so it is the registry REST API (or `MlflowClient.set_registered_model_alias` from Python)
 
 ```text
-mlflow model-registry transition-stage --name fraud-model --version 7 --stage Production
+curl -s -X POST "$MLFLOW_TRACKING_URI/api/2.0/mlflow/registered-models/alias" -H "Content-Type: application/json" -d '{"name": "fraud-model", "alias": "champion", "version": "7"}'
 ```
 
 ### Command 6
 
-Compare the model version actually serving against the registry stage - the reconciliation that catches registry drift
+Read which version the `champion` alias points at, to compare with the version actually serving - the reconciliation that catches registry drift
 
 ```text
-mlflow models get-latest-versions --name fraud-classifier --stages Production | jq ".[0].version"
+curl -s "$MLFLOW_TRACKING_URI/api/2.0/mlflow/registered-models/alias?name=fraud-model&alias=champion" | jq -r ".model_version.version"
 ```
 
 ## Automation scripts
@@ -134,31 +145,42 @@ Requires `pip install mlflow`.
 ```python
 #!/usr/bin/env python3
 """Promotion gate for MLflow model registry.
-Run in CI. Exits non-zero if any gate fails, naming the gate.
+Run in CI. Promotes the version the `challenger` alias points at to
+`champion`, or exits non-zero naming every gate that failed.
 """
+import os
 import sys
-import mlflow
-from mlflow.tracking import MlflowClient
+
+from mlflow import MlflowClient
+from mlflow.exceptions import MlflowException
 
 MODEL = "fraud-model"
 MIN_AUC_UPLIFT = 0.0      # must at least match champion
 MAX_P99_MS = 250
 MIN_SLICE_AUC = 0.70      # fairness floor on every slice
 
+# Without a tracking URI the client silently uses a local store, and the
+# gate would pass or fail against the wrong registry.
+if not os.environ.get("MLFLOW_TRACKING_URI"):
+    sys.exit("set MLFLOW_TRACKING_URI to the tracking server, e.g. https://mlflow.example.internal")
+
 client = MlflowClient()
 failures = []
 
 
-def stage_version(model, stage):
-    versions = client.get_latest_versions(model, stages=[stage])
-    return versions[0] if versions else None
+def aliased(model, alias):
+    """The version an alias points at, or None if the alias is not set."""
+    try:
+        return client.get_model_version_by_alias(model, alias)
+    except MlflowException:
+        return None
 
 
-candidate = stage_version(MODEL, "Staging")
-champion = stage_version(MODEL, "Production")
+candidate = aliased(MODEL, "challenger")
+champion = aliased(MODEL, "champion")
 
 if candidate is None:
-    print("no candidate in Staging")
+    print("no version has the challenger alias - set it on the version to evaluate")
     sys.exit(2)
 
 cand_run = client.get_run(candidate.run_id)
@@ -201,13 +223,13 @@ if failures:
         print("  FAIL " + f)
     sys.exit(1)
 
-client.transition_model_version_stage(
-    name=MODEL,
-    version=candidate.version,
-    stage="Production",
-    archive_existing_versions=False,   # keep champion for rollback
-)
-print("promoted %s version %s to Production" % (MODEL, candidate.version))
+# Moving the alias is the promotion. The previous champion stays in the
+# registry untouched, so rollback is pointing the alias back at it.
+client.set_registered_model_alias(MODEL, "champion", candidate.version)
+client.delete_registered_model_alias(MODEL, "challenger")
+print("promoted %s version %s to champion" % (MODEL, candidate.version))
+if champion is not None:
+    print("rollback: point champion back at version %s" % champion.version)
 sys.exit(0)
 ```
 
@@ -220,12 +242,12 @@ sys.exit(0)
 1. Deploy the MLflow tracking server backed by PostgreSQL and object storage rather than the local SQLite default.
 2. Train three model variants, logging parameters, metrics, artifacts and a dataset hash tag for each.
 3. Confirm every run can be reproduced from its logged record, including the exact training data version.
-4. Register the best variant and transition it to Production through the gate script.
+4. Register the best variant, set the `challenger` alias on it, and promote it to `champion` through the gate script.
 5. Train a variant with better overall AUC but deliberately degraded performance on one demographic slice.
 6. Attempt promotion and confirm the fairness gate blocks it, naming the failing slice.
 7. Remove the dataset hash tag from a run and confirm the reproducibility gate blocks it independently.
 8. Promote a genuinely better model and deploy it shadow, then canary, then full.
-9. Simulate a production regression and roll back by re-promoting the previous registry version. Measure how long the rollback takes.
+9. Simulate a production regression and roll back by pointing the `champion` alias at the previous version. Measure how long the rollback takes.
 10. Confirm no retraining was required to roll back.
 
 ### Validation
@@ -241,7 +263,7 @@ sys.exit(0)
 
 ### Automating the MLOps loop
 
-- **Run the gate script in CI** on every stage-transition request so promotion is a
+- **Run the gate script in CI** on every promotion request so promotion is a
   pipeline outcome rather than a console click. A gate the model author can bypass by
   changing a dropdown is documentation, not a control, and reviewers will assume it is
   the latter unless the pipeline is the only path.
@@ -249,11 +271,12 @@ sys.exit(0)
   discipline. Left to convention it is omitted exactly when it matters most - during a
   rushed retrain under incident pressure - which is also the run most likely to end up
   promoted to production.
-- **Webhook the registry to deployment.** A transition to Production should trigger the
-  shadow deployment automatically, because a manual step here becomes drift between what
+- **Webhook the registry to deployment.** Moving the `champion` alias should trigger the
+  shadow deployment automatically - MLflow 3 registry webhooks fire a
+  `model_version_alias.created` event for exactly this - because a manual step here becomes drift between what
   the registry claims is running and what is actually serving, and incident response
   will trust the registry.
-- **Reconcile serving version against registry stage** on a schedule and alert on
+- **Reconcile serving version against the `champion` alias** on a schedule and alert on
   mismatch. This is the check that catches drift the webhook missed, and it is the
   difference between a registry that describes intent and one that describes reality.
 - **Schedule drift detection** against the stored training distribution and open a
@@ -283,11 +306,11 @@ sys.exit(0)
 
 **Resolution:** Compute per-slice metrics during training and add a fairness floor to the promotion gate so a model that improves overall while degrading a protected or business-critical segment cannot be promoted. Aggregate improvement masking subgroup degradation is the normal case rather than the exception, particularly when a segment is small enough that its regression is invisible in the headline number.
 
-### Scenario 4: The registry says Production but a different model is serving.
+### Scenario 4: The registry's champion alias points at one version but a different model is serving.
 
-**Likely cause:** Stage transitions are performed manually in the console while deployment is a separate manual step, so the two drift apart.
+**Likely cause:** The alias is moved by hand in the UI while deployment is a separate manual step, so the two drift apart. Serving from a pinned version or file path rather than `models:/fraud-model@champion` produces the same drift.
 
-**Resolution:** Drive deployment from a registry webhook so a transition to Production triggers the rollout automatically, and add a reconciliation check that compares the serving model's version tag against the registry stage and alerts on mismatch. A registry that describes intent rather than reality is worse than none, because incident response will trust it.
+**Resolution:** Drive deployment from a registry webhook on the alias event so moving `champion` triggers the rollout automatically, and add a reconciliation check that compares the serving model's version against the alias (Command 6) and alerts on mismatch. A registry that describes intent rather than reality is worse than none, because incident response will trust it.
 
 ### Scenario 5: Model quality declines steadily in production with no deployment having occurred.
 
@@ -299,7 +322,7 @@ sys.exit(0)
 
 ### 1. What is the difference between MLflow tracking and the model registry?
 
-They answer different questions and have different owners, and conflating them is the most common reason an MLOps stack gets installed and never actually controls anything. Tracking answers "how was this built": parameters, metrics, code version, dataset version and artifacts, captured for every run including the failures - the failed runs matter because they are what stops an experiment being repeated needlessly. It belongs to the data scientist and should be permissive, since the cost of recording a run nobody needs is negligible next to the cost of losing one. The registry answers a governance question: "what is allowed to run in production". It is a release control, and it belongs to whoever is accountable for production - the same person or function that would sign off a service deployment. The distinction is not organisational tidiness. If the registry stage is simply a label a data scientist can set on their own model, then nothing is controlled and the registry is a naming convention with a database behind it. What makes it real is that transitions are gated and the gate is enforced by a pipeline the model author cannot bypass.
+They answer different questions and have different owners, and conflating them is the most common reason an MLOps stack gets installed and never actually controls anything. Tracking answers "how was this built": parameters, metrics, code version, dataset version and artifacts, captured for every run including the failures - the failed runs matter because they are what stops an experiment being repeated needlessly. It belongs to the data scientist and should be permissive, since the cost of recording a run nobody needs is negligible next to the cost of losing one. The registry answers a governance question: "what is allowed to run in production". It is a release control, and it belongs to whoever is accountable for production - the same person or function that would sign off a service deployment. The distinction is not organisational tidiness. If the registry alias is simply a pointer a data scientist can move on their own model, then nothing is controlled and the registry is a naming convention with a database behind it. What makes it real is that transitions are gated and the gate is enforced by a pipeline the model author cannot bypass.
 
 ### 2. Why log a dataset version alongside hyperparameters?
 
@@ -307,7 +330,7 @@ Because without it the run is not reproducible, and reproducibility is the prope
 
 ### 3. How do you roll back a model?
 
-By promoting the previous registry version, which makes rollback a selection rather than a rebuild. Every version that was ever promoted remains in the registry with its artifacts, so the prior known-good model is already sitting there ready to serve. That is the entire argument for routing serving through registry stages rather than file paths. The failure mode is well worn: the serving layer points at a hard-coded artifact path or a container image baked at build time, nobody exercises the rollback path because deployments have been fine, and the gap is discovered during the first bad deployment - at which point rollback means an emergency retrain under incident conditions, with the on-call engineer trying to reconstruct which dataset version the previous model used. I test the rollback path deliberately as part of onboarding a model to production, in the same way one tests a database restore rather than assuming backups work, because an untested rollback is an assumption rather than a capability.
+By promoting the previous registry version, which makes rollback a selection rather than a rebuild. Every version that was ever promoted remains in the registry with its artifacts, so the prior known-good model is already sitting there ready to serve. That is the entire argument for routing serving through a registry alias rather than a file path: rollback is moving `champion` back one version. The failure mode is well worn: the serving layer points at a hard-coded artifact path or a container image baked at build time, nobody exercises the rollback path because deployments have been fine, and the gap is discovered during the first bad deployment - at which point rollback means an emergency retrain under incident conditions, with the on-call engineer trying to reconstruct which dataset version the previous model used. I test the rollback path deliberately as part of onboarding a model to production, in the same way one tests a database restore rather than assuming backups work, because an untested rollback is an assumption rather than a capability.
 
 ### 4. What gates would you require before a model reaches production?
 
