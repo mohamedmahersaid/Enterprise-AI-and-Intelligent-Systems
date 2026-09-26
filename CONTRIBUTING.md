@@ -273,6 +273,35 @@ level. Non-markdown files under a `fixtures/` directory in `docs/` are copied as
 so a lab's data can be downloaded from the site; link each one from the fixtures
 `README.md`. The build fails if any relative link in the output does not resolve.
 
+Mermaid is served from the site, not a CDN, so diagrams render for a reader with no
+route to a third-party origin. The build copies the pinned `mermaid` devDependency
+from `node_modules/mermaid/dist/` into `site/assets/mermaid-<version>/` (the ES module
+and its chunks, without source maps), and only pages that contain a diagram load it.
+The dependency stays on 11.x; `.github/dependabot.yml` says why.
+
+After writing `site/`, the build runs `scripts/check-site.mjs` and fails if any page
+breaks one of these rules:
+
+- No page loads a script from a CDN or any other origin.
+- Every page has exactly one `h1`, and it is the first heading on the page. The
+  sidebar holds no heading at all (its tree labels are paragraphs), so the page's own
+  title is the first heading a screen reader meets.
+- A link to `#fragment`, on the same page or another page in the site, resolves to an
+  `id` on that page. Renaming a heading changes its id, so update the links to it.
+- The sidebar link to the current page has `aria-current="page"`, and no other one does.
+- A page with a mermaid block loads the mermaid module, the module path exists in the
+  site, and a page without a block does not load it.
+- The `--control-border` colour, the only visible edge of the search box and the theme
+  button, has at least 3:1 contrast against `--bg` in every theme (WCAG 1.4.11), and
+  the `#search` and `button.theme` rules draw their border with it.
+
+Run `node scripts/check-site.mjs` to check an existing `site/` without rebuilding, and
+`npm test` to run the fixtures in `test/check-site.test.mjs` that show each rule
+failing and passing. `test/site-search.test.mjs` runs the search script in jsdom and
+checks that keyboard focus can reach the "Browse the full catalog" link when a search
+finds nothing. Layout and rendering (the page title near the top of a phone
+screen, diagrams drawn as SVG) need a browser, so they are not in this check.
+
 `site/` is not committed. CI builds it on every pull request, so a structural break
 fails the build, and publishes it to GitHub Pages on merge to `main`.
 

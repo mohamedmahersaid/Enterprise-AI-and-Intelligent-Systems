@@ -14,10 +14,18 @@ import { dirname, join, normalize, relative, sep } from 'node:path';
 import { marked } from 'marked';
 
 import { readCatalog, group, slug } from './lib/derive.mjs';
-import { STYLE, SCRIPT } from './lib/site-assets.mjs';
+import { STYLE, SCRIPT, THEME_BOOTSTRAP, SIDEBAR_TOGGLE, mermaidLoader } from './lib/site-assets.mjs';
+import { checkSite } from './check-site.mjs';
 import { LEVELS, VALIDATION_PATH, needsSentence } from './lib/readiness.mjs';
 
 const OUT = 'site';
+
+// Mermaid is served from the site itself, copied at build time from the
+// pinned devDependency (held on 11.x, see .github/dependabot.yml). The version
+// is in the path so a bump can never be served from a stale browser cache.
+const MERMAID_DIST = join('node_modules', 'mermaid', 'dist');
+const MERMAID_VERSION = JSON.parse(readFileSync(join('node_modules', 'mermaid', 'package.json'), 'utf8')).version;
+const MERMAID_DIR = `assets/mermaid-${MERMAID_VERSION}`;
 const SKIP_DIRS = new Set(['node_modules', '.git', '.github', '.venv', OUT]);
 
 // ---------------------------------------------------------------------------
@@ -74,6 +82,15 @@ function rewriteLinks(html) {
 
 function pageShell({ title, description, body, sidebar, depth, current }) {
   const base = depth === 0 ? './' : '../'.repeat(depth);
+  // Only a page with a diagram loads mermaid; scripts/check-site.mjs fails the
+  // build if a page with one lacks the loader, or a page without one has it.
+  const hasDiagram = body.includes('<pre class="mermaid">');
+  const diagramScripts = hasDiagram
+    ? `<script type="module">${mermaidLoader(`${base}${MERMAID_DIR}/mermaid.esm.min.mjs`)}</script>\n`
+    : '';
+  const noscript = hasDiagram
+    ? `<noscript><style>pre.mermaid { text-align: left; } pre.mermaid::before { content: "Diagram source (rendering needs JavaScript)"; display: block; font-weight: 600; margin-bottom: 8px; }</style></noscript>\n`
+    : '';
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -81,21 +98,29 @@ function pageShell({ title, description, body, sidebar, depth, current }) {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${escapeHtml(title)}</title>
 <meta name="description" content="${escapeHtml(description)}">
+<script>${THEME_BOOTSTRAP}</script>
 <style>${STYLE}</style>
-</head>
+${noscript}</head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
 <header class="top">
   <a class="brand" href="${base}index.html">AI &amp; Intelligent Systems</a>
-  <input id="search" type="search" placeholder="Search the curriculum" aria-label="Search the curriculum" autocomplete="off">
-  <div id="results" role="listbox" aria-label="Search results"></div>
+  <div class="search" role="search">
+    <input id="search" type="search" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="results" aria-keyshortcuts="/" placeholder="Search the curriculum (press /)" aria-label="Search the curriculum" autocomplete="off">
+    <div id="results" role="listbox" aria-label="Search results" hidden></div>
+    <p id="search-status" class="search-status sr-only" role="status" aria-live="polite"></p>
+  </div>
   <span class="spacer"></span>
-  <button class="theme" id="theme" type="button" aria-label="Toggle colour theme">Theme</button>
+  <button class="theme" id="theme" type="button">Theme: System</button>
 </header>
 <div class="wrap">
 <nav class="side" aria-label="Curriculum">
+<details open>
+<summary>Browse the curriculum</summary>
 ${sidebar(base, current)}
+</details>
 </nav>
+<script>${SIDEBAR_TOGGLE}</script>
 <main id="main">
 ${body}
 </main>
@@ -106,20 +131,15 @@ ${body}
 </footer>
 <script>var BASE = ${JSON.stringify(base)};</script>
 <script>${SCRIPT}</script>
-<script type="module">
-  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11.17.2/dist/mermaid.esm.min.mjs';
-  const dark = document.documentElement.getAttribute('data-theme') === 'dark' ||
-    (!document.documentElement.getAttribute('data-theme') &&
-     matchMedia('(prefers-color-scheme: dark)').matches);
-  mermaid.initialize({ startOnLoad: true, theme: dark ? 'dark' : 'default' });
-</script>
-</body>
+${diagramScripts}</body>
 </html>
 `;
 }
 
 // ---------------------------------------------------------------------------
 // navigation, derived from the catalog
+
+const CURRENT = ' class="current" aria-current="page"';
 
 function buildSidebar(grouped) {
   return (base, current) => {
@@ -131,20 +151,23 @@ function buildSidebar(grouped) {
       ['Full catalog', 'CATALOG.html'],
       ['Readiness', 'READINESS.html'],
     ].map(([label, href]) => {
-      const active = current === href ? ' class="current"' : '';
+      const active = current === href ? CURRENT : '';
       return `<li><a href="${base}${href}"${active}>${escapeHtml(label)}</a></li>`;
     }).join('');
     const parts = [`<ul class="sidebar-top">${top}</ul>`];
     for (const [tree, branches] of grouped) {
-      parts.push(`<h2>${escapeHtml(tree)}</h2>`);
+      // Not a heading: the page's own h1 must be the first heading a screen
+      // reader meets, and the nav already has its label.
+      parts.push(`<p class="tree">${escapeHtml(tree)}</p>`);
       for (const [branch, leaves] of branches) {
         parts.push(`<ul>`);
+        const branchIndex = branchIndexOf(leaves);
         parts.push(
-          `<li><strong><a href="${base}${branchIndexOf(leaves)}">${escapeHtml(branch)}</a></strong></li>`
+          `<li><strong><a href="${base}${branchIndex}"${branchIndex === current ? CURRENT : ''}>${escapeHtml(branch)}</a></strong></li>`
         );
         for (const leaf of leaves) {
           const url = leaf.path.replace(/\.md$/, '.html');
-          const cls = url === current ? ' class="current"' : '';
+          const cls = url === current ? CURRENT : '';
           parts.push(
             `<li><a${cls} href="${base}${url}">${escapeHtml(leaf.name)}</a>` +
             ` <span class="badge lv-${escapeHtml(leaf.level)}">${escapeHtml(leaf.level)}</span></li>`
@@ -375,6 +398,21 @@ function main() {
   mkdirSync(join(OUT, 'data'), { recursive: true });
   copyFileSync(VALIDATION_PATH, join(OUT, VALIDATION_PATH));
 
+  // The mermaid entry module imports its chunks by relative path, so the
+  // layout under dist/ is kept. Source maps are left out (about 13 MB); the
+  // licence travels with the code. The files stay .mjs: Pages takes its MIME
+  // types from mime-db, which maps .mjs to text/javascript, as a module script
+  // requires (docs.github.com/en/pages/getting-started-with-github-pages/
+  // creating-a-github-pages-site#mime-types-on-github-pages).
+  const mermaidOut = join(OUT, MERMAID_DIR);
+  const chunks = join('chunks', 'mermaid.esm.min');
+  mkdirSync(join(mermaidOut, chunks), { recursive: true });
+  copyFileSync(join(MERMAID_DIST, 'mermaid.esm.min.mjs'), join(mermaidOut, 'mermaid.esm.min.mjs'));
+  copyFileSync(join('node_modules', 'mermaid', 'LICENSE'), join(mermaidOut, 'LICENSE'));
+  for (const entry of readdirSync(join(MERMAID_DIST, chunks))) {
+    if (entry.endsWith('.mjs')) copyFileSync(join(MERMAID_DIST, chunks, entry), join(mermaidOut, chunks, entry));
+  }
+
   let copied = 0;
   for (const source of fixtureDataFiles('docs')) {
     const target = join(OUT, relative('.', source));
@@ -392,7 +430,14 @@ function main() {
     return 1;
   }
 
-  console.log(`Built ${written} pages and ${copied} fixture files into ${OUT}/ (${index.length} leaves indexed for search).`);
+  // Structural rules a page must keep: see scripts/check-site.mjs.
+  const problems = checkSite(OUT);
+  if (problems.length) {
+    console.error(`${problems.length} structural problem(s) in the built site:\n${problems.map((p) => '  ' + p).join('\n')}`);
+    return 1;
+  }
+
+  console.log(`Built ${written} pages and ${copied} fixture files into ${OUT}/ (${index.length} leaves indexed for search); every page passes check-site.`);
   return 0;
 }
 
