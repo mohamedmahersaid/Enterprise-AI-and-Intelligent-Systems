@@ -19,7 +19,7 @@
       "id": "ai-ollama-local-inference",
       "name": "Ollama and Local Model Serving",
       "level": "Beginner",
-      "readiness": "lab",
+      "readiness": "validated",
       "needs": [
         "ollama"
       ],

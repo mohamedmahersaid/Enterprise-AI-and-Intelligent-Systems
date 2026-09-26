@@ -1,4 +1,14 @@
 {
   "$comment": "Live runs of leaf commands against the real service. A leaf is 'validated' in data/catalog.json exactly while its latest run here passed; see READINESS.md and scripts/lib/readiness.mjs. Each run: leaf (catalog id), date (YYYY-MM-DD, UTC, the day the run finished), workflow (path under .github/workflows/), run (the GitHub Actions run URL), environment (runner image and service versions), covered (which commands or lab steps ran), result (pass or fail). Add a run by pull request, never from the workflow itself.",
-  "runs": []
+  "runs": [
+    {
+      "leaf": "ai-ollama-local-inference",
+      "date": "2026-09-26",
+      "workflow": ".github/workflows/live.yml",
+      "run": "https://github.com/mohamedmahersaid/Enterprise-AI-and-Intelligent-Systems/actions/runs/36244545499",
+      "environment": "GitHub-hosted ubuntu-latest (image ubuntu24 20260920.314.1), CPU only; Ollama 0.34.4; repository at be50a13; llama3.1:8b-instruct-q4_K_M resolved to sha256:46e0c10c039e019119339687c3c1757cc81b9da49709a3b3924863ba87ca666e",
+      "covered": "Commands 1, 2, 3, 4, 5, 6, 7, 8, 10, run as data/live/ai-ollama-local-inference.json describes; Command 9 skipped because it binds the API to every interface",
+      "result": "pass"
+    }
+  ]
 }

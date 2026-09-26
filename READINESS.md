@@ -6,7 +6,7 @@ Every leaf says how far its content has been proven. The level is a claim the
 repository backs with evidence, and `npm run validate` fails when a leaf claims
 more than its evidence supports.
 
-**34 leaves:** Lab: 34 · Validated: 0
+**34 leaves:** Lab: 33 · Validated: 1
 
 ## Lab
 
@@ -77,7 +77,7 @@ at no cost. The rest need infrastructure or credentials this repository does not
 
 | Leaf | Level | Readiness | A live run needs | Latest run |
 | --- | --- | --- | --- | --- |
-| [Ollama and Local Model Serving](docs/ai-tree-model-platforms/ai-branch-local-inference/ai-ollama-local-inference.md) | Beginner | Lab | Ollama | none recorded |
+| [Ollama and Local Model Serving](docs/ai-tree-model-platforms/ai-branch-local-inference/ai-ollama-local-inference.md) | Beginner | Validated | Ollama | [pass 2026-09-26](https://github.com/mohamedmahersaid/Enterprise-AI-and-Intelligent-Systems/actions/runs/36244545499) |
 | [Model Selection, Sizing and Cost Control](docs/ai-tree-model-platforms/ai-branch-local-inference/ai-model-selection-cost.md) | Intermediate | Lab | Ollama, NVIDIA GPU, Azure subscription | none recorded |
 | [Local Inference at Production Scale: Batching, KV Cache and the Point It Stops Being Cheaper](docs/ai-tree-model-platforms/ai-branch-local-inference/ai-local-inference-at-scale.md) | Advanced | Lab | NVIDIA GPU | none recorded |
 | [Azure OpenAI Enterprise Integration](docs/ai-tree-model-platforms/ai-branch-managed-model-services/ai-azure-openai-integration.md) | Advanced | Lab | Azure subscription | none recorded |
