@@ -96,10 +96,10 @@ flowchart TD
 
 ### Command 1
 
-Run tracking server with a real database and object store - the SQLite default does not survive concurrent use
+Run tracking server with a real database and object store - the SQLite default does not survive concurrent use. The server host needs `pip install mlflow "psycopg[binary]" boto3`, because `mlflow` installs neither a PostgreSQL driver nor the S3 client. `postgresql+psycopg://` names the driver: a bare `postgresql://` loads whichever driver the installed SQLAlchemy defaults to - psycopg2 in 2.0, psycopg (version 3) in 2.1 - and fails with `No module named` when that one is missing. `--artifacts-destination` makes the server proxy artifact uploads and downloads, so only the server needs S3 credentials; for MinIO or another S3-compatible store, also set `MLFLOW_S3_ENDPOINT_URL` on the server. Port 5001 leaves the default, 5000, to the model server in Command 3; in the shell that runs the other Commands, `export MLFLOW_TRACKING_URI=http://127.0.0.1:5001`
 
 ```text
-mlflow server --backend-store-uri postgresql://... --default-artifact-root s3://mlflow
+mlflow server --backend-store-uri postgresql+psycopg://... --artifacts-destination s3://mlflow --port 5001
 ```
 
 ### Command 2
@@ -112,7 +112,7 @@ mlflow runs describe --run-id <id>
 
 ### Command 3
 
-Serve whichever version the `champion` alias points at when the process starts, by registry reference rather than by file path. `--env-manager local` uses the current Python environment; production images are built with `mlflow models build-docker`
+Serve whichever version the `champion` alias points at when the process starts, by registry reference rather than by file path - resolved through `MLFLOW_TRACKING_URI`, on port 5000 while the tracking server holds 5001. `--env-manager local` uses the current Python environment; production images are built with `mlflow models build-docker`
 
 ```text
 mlflow models serve -m "models:/fraud-model@champion" -p 5000 --env-manager local
@@ -367,6 +367,9 @@ Six, and each exists because of a specific failure I want to make impossible. Re
 
 - [MLflow (Linux Foundation project): ML Experiment Tracking](https://mlflow.org/docs/latest/ml/tracking/) - MLflow experiment and run tracking.
 - [MLflow (Linux Foundation project): ML Model Registry](https://mlflow.org/docs/latest/ml/model-registry/) - Model registry versioning, lineage and promotion (legacy stage transitions, now aliases).
+- [MLflow (Linux Foundation project): MLflow Tracking Server](https://mlflow.org/docs/latest/self-hosting/architecture/tracking-server/) - Default port 5000, and `--artifacts-destination` for proxied artifact access with credentials held by the server.
+- [MLflow (Linux Foundation project): Artifact Stores](https://mlflow.org/docs/latest/self-hosting/architecture/artifact-store/) - S3 and S3-compatible artifact storage, credentials and `MLFLOW_S3_ENDPOINT_URL`.
+- [SQLAlchemy: What's New in SQLAlchemy 2.1?](https://docs.sqlalchemy.org/en/21/changelog/migration_21.html) - The default PostgreSQL driver changing from psycopg2 to psycopg (version 3), which a bare `postgresql://` URL depends on.
 - [MLflow (Linux Foundation project): Webhooks](https://mlflow.org/docs/latest/ml/webhooks/) - Model registry webhooks for event-driven promotion automation.
 - [Microsoft Learn: Work with registered models in Azure Machine Learning](https://learn.microsoft.com/azure/machine-learning/how-to-manage-models?view=azureml-api-2) - Azure Machine Learning model registry.
 - [Microsoft Learn: Perform safe rollout of new deployments for real-time inference](https://learn.microsoft.com/azure/machine-learning/how-to-safely-rollout-online-endpoints?view=azureml-api-2) - Online endpoints and controlled (blue-green) rollout.

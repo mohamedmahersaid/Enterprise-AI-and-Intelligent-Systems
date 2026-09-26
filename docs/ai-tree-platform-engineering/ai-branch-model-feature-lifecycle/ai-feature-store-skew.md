@@ -121,7 +121,7 @@ feast feature-views describe user_stats | grep -E "ttl:|endTime:"
 
 ### detect_training_serving_skew.py
 
-Requires `pip install feast pandas`.
+Requires `pip install feast pandas`. Save it in the feature repository, or anywhere else with `FEAST_REPO_PATH` set to the repository. `feast apply` (Command 1) reads every Python file in the repository, so the script does its work only under `if __name__ == "__main__":` - work done at import would run, and fail, inside `feast apply`. Listing the script in `.feastignore`, as Feast recommends for imperative scripts, keeps `feast apply` from reading it at all.
 
 ```python
 #!/usr/bin/env python3
@@ -147,71 +147,79 @@ SAMPLE_SIZE = 500
 REPO = os.environ.get("FEAST_REPO_PATH", ".")
 ENTITIES = os.environ.get("SKEW_ENTITIES", "sample_entities.parquet")
 
-# Both inputs are the reader's own; say which is missing rather than crash.
-if not os.path.exists(os.path.join(REPO, "feature_store.yaml")):
-    sys.exit("no feature_store.yaml in %s - run from the feature repository, "
-             "or set FEAST_REPO_PATH" % os.path.abspath(REPO))
-if not os.path.exists(ENTITIES):
-    sys.exit("no %s - export a parquet file of user_id values to compare, "
-             "or set SKEW_ENTITIES to one" % ENTITIES)
 
-store = FeatureStore(repo_path=REPO)
+def main():
+    # Both inputs are the reader's own; say which is missing rather than crash.
+    if not os.path.exists(os.path.join(REPO, "feature_store.yaml")):
+        sys.exit("no feature_store.yaml in %s - run from the feature repository, "
+                 "or set FEAST_REPO_PATH" % os.path.abspath(REPO))
+    if not os.path.exists(ENTITIES):
+        sys.exit("no %s - export a parquet file of user_id values to compare, "
+                 "or set SKEW_ENTITIES to one" % ENTITIES)
 
-# Sample entities to compare.
-entities = pd.read_parquet(ENTITIES).head(SAMPLE_SIZE)
-entities["event_timestamp"] = datetime.now(timezone.utc)
+    store = FeatureStore(repo_path=REPO)
 
-# Offline path - what training would see.
-offline = store.get_historical_features(
-    entity_df=entities,
-    features=FEATURES,
-).to_df()
+    # Sample entities to compare.
+    entities = pd.read_parquet(ENTITIES).head(SAMPLE_SIZE)
+    entities["event_timestamp"] = datetime.now(timezone.utc)
 
-# Online path - what inference actually sees.
-rows = entities[["user_id"]].to_dict("records")
-online = store.get_online_features(
-    features=FEATURES,
-    entity_rows=rows,
-).to_df()
+    # Offline path - what training would see.
+    offline = store.get_historical_features(
+        entity_df=entities,
+        features=FEATURES,
+    ).to_df()
 
-failures = []
+    # Online path - what inference actually sees.
+    rows = entities[["user_id"]].to_dict("records")
+    online = store.get_online_features(
+        features=FEATURES,
+        entity_rows=rows,
+    ).to_df()
 
-for feature in FEATURES:
-    col = feature.split(":")[1]
-    if col not in offline or col not in online:
-        failures.append("%s missing from one store" % feature)
-        continue
+    failures = []
 
-    off = offline[col].astype(float).fillna(0)
-    onl = online[col].astype(float).fillna(0)
+    for feature in FEATURES:
+        col = feature.split(":")[1]
+        if col not in offline or col not in online:
+            failures.append("%s missing from one store" % feature)
+            continue
 
-    denom = off.abs().clip(lower=1e-9)
-    rel_diff = ((off - onl).abs() / denom)
-    skewed = (rel_diff > TOLERANCE).sum()
-    pct = 100.0 * skewed / len(off)
+        off = offline[col].astype(float).fillna(0)
+        onl = online[col].astype(float).fillna(0)
 
-    print("%-40s skewed rows: %4d / %4d (%.1f%%)" % (feature, skewed, len(off), pct))
+        denom = off.abs().clip(lower=1e-9)
+        rel_diff = ((off - onl).abs() / denom)
+        skewed = (rel_diff > TOLERANCE).sum()
+        pct = 100.0 * skewed / len(off)
 
-    # Any sustained skew is a defect - the two stores derive from one
-    # definition and should agree.
-    if pct > 1.0:
-        failures.append(
-            "%s: %.1f%% of rows differ beyond tolerance" % (feature, pct)
-        )
+        print("%-40s skewed rows: %4d / %4d (%.1f%%)" % (feature, skewed, len(off), pct))
 
-print("")
-if failures:
-    print("TRAINING-SERVING SKEW DETECTED")
-    for f in failures:
-        print("  " + f)
+        # Any sustained skew is a defect - the two stores derive from one
+        # definition and should agree.
+        if pct > 1.0:
+            failures.append(
+                "%s: %.1f%% of rows differ beyond tolerance" % (feature, pct)
+            )
+
     print("")
-    print("Likely causes: materialisation lagging, a transformation changed on")
-    print("one side only, or a feature computed in application code rather")
-    print("than read from the store.")
-    sys.exit(1)
+    if failures:
+        print("TRAINING-SERVING SKEW DETECTED")
+        for f in failures:
+            print("  " + f)
+        print("")
+        print("Likely causes: materialisation lagging, a transformation changed on")
+        print("one side only, or a feature computed in application code rather")
+        print("than read from the store.")
+        sys.exit(1)
 
-print("No skew detected above tolerance.")
-sys.exit(0)
+    print("No skew detected above tolerance.")
+    sys.exit(0)
+
+
+# feast apply imports every Python file in the feature repository, so the
+# work runs only when the script is started, never when it is imported.
+if __name__ == "__main__":
+    main()
 ```
 
 ## Lab
@@ -324,6 +332,7 @@ Because freshness is a property of what the feature means, not of the infrastruc
 
 - [Feast (the Open Source Feature Store): Point-in-time joins](https://docs.feast.dev/getting-started/concepts/point-in-time-joins) - Point-in-time correct joins via get_historical_features to prevent label leakage.
 - [Feast (the Open Source Feature Store): Feature view](https://docs.feast.dev/getting-started/concepts/feature-view) - Feature views, per-feature TTL and materialisation to the online store.
+- [Feast (the Open Source Feature Store): Feature repository](https://docs.feast.dev/reference/feature-repository) - `feast apply` reading every Python file in the repository, and `.feastignore` for scripts kept there.
 - [Google for Developers: Rules of Machine Learning](https://developers.google.com/machine-learning/guides/rules-of-ml) - Training-serving skew guidance and keeping training and serving pipelines consistent.
 - [TensorFlow (TFX): TensorFlow Data Validation: Checking and analyzing your data](https://www.tensorflow.org/tfx/guide/tfdv) - Schema validation and skew detection between training and serving data.
 - [Uber Engineering Blog: Meet Michelangelo: Uber's Machine Learning Platform](https://www.uber.com/us/en/blog/michelangelo-machine-learning-platform/) - Origin case study for production feature stores (Michelangelo feature store).
