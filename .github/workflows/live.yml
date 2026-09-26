@@ -1,0 +1,76 @@
+name: Live validation
+
+# Runs what the other workflows cannot: the curriculum against live services.
+# It needs the network and minutes of runner time, so it runs on the pull
+# requests that change what it tests, weekly, and on demand - not on every
+# pull request. A passing run is evidence; recording it in
+# data/validation.json, and so promoting a leaf to validated, is a reviewed
+# pull request, never something this workflow does.
+on:
+  pull_request:
+    paths:
+      - data/live/**
+      - scripts/live-run.mjs
+      - docs/ai-tree-model-platforms/ai-branch-local-inference/ai-ollama-local-inference.md
+      - .github/workflows/live.yml
+  schedule:
+    - cron: '41 5 * * 2'
+  workflow_dispatch:
+    inputs:
+      ollama_version:
+        description: 'Ollama release to install, e.g. 0.12.3 (blank for the current release)'
+        required: false
+        default: ''
+
+# Read-only, and no job here holds a secret: live-run.mjs executes the
+# leaves' commands. The registry check for pinned model tags is in
+# model-tags.yml, which runs on every leaf change because it takes seconds.
+permissions:
+  contents: read
+
+# A newer push to a pull request supersedes its run; a scheduled or manual run
+# on main is evidence and is never cancelled by the other.
+concurrency:
+  group: live-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  ollama-leaf:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22'
+
+      # The manual install from Ollama's Linux documentation, not install.sh:
+      # the script registers a systemd service that would already hold port
+      # 11434 when the leaf's Command 1 starts its own server. The version
+      # installed is recorded in the run report either way.
+      - name: Install Ollama
+        env:
+          OLLAMA_VERSION: ${{ inputs.ollama_version }}
+        run: |
+          curl -fsSL "https://ollama.com/download/ollama-linux-amd64.tar.zst${OLLAMA_VERSION:+?version=$OLLAMA_VERSION}" \
+            | zstd -d | sudo tar -x -C /usr
+          ollama -v || true
+
+      # Runs the leaf's own command blocks, in order, against a local server on
+      # the runner's CPU, and fails at the first command whose exit status or
+      # output does not match data/live/ai-ollama-local-inference.json.
+      - name: Run the Ollama leaf's commands
+        run: node scripts/live-run.mjs ai-ollama-local-inference --json live-run.json
+
+      - name: Print the run report
+        if: always()
+        run: |
+          if [ -f live-run.json ]; then
+            # The last lines each command printed, so the evidence can be read
+            # rather than taken on trust.
+            jq '.steps[].output |= (split("\n") | map(select(length > 0)) | .[-8:])' live-run.json
+          else
+            echo "No report: the run stopped before writing one."
+          fi

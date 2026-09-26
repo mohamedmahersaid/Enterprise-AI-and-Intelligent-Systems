@@ -1,0 +1,19 @@
+# Every third-party package a leaf script imports, including the heavy ones
+# requirements.in leaves out, so one CI job can run every script rather than
+# skip three of them. That skip is how a traceback in the feature-store skew
+# script went unnoticed: nothing ever started it with its dependency present.
+#
+# mlflow-skinny provides the `mlflow` module the promotion gate imports without
+# the tracking server's web stack; readers install `mlflow` as their leaf says.
+# azure-identity is present so the keyless paths are exercised as well as the
+# fallbacks that run without it.
+#
+# Regenerate the pinned, hashed lockfile after editing, from this directory,
+# for the runner's Python (ubuntu-latest):
+#   uv pip compile --python-version 3.12 --python-platform x86_64-manylinux_2_28 --generate-hashes --output-file=requirements-full.txt requirements-full.in
+-r requirements.in
+mlflow-skinny
+feast
+pandas
+langgraph
+azure-identity

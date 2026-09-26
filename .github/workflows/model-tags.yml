@@ -1,0 +1,44 @@
+name: Model tags
+
+# Asks the Ollama registry whether every tag a leaf pins is still published.
+# The tags come from every leaf, so this runs on any leaf or catalog change -
+# it takes seconds - as well as weekly and on demand. The run that executes a
+# leaf's commands against a live model is live.yml.
+on:
+  pull_request:
+    paths:
+      - docs/**/*.md
+      - data/catalog.json
+      - scripts/check-ollama-tags.mjs
+      - scripts/lib/assumptions.mjs
+      - .github/workflows/model-tags.yml
+  schedule:
+    - cron: '23 5 * * 2'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: model-tags-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  ollama-tags:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      # Actions are pinned to a commit SHA rather than a tag: a tag can be moved
+      # to point at different code, a SHA cannot.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22'
+
+      # Fails when a pinned tag is no longer published (404). Any other answer
+      # is reported as unconfirmed, not failed, the same policy as the link
+      # check; the job summary records each tag's status and digest today.
+      - name: Check pinned Ollama tags against the registry
+        run: node scripts/check-ollama-tags.mjs --json ollama-tags.json

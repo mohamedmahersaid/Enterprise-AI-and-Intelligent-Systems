@@ -19,7 +19,9 @@
  * reported as skipped by name rather than passed: a check that silently skips
  * reads as coverage it did not provide. validate-python separately ensures
  * every such dependency is declared. Set LEAF_PYTHON to an interpreter that
- * has them (CI installs scripts/requirements.txt) to run more of the corpus.
+ * has them (CI installs scripts/requirements.txt) to run more of the corpus;
+ * a second CI job installs scripts/requirements-full.txt and passes
+ * --require-all, so there every script runs and a skip fails.
  *
  * This executes code, so it is contained, not sandboxed: each script runs in a
  * throwaway directory with an empty stdin, a stripped environment (no proxy
@@ -123,6 +125,9 @@ function run(block) {
 
 // --verbose prints every outcome, so a reviewer can read what each script said.
 const verbose = process.argv.includes('--verbose');
+// --require-all fails on a skip: for the job that installs every declared
+// dependency, a skipped script means coverage was lost, not that it was saved.
+const requireAll = process.argv.includes('--require-all');
 const counts = { ran: 0, refused: 0, skip: 0, fail: 0 };
 const skipped = [];
 for (const block of blocks) {
@@ -151,5 +156,12 @@ if (skipped.length) {
 
 if (counts.fail) {
   console.error(`\n${counts.fail} script(s) crashed on a bare first run.`);
+  process.exit(1);
+}
+if (requireAll && counts.skip) {
+  console.error(
+    `\n--require-all: ${counts.skip} script(s) were skipped for a missing dependency. ` +
+      'Add it to scripts/requirements-full.in and regenerate the lockfile.'
+  );
   process.exit(1);
 }

@@ -1,0 +1,21 @@
+{
+  "$comment": "What scripts/live-run.mjs runs for this leaf. Commands are read from the leaf; this file only says how to run each and what its output must show. The Modelfile is the one Lab step 4 has the reader write.",
+  "version": "ollama -v",
+  "files": {
+    "Modelfile": "FROM llama3.1:8b-instruct-q4_K_M\nSYSTEM You are a change-management assistant. Answer with the change record fields a reviewer needs, and nothing else.\nPARAMETER temperature 0.2\nPARAMETER num_ctx 8192\n"
+  },
+  "steps": [
+    { "command": 1, "background": true, "ready": "curl -sf http://127.0.0.1:11434/api/version", "timeout": 60 },
+    { "command": 2, "timeout": 1200 },
+    { "command": 3, "expect": "llama3\\.1:8b-instruct-q4_K_M" },
+    { "command": 4, "stdin": "Reply with the single word ok.", "expect": "eval rate", "timeout": 1200 },
+    { "command": 5, "expect": "success" },
+    { "command": 6, "expect": "^FROM " },
+    { "command": 7, "expect": "llama3\\.1" },
+    { "command": 8, "expect": "\"models\"" },
+    { "command": 10, "expect": "deleted" }
+  ],
+  "skip": {
+    "9": "Binds the API to every interface; the leaf teaches it only behind an authenticating proxy, and a second server would collide with Command 1 on port 11434."
+  }
+}
