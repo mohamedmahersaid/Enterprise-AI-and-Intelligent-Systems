@@ -113,8 +113,15 @@ const PINNED = [
   {
     id: 'ollama-model',
     label: 'Ollama model tags',
-    note: 'Tags are withdrawn and re-pointed upstream; a pull can fail or change.',
-    pattern: /\b([a-z0-9.]+:\d+b(?:-[a-z0-9_]+)*)\b/g,
+    note:
+      'Tags are withdrawn and re-pointed upstream; a pull can fail or change. ' +
+      'An untagged pull resolves to latest, which moves whenever upstream ' +
+      'publishes, so it pins nothing.',
+    // Quantisation suffixes are mixed case (q4_K_M), so the suffix class must
+    // allow capitals: a lowercase-only class once recorded
+    // llama3.1:8b-instruct-q4_K_M as llama3.1:8b-instruct, a different tag.
+    pattern: /\b([a-z0-9.]+:\d+b(?:-[A-Za-z0-9_]+)*)\b|\bollama pull ([a-z0-9][a-z0-9._-]*)(?![:\w.-])/g,
+    format: (m) => m[1] ?? `${m[2]} (untagged - resolves to latest)`,
   },
   {
     id: 'container-image',

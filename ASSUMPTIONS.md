@@ -55,13 +55,14 @@ Deployment names are chosen locally; these are the underlying models.
 
 ### Ollama model tags
 
-Tags are withdrawn and re-pointed upstream; a pull can fail or change.
+Tags are withdrawn and re-pointed upstream; a pull can fail or change. An untagged pull resolves to latest, which moves whenever upstream publishes, so it pins nothing.
 
 | Value | Used by |
 | --- | --- |
 | `llama3.1:8b` | `ai-agents-orchestration`, `ai-model-selection-cost`, `ai-ollama-local-inference`, `ai-private-enterprise-rag`, `ai-prompt-engineering-ops` |
-| `llama3.1:8b-instruct` | `ai-ollama-local-inference` |
-| `qwen2.5:7b-instruct` | `ai-ollama-local-inference` |
+| `llama3.1:8b-instruct-q4_K_M` | `ai-ollama-local-inference` |
+| `nomic-embed-text (untagged - resolves to latest)` | `ai-rag-architecture` |
+| `qwen2.5:7b-instruct-q4_K_M` | `ai-ollama-local-inference` |
 
 ### Container images
 

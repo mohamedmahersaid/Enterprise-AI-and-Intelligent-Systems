@@ -170,6 +170,12 @@ python3 -m venv .venv
 LEAF_PYTHON=.venv/bin/python npm run validate
 ```
 
+A second CI job installs `scripts/requirements-full.txt` - every dependency a leaf
+declares, including MLflow, Feast and LangGraph - and runs
+`npm run validate:scripts -- --require-all`, which fails on any skip, so every
+script is started at least once. Regenerate that lockfile with the `uv pip compile`
+line in `scripts/requirements-full.in` when a leaf declares a new dependency.
+
 `.venv/` is ignored by git, the linter and the site build. Containment is not a
 sandbox: a script can still read its parent's files and reach the network, so the
 check runs only in CI jobs that hold no deploy token. A script reads credentials
@@ -179,6 +185,29 @@ kept in shell history and visible in the process list.
 `validate:commands` is deliberately not a shell linter. Commands are documented
 with `<angle-bracket>` placeholders and some blocks are SQL, so a shell parser
 rejects correct content; it checks safety and convention invariants instead.
+
+## Live validation
+
+`.github/workflows/live.yml` runs what no offline check can, on the pull
+requests that change what it tests, every Tuesday, and on demand:
+
+- **Ollama tags.** `node scripts/check-ollama-tags.mjs` asks the Ollama registry
+  for every tag the leaves pin - read from the same derivation as
+  `ASSUMPTIONS.md` - fails when one is no longer published, and records the
+  digest each resolves to.
+- **Leaf commands.** `node scripts/live-run.mjs <leaf-id>` runs a leaf's own
+  command blocks, taken from the leaf text, against the live service, as
+  `data/live/<leaf-id>.json` describes: fixtures, the order, which commands start
+  a server, what each output must show, and why any command is skipped. Every
+  command in the leaf must be run or skipped with a reason, so a new command
+  cannot go untested unnoticed. Today it runs the Ollama leaf on the runner's CPU.
+
+Both run repository code, so the workflow is read-only and holds no secret. A
+passing run is evidence, not a promotion: to mark a leaf validated, record the
+run in `data/validation.json` in a pull request, as the readiness section above
+describes. Leaves that need Azure, a GPU or a cluster are not run here; the
+repository holds no credentials or infrastructure for them, and
+[READINESS.md](READINESS.md) says what each would need.
 
 ## On Windows
 

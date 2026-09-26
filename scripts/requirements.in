@@ -3,8 +3,9 @@
 # need this file; each leaf names what its own script requires.
 #
 # Only lightweight dependencies belong here. mlflow, feast (with pandas) and
-# langgraph are declared by their leaves but deliberately not installed: their
-# scripts are reported as skipped by name.
+# langgraph are declared by their leaves but not installed by this file: the
+# main validate job reports their scripts as skipped by name, and a second job
+# installs requirements-full.txt and runs every script with --require-all.
 #
 # Regenerate the pinned, hashed lockfile after editing, from this directory:
 #   pip-compile --generate-hashes --strip-extras --output-file=requirements.txt requirements.in
