@@ -33,7 +33,7 @@ Enterprise AI engineering: local and offline inference with Ollama, Azure OpenAI
 
 **Level distribution:** Advanced: 14 · Beginner: 10 · Enterprise: 2 · Expert: 2 · Intermediate: 6
 
-**Readiness:** Lab: 34 · Validated: 0 ([what that means](READINESS.md))
+**Readiness:** Lab: 33 · Validated: 1 ([what that means](READINESS.md))
 
 Browse the complete [leaf catalog](CATALOG.md), or follow a [learning path](PATHS.md)
 if you would rather be told what to read in what order. The catalog lists every leaf

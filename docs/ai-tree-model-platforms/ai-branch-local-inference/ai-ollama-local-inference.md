@@ -2,7 +2,7 @@
 id: 'ai-ollama-local-inference'
 title: 'Ollama and Local Model Serving'
 level: 'Beginner'
-readiness: 'lab'
+readiness: 'validated'
 forest: 'AI & Intelligent Systems'
 tree: 'Running and Integrating Models'
 branch: 'Local and Private Inference'
@@ -14,7 +14,7 @@ branch: 'Local and Private Inference'
 **Tree:** [Running and Integrating Models](../README.md)
 **Branch:** [Local and Private Inference](README.md)
 **Forest:** [AI & Intelligent Systems](../../../README.md)
-**Readiness:** [Lab](../../../READINESS.md#lab) - checked offline, not yet run against a live service. A live run needs a local Ollama server.
+**Readiness:** [Validated](../../../READINESS.md#validated) - run live on 2026-09-26 ([evidence](https://github.com/mohamedmahersaid/Enterprise-AI-and-Intelligent-Systems/actions/runs/36244545499)).
 
 ## Explanation
 
