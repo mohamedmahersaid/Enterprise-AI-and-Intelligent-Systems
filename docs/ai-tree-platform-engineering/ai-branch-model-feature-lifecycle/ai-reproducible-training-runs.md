@@ -101,15 +101,15 @@ flowchart TD
 
 ### Command 1
 
-Record the exact interpreter and every installed package version, including the ones you never asked for
+Record the exact interpreter, and compile a lockfile that pins every package - including the ones you never asked for - with a hash of each file. List the packages your code imports in `requirements.in` first, and install the compiler with `pip install pip-tools`. `pip freeze > requirements.lock.txt` also pins exact versions, but it writes no hashes, so Command 6 rejects its output with "Hashes are required in --require-hashes mode". `--allow-unsafe` pins setuptools and pip too when a package depends on them: pip-tools 7.x (checked with 7.6.1) leaves them out without it, and a hash-checked install into a fresh Python 3.12 environment, which has no setuptools, then fails. The pip-tools README says its next major release makes this the default. Commit `requirements.in` and the lockfile
 
 ```text
-python --version && pip freeze > requirements.lock.txt
+python --version && pip-compile --generate-hashes --allow-unsafe --strip-extras --output-file=requirements.lock.txt requirements.in
 ```
 
 ### Command 2
 
-Hash the training data so two runs can be compared on whether they saw the same rows
+Hash the training data so two runs can be compared on whether they saw the same rows. Commit the `.sha256` file before the run: `run_record.py` refuses to start while it is an uncommitted change
 
 ```text
 sha256sum data/train.csv | tee data/train.csv.sha256
@@ -125,23 +125,23 @@ git rev-parse HEAD && git status --porcelain
 
 ### Command 4
 
-Make the seed an input to the run rather than a line buried in the script
+Make the seed an input to the run rather than a line buried in the script. List `runs/` in `.gitignore`: otherwise the next run's uncommitted-changes check sees this run's output and refuses to start
 
 ```text
-python train.py --seed 42 --data data/train.csv --out runs/
+python train.py --seed 42 --data data/train.csv --out runs/run-a
 ```
 
 ### Command 5
 
-Check whether a rerun matched, by comparing the recorded inputs rather than the model file
+Check whether a rerun (written to `runs/run-b`) matched, by comparing the recorded inputs rather than the model file. The timestamps and metrics are left out: `started_at` differs on every run, so a diff that kept it could never report a match, and metrics are judged against the stated tolerance instead. No output and exit status 0 mean the inputs matched; each differing line names the input that changed
 
 ```text
-diff <(jq -S . runs/run-a/run.json) <(jq -S . runs/run-b/run.json)
+diff <(jq -S 'del(.started_at, .finished_at, .metrics)' runs/run-a/run.json) <(jq -S 'del(.started_at, .finished_at, .metrics)' runs/run-b/run.json)
 ```
 
 ### Command 6
 
-Rebuild the environment exactly as it was, on the other person's machine
+Rebuild the environment exactly as it was, on the other person's machine. `--require-hashes` refuses any package whose file does not match the hash recorded in Command 1
 
 ```text
 python -m venv .venv && .venv/bin/pip install --require-hashes -r requirements.lock.txt
@@ -284,7 +284,7 @@ if __name__ == "__main__":
 1. Start from a working notebook that loads a dataset, trains a small model and prints an accuracy.
 2. Run every cell top to bottom in a fresh kernel and note whether the printed figure changes from the value already in the notebook.
 3. Extract the training code into `train.py`, taking the data path, seed and hyperparameters as arguments rather than edited lines.
-4. Pin the environment with `pip freeze` into a lockfile and record the interpreter version alongside it.
+4. Pin the environment: list the imported packages in `requirements.in`, compile a hashed lockfile from it (Command 1), record the interpreter version alongside it, and commit both files.
 5. Hash the training data and store the digest with the run rather than relying on the filename.
 6. Call `run_record.py` at the start of the run and confirm it refuses to proceed while you have uncommitted changes.
 7. State the tolerance you will accept before rerunning - for example, accuracy within 0.5 percentage points - and write it into the run record.
@@ -357,7 +357,7 @@ if __name__ == "__main__":
 
 ### Scenario 5: The lockfile installs cleanly on one machine and fails on another.
 
-**Likely cause:** The lockfile captured packages built for one platform - a different operating system, CPU architecture or CUDA version - and `pip freeze` records versions without recording what they were built against.
+**Likely cause:** The lockfile was compiled on one platform - a different operating system, CPU architecture or CUDA version - and it records versions and file hashes without recording the system libraries or CUDA version those packages were built against.
 
 **Resolution:** Record the platform and interpreter version in the run record, as `run_record.py` does, so the mismatch is visible rather than mysterious. For teams crossing platforms, move to a container image built from the lockfile, which pins the system libraries the lockfile cannot describe. Confirm it by comparing the `platform` field between the two records before debugging any individual package.
 
@@ -391,6 +391,7 @@ When comparison crosses people rather than days. By hand - a run record written 
 - [MLflow: ML Experiment Tracking](https://mlflow.org/docs/latest/ml/tracking/) - Tracking runs, parameters, metrics and artifacts.
 - [MLflow: ML Model Registry](https://mlflow.org/docs/latest/ml/model-registry/) - The model registry as the promotion path for tracked models.
 - [Python Packaging Authority (pip documentation): Repeatable Installs](https://pip.pypa.io/en/stable/topics/repeatable-installs/) - Pinning every dependency (e.g. via pip freeze) so installs repeat.
+- [Jazzband (GitHub): pip-tools (jazzband/pip-tools)](https://github.com/jazzband/pip-tools) - `pip-compile --generate-hashes` for a hashed lockfile, and `--allow-unsafe` for setuptools and pip.
 - [Python Packaging Authority (pip documentation): Secure installs](https://pip.pypa.io/en/stable/topics/secure-installs/) - Hash-checking installs with --require-hashes.
 - [Python Packaging Authority (Python Packaging User Guide): pylock.toml Specification](https://packaging.python.org/en/latest/specifications/pylock-toml/) - Standard lockfile format for reproducible Python environments.
 - [PyTorch: Reproducibility](https://docs.pytorch.org/docs/main/notes/randomness.html) - Seeding, deterministic algorithms and their limits on GPU.

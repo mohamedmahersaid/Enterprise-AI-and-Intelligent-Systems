@@ -96,10 +96,10 @@ git log --oneline -- prompts/system_prompt.txt
 
 ### Command 7
 
-Run a frozen golden-question set against canary and production and diff scores.
+Run a frozen golden-question set against canary and production and diff scores, with the drift gate script below saved as `drift_gate.py` and `AZURE_OPENAI_ENDPOINT` set. It writes drift.json, and exits 1 when the canary drifted beyond MAX_DRIFT_PCT and 2 when the run could not be scored.
 
 ```text
-python -m evalharness --set golden_questions.jsonl --model chat-canary --baseline chat-prod --report drift.json
+python drift_gate.py golden_questions.jsonl chat-canary chat-prod
 ```
 
 ### Command 8
@@ -122,7 +122,7 @@ az role assignment create --assignee <principal-object-id> --role "Cognitive Ser
 
 ### Golden-set drift detector and canary gate
 
-The script authenticates with Microsoft Entra ID - az login on a laptop, managed identity on an Azure-hosted runner - and requires `pip install azure-identity`. If a key is unavoidable, keep it in Key Vault and read it at runtime, never in pipeline variables or the repository.
+Save it as `drift_gate.py`; Command 7 runs it. The script authenticates with Microsoft Entra ID - az login on a laptop, managed identity on an Azure-hosted runner - and requires `pip install azure-identity`. If a key is unavoidable, keep it in Key Vault and read it at runtime, never in pipeline variables or the repository.
 
 ```python
 #!/usr/bin/env python3

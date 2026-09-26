@@ -151,10 +151,13 @@ jq -r '[.timestamp, .correlation_id, .usage.prompt_tokens, .usage.completion_tok
 ### Command 3
 
 Find the interaction a user is complaining about. This is the query that
-justifies storing a correlation identifier at all.
+justifies storing a correlation identifier at all. It matches on the parsed
+field rather than on the text, because a text match such as
+`grep '"correlation_id":"abc-123"'` finds nothing in a log written by Python's
+default `json.dumps`, which puts a space after each colon.
 
 ```text
-grep -h '"correlation_id":"abc-123"' logs/*.jsonl | jq '.rendered_prompt, .response'
+jq 'select(.correlation_id == "abc-123") | .rendered_prompt, .response' logs/*.jsonl
 ```
 
 ### Command 4
@@ -178,10 +181,22 @@ jq -r 'select(.finish_reason=="length") | .timestamp[0:10]' app.log | sort | uni
 
 Before shipping, prove your logger is not writing secrets. Grepping your own
 log for the key you configured is a ten-second check that has saved real
-incidents.
+incidents. Point the glob at the files your logger actually writes; Commands 2,
+4 and 5 read `app.log`, so change `logs/*.jsonl` if that is where yours goes.
+
+It passes only when grep read every file and found nothing: it then prints
+`no key prefix found` and exits 0. It exits 1 when a file holds the key's first
+twelve characters (grep lists it), and also when nothing matches the glob or a
+file cannot be read, because grep reports those with status 2 and a check that
+searched nothing has proved nothing. It stops with a message when `KEY` is
+unset, since an empty prefix would match every line. It needs bash
+(`${KEY:0:12}` is not POSIX sh), and under `set -e` it fails the CI step
+wherever in the step it sits.
 
 ```text
-grep -c "$(echo "$KEY" | cut -c1-12)" logs/*.jsonl
+: "${KEY:?set KEY to the API key your application uses}"
+rc=0; grep -lF -- "${KEY:0:12}" logs/*.jsonl || rc=$?
+if [ "$rc" -eq 1 ]; then echo "no key prefix found"; else false; fi
 ```
 
 ## Automation scripts
@@ -307,7 +322,7 @@ from, then prove it does not silently hold personal data or secrets.
 - A log record containing all six required fields, with the rendered prompt distinguishable from the template.
 - `log_shape.py` output before and after your handling decision, showing the refusal and then the pass.
 - One sentence naming your retention choice and what it costs you.
-- A grep for your API key prefix returning zero.
+- Command 6, pointed at the files your logger writes, printing `no key prefix found` and exiting 0.
 - A single complaint reconstructed from its correlation identifier, with the prompt, retrieved context and full response shown.
 
 ## Operational automation

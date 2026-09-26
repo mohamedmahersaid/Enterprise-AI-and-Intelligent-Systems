@@ -43,5 +43,15 @@
     "pattern": "@modelcontextprotocol/inspector(?!@)",
     "reason": "An unpinned Inspector resolves to whatever npm tags latest; v1 (1.0.2) prints {\"tools\": ...} where v2 prints {\"result\": {\"tools\": ...}}, so a pinned tool-definition hash silently hashes empty input. Pin the version, for example npx @modelcontextprotocol/inspector@2.8.0.",
     "source": "https://github.com/modelcontextprotocol/inspector/blob/main/docs/v1-to-v2-migration.md"
+  },
+  {
+    "pattern": "\\bpip3?\\s+freeze\\b[^\\n|]*>\\s*\\S*lock",
+    "reason": "pip freeze writes versions but no hashes, so a lockfile written by it fails `pip install --require-hashes` (\"Hashes are required in --require-hashes mode\"). Compile the lock with `pip-compile --generate-hashes --allow-unsafe` from a requirements.in (or `uv pip compile --generate-hashes`).",
+    "source": "https://github.com/pypa/pip/blob/26.2.1/docs/html/topics/secure-installs.md"
+  },
+  {
+    "pattern": "\\bpython3?\\s+-m\\s+evalharness\\b",
+    "reason": "No evalharness module is defined by any leaf or published on PyPI (the project lookup returns 404). Run the leaf's own drift gate instead: `python drift_gate.py golden_questions.jsonl chat-canary chat-prod`.",
+    "source": "https://pypi.org/pypi/evalharness/json"
   }
 ]

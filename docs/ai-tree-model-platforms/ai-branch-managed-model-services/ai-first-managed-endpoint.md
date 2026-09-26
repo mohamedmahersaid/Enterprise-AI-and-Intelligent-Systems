@@ -167,10 +167,13 @@ curl -s -X POST "$ENDPOINT/v1/chat/completions" -H "Authorization: Bearer $KEY" 
 ### Command 4
 
 Check the key is not in the repository, including history. A clean working tree
-proves nothing about what was committed last March.
+proves nothing about what was committed last March. The first line stops when
+`KEY` is unset: an empty search string makes git abort, and `head` would hide
+that as an empty, clean-looking result.
 
 ```text
-git log --all -p -S "$(echo "$KEY" | cut -c1-12)" --oneline | head
+: "${KEY:?set KEY to the key you deployed with}"
+git log --all -p -S "${KEY:0:12}" --oneline | head
 ```
 
 ### Command 5
