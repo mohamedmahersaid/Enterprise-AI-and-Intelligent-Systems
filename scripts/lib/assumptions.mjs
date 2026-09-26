@@ -23,9 +23,10 @@
  */
 import fs from 'node:fs';
 import { citations, loadRegistry } from './certifications.mjs';
+import { commandTools } from './readiness.mjs';
 
 /**
- * Leading command tokens worth declaring, mapped to what a reader must obtain.
+ * Command names worth declaring, mapped to what a reader must obtain.
  * Shell builtins and text-mangling utilities are omitted on purpose: `grep`
  * tells a reader nothing about what to install, while `az` tells them
  * everything.
@@ -123,30 +124,16 @@ const PINNED = [
   },
 ];
 
-/** Command blocks are fenced as ```text; python blocks are checked elsewhere. */
-function commandLines(body) {
-  const out = [];
-  let inside = false;
-  for (const line of body.split('\n')) {
-    if (!inside && line.trimEnd() === '```text') {
-      inside = true;
-    } else if (inside && line.trimStart().startsWith('```')) {
-      inside = false;
-    } else if (inside) {
-      out.push(line);
-    }
-  }
-  return out;
-}
-
-/** The tools a leaf's own commands invoke, in stable order. */
+/**
+ * The tools a leaf's own commands invoke, in stable order. Every command in a
+ * line counts - `TOKEN=$(az ...)`, `jq ... | curl ...` - not only the first
+ * word, or a leaf whose commands open with an assignment or a pipe would be
+ * listed as needing less than it does.
+ */
 function toolsFor(body) {
   const found = new Set();
-  for (const line of commandLines(body)) {
-    const text = line.trim();
-    if (!text || text.startsWith('#')) continue;
-    const token = text.split(/\s+/)[0];
-    if (TOOLS[token]) found.add(TOOLS[token]);
+  for (const tool of commandTools(body)) {
+    if (TOOLS[tool]) found.add(TOOLS[tool]);
   }
   return [...found].sort();
 }

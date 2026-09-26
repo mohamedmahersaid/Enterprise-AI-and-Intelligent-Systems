@@ -166,13 +166,24 @@ function toolsIn(line) {
   return tools;
 }
 
+/**
+ * Every tool a leaf's shell commands run, wherever in a line it appears. Shared
+ * with ASSUMPTIONS.md, so the tools a reader is told to install and the needs
+ * the floor enforces are read from the commands the same way.
+ */
+export function commandTools(body) {
+  const found = new Set();
+  for (const line of shellLines(body)) {
+    for (const tool of toolsIn(line)) found.add(tool);
+  }
+  return found;
+}
+
 /** The needs a leaf's own commands prove, in canonical order. */
 export function impliedNeeds(body) {
   const found = new Set();
-  for (const line of shellLines(body)) {
-    for (const tool of toolsIn(line)) {
-      if (TOOL_NEEDS[tool]) found.add(TOOL_NEEDS[tool]);
-    }
+  for (const tool of commandTools(body)) {
+    if (TOOL_NEEDS[tool]) found.add(TOOL_NEEDS[tool]);
   }
   return ORDER.filter((n) => found.has(n));
 }

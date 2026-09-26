@@ -131,34 +131,34 @@ Derived from the leading command in every `text` block. A leaf listing a tool as
 | `ai-ollama-local-inference` | Ollama, curl |
 | `ai-model-selection-cost` | Azure CLI, NVIDIA driver and CUDA runtime, Ollama |
 | `ai-local-inference-at-scale` | NVIDIA driver and CUDA runtime, curl, vLLM |
-| `ai-azure-openai-integration` | Azure CLI, curl |
+| `ai-azure-openai-integration` | Azure CLI, curl, jq |
 | `ai-prompt-engineering-ops` | Azure CLI, Ollama, Python 3, curl, git, jq |
 | `ai-provider-failover` | Azure CLI, curl, jq |
-| `ai-first-managed-endpoint` | curl, git |
+| `ai-first-managed-endpoint` | curl, git, jq |
 | `ai-rag-architecture` | Azure CLI, Ollama, Python 3, curl |
-| `ai-private-enterprise-rag` | Azure CLI, curl |
+| `ai-private-enterprise-rag` | Azure CLI, Ollama, curl |
 | `ai-do-you-need-rag` | Python 3, curl, jq |
 | `ai-agents-orchestration` | Azure CLI, Python 3, curl, pip |
-| `ai-mcp-security-evaluation` | Azure CLI, Python 3, jq, pip |
-| `ai-content-safety-guardrails` | jq |
+| `ai-mcp-security-evaluation` | Azure CLI, Python 3, curl, jq, pip |
+| `ai-content-safety-guardrails` | Azure CLI, curl, jq |
 | `ai-do-you-need-an-agent` | curl, jq |
 | `ai-llmops-deployment-lifecycle` | Azure CLI, Python 3, git, kubectl |
-| `ai-observability-performance-monitoring` | Azure CLI, NVIDIA driver and CUDA runtime, curl, kubectl |
+| `ai-observability-performance-monitoring` | Azure CLI, NVIDIA driver and CUDA runtime, curl, jq, kubectl |
 | `ai-incident-response` | Azure CLI, jq |
 | `ai-what-to-log` | curl, jq |
 | `ai-governance-compliance-framework` | Azure CLI |
 | `ai-enterprise-adoption-patterns` | Azure CLI |
 | `ai-inventory-acceptable-use` | jq |
-| `ai-mlops-mlflow-registry` | MLflow, curl |
-| `ai-distributed-training-kubeflow-ray` | NVIDIA driver and CUDA runtime, Ray, kubectl |
+| `ai-mlops-mlflow-registry` | MLflow, curl, jq |
+| `ai-distributed-training-kubeflow-ray` | NVIDIA driver and CUDA runtime, Ray, jq, kubectl |
 | `ai-quantisation-gpu-sharing` | NVIDIA driver and CUDA runtime, Python 3, vLLM |
 | `ai-first-gpu-job` | NVIDIA driver and CUDA runtime |
 | `ai-feature-store-skew` | Feast |
 | `ai-fine-tuning-peft` | Python 3, jq, vLLM |
-| `ai-reproducible-training-runs` | Python 3, git |
+| `ai-reproducible-training-runs` | Python 3, git, jq, pip |
 | `ai-vector-db-hybrid-retrieval` | curl, psql (PostgreSQL client) |
 | `ai-evaluation-harness-gates` | Python 3, git, promptfoo |
 | `ai-how-retrieval-finds-things` | Azure CLI, curl, jq |
-| `ai-agent-orchestration-guardrails` | Python 3, curl, kubectl, pip |
-| `ai-finops-build-vs-buy` | NVIDIA driver and CUDA runtime, curl, kubectl |
-| `ai-prototype-to-production` | curl |
+| `ai-agent-orchestration-guardrails` | Python 3, curl, jq, kubectl, pip |
+| `ai-finops-build-vs-buy` | NVIDIA driver and CUDA runtime, curl, jq, kubectl |
+| `ai-prototype-to-production` | curl, jq |
