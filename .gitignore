@@ -8,3 +8,6 @@ Thumbs.db
 
 # Generated site. Built by CI and served by Pages; never committed.
 site/
+
+# Python wheels downloaded while checking a package locally; never content.
+*.whl
