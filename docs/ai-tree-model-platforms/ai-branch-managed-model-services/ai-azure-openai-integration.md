@@ -89,13 +89,45 @@ az cognitiveservices account deployment create -g rg-ai -n aoai-prod --deploymen
 
 ### Command 6
 
+Get an Entra token for the v1 API; the audience is `https://ai.azure.com`, and the role assignment can take up to five minutes to apply.
+
+```text
+TOKEN=$(az account get-access-token --resource https://ai.azure.com --query accessToken -o tsv)
+```
+
+### Command 7
+
+Prove the keyless path end to end from inside the VNet: v1 route, deployment name in `model`, no api-version, no key.
+
+```text
+curl -s https://aoai-prod.openai.azure.com/openai/v1/chat/completions -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"model":"chat","messages":[{"role":"user","content":"Reply with the word ok."}]}' | jq -r ".choices[0].message.content"
+```
+
+### Command 8
+
 Rotate a key during migration away from key auth; audit that no caller breaks.
 
 ```text
 az cognitiveservices account keys regenerate -g rg-ai -n aoai-prod --key-name key1
 ```
 
-### Command 7
+### Command 9
+
+Turn key authentication off once every caller is on Entra ID; propagation can take several hours.
+
+```text
+Set-AzCognitiveServicesAccount -ResourceGroupName rg-ai -Name aoai-prod -DisableLocalAuth $true
+```
+
+### Command 10
+
+Confirm keys are really off: an old key must now get HTTP 401, and until it does, treat key auth as still enabled.
+
+```text
+curl -s -o /dev/null -w "%{http_code}\n" https://aoai-prod.openai.azure.com/openai/v1/chat/completions -H "api-key: $OLD_KEY" -H "Content-Type: application/json" -d '{"model":"chat","messages":[{"role":"user","content":"ping"}]}'
+```
+
+### Command 11
 
 Stream request and audit logs for security monitoring and chargeback.
 
@@ -103,7 +135,7 @@ Stream request and audit logs for security monitoring and chargeback.
 az monitor diagnostic-settings create --name aoai-diag --resource $AOAI_ID --workspace $LAW_ID --logs "[{category:RequestResponse,enabled:true},{category:Audit,enabled:true}]"
 ```
 
-### Command 8
+### Command 12
 
 Verify the effective network ACLs during a compliance review.
 
@@ -111,12 +143,20 @@ Verify the effective network ACLs during a compliance review.
 az cognitiveservices account show -g rg-ai -n aoai-prod --query "properties.networkAcls"
 ```
 
-### Command 9
+### Command 13
 
 Enforce that no Azure OpenAI account can be created with public access enabled.
 
 ```text
 az policy assignment create --name deny-public-aoai --policy $POLICY_ID --scope /subscriptions/$SUB
+```
+
+### Command 14
+
+Assign the built-in policy "Azure AI Services resources should have key access disabled (disable local authentication)" so an account that turns keys back on is caught.
+
+```text
+az policy assignment create --name deny-aoai-keys --policy $KEY_POLICY_ID --scope /subscriptions/$SUB
 ```
 
 ## Automation scripts

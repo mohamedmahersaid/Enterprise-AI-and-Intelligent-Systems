@@ -110,9 +110,19 @@ Create a scheduled query alert that fires when a drift signal appears in logs.
 az monitor scheduled-query create -g rg-ai -n aoai-drift-alert --scopes $LAW_ID --condition "count 'AppTraces | where Message contains \"drift_score_low\"' > 0" --evaluation-frequency 1h --window-size 1h
 ```
 
+### Command 9
+
+Grant the identity that runs the drift gate - your account, or the pipeline's managed identity - the least-privilege inference role on the account. It cannot create or change deployments; that control-plane work needs a role such as Cognitive Services Contributor, held by a different identity. The assignment can take up to five minutes to apply.
+
+```text
+az role assignment create --assignee <principal-object-id> --role "Cognitive Services OpenAI User" --scope $AOAI_ID
+```
+
 ## Automation scripts
 
 ### Golden-set drift detector and canary gate
+
+The script authenticates with Microsoft Entra ID - az login on a laptop, managed identity on an Azure-hosted runner - and requires `pip install azure-identity`. If a key is unavoidable, keep it in Key Vault and read it at runtime, never in pipeline variables or the repository.
 
 ```python
 #!/usr/bin/env python3
@@ -127,7 +137,7 @@ import time
 import urllib.request
 
 AOAI_ENDPOINT = os.environ.get("AZURE_OPENAI_ENDPOINT", "")
-AOAI_KEY = os.environ.get("AZURE_OPENAI_API_KEY", "")
+_TOKEN_PROVIDER = None
 MAX_DRIFT_PCT = float(os.environ.get("MAX_DRIFT_PCT", "5.0"))
 # The system prompt both deployments run under, and an optional override for
 # the candidate alone - how a prompt regression is tested before it ships.
@@ -158,6 +168,21 @@ def read_prompt(path):
         return fh.read()
 
 
+def aoai_token():
+    """Short-lived Entra ID token for Azure OpenAI - no API key. The import is
+    lazy so a bare run can print its usage without azure-identity installed."""
+    global _TOKEN_PROVIDER
+    if _TOKEN_PROVIDER is None:
+        try:
+            from azure.identity import DefaultAzureCredential, get_bearer_token_provider
+        except ImportError:
+            raise RuntimeError("azure-identity is not installed: "
+                               "pip install azure-identity") from None
+        _TOKEN_PROVIDER = get_bearer_token_provider(
+            DefaultAzureCredential(), "https://ai.azure.com/.default")
+    return _TOKEN_PROVIDER()
+
+
 def call_deployment(deployment, prompt, system=None):
     url = "%s/openai/v1/chat/completions" % AOAI_ENDPOINT.rstrip("/")
     messages = [{"role": "system", "content": system}] if system else []
@@ -169,7 +194,7 @@ def call_deployment(deployment, prompt, system=None):
             "max_completion_tokens": 400}
     req = urllib.request.Request(url, data=json.dumps(body).encode(),
                                  headers={"Content-Type": "application/json",
-                                          "api-key": AOAI_KEY})
+                                          "Authorization": "Bearer " + aoai_token()})
     with urllib.request.urlopen(req, timeout=120) as resp:
         out = json.loads(resp.read().decode())
     return out["choices"][0]["message"]["content"]
@@ -203,8 +228,15 @@ def main():
     path, candidate = sys.argv[1], sys.argv[2]
     baseline = sys.argv[3] if len(sys.argv) > 3 else "chat-prod"
 
-    if not AOAI_ENDPOINT or not AOAI_KEY:
-        print("ERROR: AZURE_OPENAI_ENDPOINT / AZURE_OPENAI_API_KEY not set")
+    if not AOAI_ENDPOINT:
+        print("ERROR: AZURE_OPENAI_ENDPOINT not set")
+        sys.exit(2)
+    # Fail fast: an auth failure mid-suite scores both sides zero, which
+    # would read as no drift and pass the gate.
+    try:
+        aoai_token()
+    except Exception as exc:
+        print("ERROR: no Entra ID token for Azure OpenAI (run az login): %s" % exc)
         sys.exit(2)
 
     rows = load_goldenset(path)
@@ -241,9 +273,9 @@ if __name__ == "__main__":
 
 ### Steps
 
-1. Create two Azure OpenAI deployments, each pinned to an explicit model version and with an explicit sku-capacity: chat-prod on the model in service today, and chat-canary on the model that will replace it when that one retires.
+1. Create two Azure OpenAI deployments, each pinned to an explicit model version and with an explicit sku-capacity: chat-prod on the model in service today, and chat-canary on the model that will replace it when that one retires. Creating deployments is a control-plane action that needs a role such as Cognitive Services Contributor.
 2. Write 20-30 golden questions with expected keyword lists into golden_questions.jsonl, covering the core intents your application actually serves.
-3. Put your application's system prompt in system_prompt.txt, set SYSTEM_PROMPT_FILE to it along with AZURE_OPENAI_ENDPOINT and AZURE_OPENAI_API_KEY, then run the drift detector script comparing chat-canary against chat-prod.
+3. Put your application's system prompt in system_prompt.txt and set SYSTEM_PROMPT_FILE to it along with AZURE_OPENAI_ENDPOINT - no API key. Grant your identity Cognitive Services OpenAI User on the account (Command 9), run az login, then run the drift detector script comparing chat-canary against chat-prod.
 4. Copy system_prompt.txt, remove a key instruction from the copy, point CANDIDATE_SYSTEM_PROMPT_FILE at it so only the canary runs the regressed prompt, re-run the script, and confirm drift_pct rises and the script exits non-zero.
 5. Wire the script into a CI pipeline stage that runs on every pull request touching prompts/ or the deployment configuration, failing the build on non-zero exit.
 6. Add a scheduled nightly run of the same script against production only, comparing today's score to a stored baseline from last week to catch provider-side model drift.
@@ -331,6 +363,7 @@ A system prompt directly determines model behaviour with the same blast radius a
 ## References
 
 - [Microsoft Learn: Working with models](https://learn.microsoft.com/azure/foundry/openai/how-to/working-with-models) - Azure OpenAI deployment management: version pinning, upgrade policies and controlled migration between model versions.
+- [Microsoft Learn: How to configure Azure OpenAI in Microsoft Foundry Models with Microsoft Entra ID authentication (classic)](https://learn.microsoft.com/azure/foundry-classic/openai/how-to/managed-identity) - Keyless drift-gate calls with DefaultAzureCredential, the Cognitive Services OpenAI User role, and the separate control-plane role for deployments.
 - [Microsoft Learn: Microsoft Foundry Models lifecycle and support policy](https://learn.microsoft.com/azure/foundry/openai/concepts/model-retirements) - Azure OpenAI model version lifecycle: deprecation, retirement and notification timelines.
 - [Argo Project: Canary Deployment Strategy - Argo Rollouts](https://argo-rollouts.readthedocs.io/en/stable/features/canary/) - Canary rollout strategies with weighted traffic steps.
 - [Argo Project: Analysis & Progressive Delivery - Argo Rollouts](https://argo-rollouts.readthedocs.io/en/stable/features/analysis/) - Automated analysis gating promotion or rollback of a canary.

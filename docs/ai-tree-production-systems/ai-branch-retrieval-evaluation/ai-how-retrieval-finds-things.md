@@ -112,29 +112,53 @@ grep -ril "authentication failure" corpus/ | head; grep -ril "cannot sign in" co
 
 ### Command 2
 
-Run the same question through the semantic index and read the scores, not just the order
+One-time switch so the search service accepts Entra tokens alongside keys; move to `--disable-local-auth` once no caller still sends a key
 
 ```text
-curl -s "$SEARCH/indexes/docs/docs/search?api-version=2026-04-01" -H "api-key: $KEY" -d "{\"vectorQueries\":[{\"kind\":\"text\",\"text\":\"$Q\",\"fields\":\"embedding\",\"k\":5}]}" | jq -r ".value[] | [.\"@search.score\", .id] | @tsv"
+az search service update --name $SEARCH_NAME --resource-group $RG --aad-auth-failure-mode http401WithBearerChallenge --auth-options aadOrApiKey
 ```
 
 ### Command 3
 
-Ask for an identifier that is not in the corpus, and watch five confident results come back anyway
+Grant query-only access on this one index (drop `/indexes/docs` for the whole service); assignments can take several minutes to apply
 
 ```text
-curl -s "$SEARCH/indexes/docs/docs/search?api-version=2026-04-01" -H "api-key: $KEY" -d "{\"vectorQueries\":[{\"kind\":\"text\",\"text\":\"ZZ-99999\",\"fields\":\"embedding\",\"k\":5}]}" | jq -r ".value[].\"@search.score\""
+az role assignment create --assignee $PRINCIPAL_ID --role "Search Index Data Reader" --scope $SEARCH_ID/indexes/docs
 ```
 
 ### Command 4
 
-Compare the two modes on the same identifier, which is the clearest demonstration of why both are needed
+Get a bearer token for the search data plane; send no api-key header with it, because when both arrive the key is the one used
 
 ```text
-curl -s "$SEARCH/indexes/docs/docs/search?api-version=2026-04-01&search=0x80070005" -H "api-key: $KEY" | jq -r ".value[].id"
+TOKEN=$(az account get-access-token --resource https://search.azure.com --query accessToken -o tsv)
 ```
 
 ### Command 5
+
+Run the same question through the semantic index and read the scores, not just the order
+
+```text
+curl -s "$SEARCH/indexes/docs/docs/search?api-version=2026-04-01" -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d "{\"vectorQueries\":[{\"kind\":\"text\",\"text\":\"$Q\",\"fields\":\"embedding\",\"k\":5}]}" | jq -r ".value[] | [.\"@search.score\", .id] | @tsv"
+```
+
+### Command 6
+
+Ask for an identifier that is not in the corpus, and watch five confident results come back anyway
+
+```text
+curl -s "$SEARCH/indexes/docs/docs/search?api-version=2026-04-01" -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d "{\"vectorQueries\":[{\"kind\":\"text\",\"text\":\"ZZ-99999\",\"fields\":\"embedding\",\"k\":5}]}" | jq -r ".value[].\"@search.score\""
+```
+
+### Command 7
+
+Compare the two modes on the same identifier, which is the clearest demonstration of why both are needed
+
+```text
+curl -s "$SEARCH/indexes/docs/docs/search?api-version=2026-04-01&search=0x80070005" -H "Authorization: Bearer $TOKEN" | jq -r ".value[].id"
+```
+
+### Command 8
 
 Check what actually reached the model, before forming any opinion about the answer
 
@@ -142,7 +166,7 @@ Check what actually reached the model, before forming any opinion about the answ
 jq -r ".retrieved[] | [.score, .doc_id] | @tsv" query-trace.json
 ```
 
-### Command 6
+### Command 9
 
 Measure recall directly - how often the expected document appears anywhere in the candidate set
 
@@ -159,8 +183,14 @@ measures retrieval alone against known query-to-document pairs, reports recall f
 mode, and names which queries each mode misses - the evidence that decides whether you
 need keywords, meaning, or both.
 
-Requires `pip install requests`. The query key is read from `SEARCH_API_KEY` rather than
-the command line, where it would be kept in shell history.
+Requires `pip install azure-identity requests`. There is no key to handle: it signs in with
+`DefaultAzureCredential` (`az login` on a laptop, managed identity on an Azure host), asks
+for a `https://search.azure.com` token, and needs only Search Index Data Reader on the
+index (Commands 2 and 3). It sends no `api-key` header, because a request carrying both is
+authorised by the key. The `text` vector queries run through the index's Azure OpenAI
+vectorizer; leave its `apiKey` and `authIdentity` empty so the search service calls Azure
+OpenAI with its own managed identity, which needs Cognitive Services OpenAI User on that
+account and nothing broader.
 
 ```python
 #!/usr/bin/env python3
@@ -172,13 +202,26 @@ nothing downstream can recover a passage that was never retrieved.
 """
 import argparse
 import json
-import os
 import sys
 from collections import defaultdict
 
 import requests
 
-def search(endpoint, key, index, mode, query, k):
+SEARCH_SCOPE = "https://search.azure.com/.default"
+
+def bearer_token():
+    """Entra token for the search data plane; no API key is read or sent."""
+    try:
+        from azure.identity import DefaultAzureCredential
+    except ImportError:
+        sys.exit("pip install azure-identity requests first")
+    try:
+        # One token covers a normal run; it lasts about an hour.
+        return DefaultAzureCredential().get_token(SEARCH_SCOPE).token
+    except Exception as error:  # CredentialUnavailableError, ClientAuthenticationError
+        sys.exit(f"could not get a search token - run az login first ({error})")
+
+def search(endpoint, token, index, mode, query, k):
     """mode: 'keyword' | 'semantic' | 'hybrid'."""
     body = {"top": k}
     if mode in ("keyword", "hybrid"):
@@ -189,9 +232,13 @@ def search(endpoint, key, index, mode, query, k):
         ]
     response = requests.post(
         f"{endpoint}/indexes/{index}/docs/search?api-version=2026-04-01",
-        headers={"api-key": key, "content-type": "application/json"},
+        headers={"Authorization": f"Bearer {token}",
+                 "Content-Type": "application/json"},
         json=body, timeout=30,
     )
+    if response.status_code in (401, 403):
+        sys.exit(f"HTTP {response.status_code}: enable roles on the service and grant "
+                 "Search Index Data Reader on the index, then allow a few minutes")
     response.raise_for_status()
     return [hit["id"] for hit in response.json().get("value", [])]
 
@@ -202,7 +249,7 @@ def main():
     parser.add_argument("--index", required=True)
     parser.add_argument("-k", type=int, default=20)
     args = parser.parse_args()
-    key = os.environ.get("SEARCH_API_KEY") or parser.error("set SEARCH_API_KEY first")
+    token = bearer_token()
 
     with open(args.pairs) as handle:
         cases = [json.loads(line) for line in handle if line.strip()]
@@ -211,7 +258,7 @@ def main():
     hits = defaultdict(int)
     for mode in ("keyword", "semantic", "hybrid"):
         for case in cases:
-            found = search(args.endpoint, key, args.index, mode,
+            found = search(args.endpoint, token, args.index, mode,
                            case["query"], args.k)
             if case["expected_doc"] in found:
                 hits[mode] += 1
@@ -251,7 +298,7 @@ if __name__ == "__main__":
 
 ### Steps
 
-1. Index a small real corpus that contains both prose and exact identifiers such as error codes or part numbers.
+1. Index a small real corpus that contains both prose and exact identifiers such as error codes or part numbers, then enable roles on the service and grant yourself Search Index Data Reader on the index (Commands 2 and 3) so every query in the lab runs on a token rather than a key.
 2. Write twenty query-to-document pairs from questions you already know the answers to, including at least five identifier lookups.
 3. Run `retrieval_recall.py` for keyword, semantic and hybrid, and record recall for each.
 4. Read the two miss lists and confirm each mode loses a different class of query.
@@ -358,6 +405,9 @@ By writing down real queries paired with the documents that should be found, the
 
 - [Microsoft Learn: Hybrid search using vectors and full-text search in Azure AI Search](https://learn.microsoft.com/azure/search/hybrid-search-overview) - Full-text search, vector search and how hybrid queries combine them.
 - [Microsoft Learn: Relevance scoring in hybrid search using Reciprocal Rank Fusion (RRF)](https://learn.microsoft.com/azure/search/hybrid-search-ranking) - How hybrid query result sets are fused into one ranking.
+- [Microsoft Learn: Enable or disable role-based access control in Azure AI Search](https://learn.microsoft.com/azure/search/search-security-enable-roles) - The one-time `az search service update` that makes the service accept bearer tokens, and the rule that an API key wins when both are sent.
+- [Microsoft Learn: Connect to Azure AI Search using roles](https://learn.microsoft.com/azure/search/search-security-rbac) - Search Index Data Reader for queries, assigned at service or single-index scope.
+- [Microsoft Learn: Azure OpenAI vectorizer](https://learn.microsoft.com/azure/search/vector-search-vectorizer-azure-open-ai) - Letting the vectorizer call Azure OpenAI with the search service's managed identity instead of an API key.
 - [OpenAI: Vector embeddings](https://developers.openai.com/api/docs/guides/embeddings) - Embeddings, similarity and their appropriate uses.
 - [now publishers (Foundations and Trends in Information Retrieval; Robertson and Zaragoza, 2009): The Probabilistic Relevance Framework: BM25 and Beyond](https://www.nowpublishers.com/article/Details/INR-019) - The BM25 ranking function behind lexical search.
 - [NIST Text REtrieval Conference (TREC): Common Evaluation Measures](https://trec.nist.gov/pubs/trec16/appendices/measures.pdf) - Recall and precision as TREC evaluation measures.
