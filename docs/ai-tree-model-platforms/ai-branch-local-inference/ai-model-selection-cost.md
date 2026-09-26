@@ -74,10 +74,10 @@ az monitor metrics list --resource $AOAI_ID --metric ProcessedPromptTokens Gener
 
 ### Command 4
 
-Extract actual billed Azure OpenAI usage for the month.
+Extract actual billed Azure OpenAI cost for the month, per resource, from the Cost Management Query API. This replaces `az consumption usage list`, which calls the Consumption Usage Details API: Microsoft Learn marks that API deprecated for Enterprise Agreement and Microsoft Customer Agreement accounts and recommends against building reporting on it, though it remains the documented on-demand option for pay-as-you-go and Visual Studio subscriptions. For line-item detail rather than totals, use Cost Management Exports, or the Cost Details report on EA and MCA. With one grouping, each row is the cost, the grouped column and the currency, in the order `properties.columns` lists them, as in Microsoft Learn's grouping samples; the `--query` keeps the rows whose resource ID contains `aoai`.
 
 ```text
-az consumption usage list --start-date 2026-06-01 --end-date 2026-06-30 --query "[?contains(instanceName,'aoai')]" -o table
+az rest --method post --url "https://management.azure.com/subscriptions/$SUB/providers/Microsoft.CostManagement/query?api-version=2026-06-01" --body "{\"type\":\"ActualCost\",\"timeframe\":\"Custom\",\"timePeriod\":{\"from\":\"2026-06-01T00:00:00Z\",\"to\":\"2026-06-30T23:59:59Z\"},\"dataset\":{\"granularity\":\"None\",\"aggregation\":{\"totalCost\":{\"name\":\"PreTaxCost\",\"function\":\"Sum\"}},\"grouping\":[{\"type\":\"Dimension\",\"name\":\"ResourceId\"}]}}" --query "properties.rows[?contains(@[1], 'aoai')]"
 ```
 
 ### Command 5
@@ -90,7 +90,7 @@ ollama run llama3.1:8b --verbose
 
 ### Command 6
 
-Throttle a deployment by re-applying it at lower TPM capacity as an emergency cost brake. The CLI has no deployment update command; create with the same name, model and SKU replaces the capacity.
+Throttle a deployment by re-applying it at lower TPM capacity as an emergency cost brake. The core CLI has no update command for a deployment's capacity or model version; create with the same name, model and SKU replaces the capacity. (The `az cognitiveservices account deployment update` command in the preview foundry-cost-control extension only attaches or removes cost controls.)
 
 ```text
 az cognitiveservices account deployment create -g rg-ai -n aoai-prod --deployment-name chat-small --model-name gpt-5.4-mini --model-version 2026-03-17 --model-format OpenAI --sku-name GlobalStandard --sku-capacity 10
@@ -394,6 +394,10 @@ Memory first, then throughput. Memory is weights plus KV cache plus overhead. We
 - [OpenAI: Prompt caching | OpenAI API](https://developers.openai.com/api/docs/guides/prompt-caching) - OpenAI prompt caching semantics.
 - [OpenAI: Batch API | OpenAI API](https://developers.openai.com/api/docs/guides/batch) - OpenAI batch processing semantics.
 - [Microsoft Learn: Design principles for AI workloads on Azure](https://learn.microsoft.com/azure/well-architected/ai/design-principles#cost-optimization) - Well-Architected Cost Optimization principles applied to AI workloads.
+- [Microsoft Learn: Query - Usage](https://learn.microsoft.com/rest/api/cost-management/query/usage) - Cost Management Query API at api-version 2026-06-01, with a custom time period and ResourceId grouping, used for the monthly Azure OpenAI cost in Command 4.
+- [Microsoft Learn: Migrate from Consumption Usage Details API](https://learn.microsoft.com/azure/cost-management-billing/automate/migrate-consumption-usage-details-api) - The deprecation of the API behind `az consumption usage list` and the Exports and Cost Details replacements.
+- [Microsoft Learn: Get cost details for a pay-as-you-go subscription](https://learn.microsoft.com/azure/cost-management-billing/automate/get-usage-details-legacy-customer) - Consumption Usage Details API deprecated for all but pay-as-you-go and Visual Studio subscriptions.
+- [Microsoft Learn: az cognitiveservices account deployment](https://learn.microsoft.com/cli/azure/cognitiveservices/account/deployment) - Core create, delete, list and show commands, and the preview extension's update command that only manages cost-control attachments.
 
 ## Suggested video search
 

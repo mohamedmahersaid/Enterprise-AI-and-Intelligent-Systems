@@ -59,18 +59,20 @@ OLLAMA_HOST=127.0.0.1 ollama serve
 
 ### Command 2
 
-Create an Azure AI Search index whose schema includes filterable ACL/group fields for security trimming.
+Create an Azure AI Search index whose schema includes filterable ACL/group fields for security trimming, with `aclGroups` declared as a `Collection(Edm.String)` field with `"filterable": true`. The Azure CLI has no `az search index` command group, so the index goes through the data-plane REST API; the Bearer token works only once role-based access is enabled on the service (`az search service update -g rg-ai -n aisearch-prod --aad-auth-failure-mode http401WithBearerChallenge --auth-options aadOrApiKey`; the CLI rejects `--auth-options aadOrApiKey` without `--aad-auth-failure-mode`) and the caller holds Search Service Contributor.
 
 ```text
-az search index create --service-name aisearch-prod --name kb-secure --fields @secure-schema.json
+SEARCH=https://aisearch-prod.search.windows.net
+TOKEN=$(az account get-access-token --resource https://search.azure.com --query accessToken -o tsv)
+curl -sS -X PUT "$SEARCH/indexes/kb-secure?api-version=2026-04-01" -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -H "Prefer: return=representation" -d @secure-schema.json | jq -e -r ".name"
 ```
 
 ### Command 3
 
-Confirm the ACL metadata field is marked filterable so it can be used in the retrieval query, not just stored.
+Confirm the ACL metadata field is marked filterable so it can be used in the retrieval query, not just stored. This is a read-back check, not a fix: filterable is fixed when a field is created, and an existing field cannot be made filterable in place. If this prints anything but `true`, rebuild the index from a corrected schema, or add a new filterable field and cut queries over to it (an index alias lets the application switch without a code change). `SEARCH` and `TOKEN` are the ones set in Command 2.
 
 ```text
-az search index update --service-name aisearch-prod --name kb-secure --set fields[?name=='aclGroups'].filterable=true
+curl -sS "$SEARCH/indexes/kb-secure?api-version=2026-04-01" -H "Authorization: Bearer $TOKEN" | jq -e '.fields[] | select(.name == "aclGroups") | .filterable'
 ```
 
 ### Command 4
@@ -283,6 +285,8 @@ I never trust the architecture diagram alone, because 'local' components frequen
 - [Ollama: FAQ - Ollama](https://docs.ollama.com/faq) - Running Ollama in local-only mode bound to loopback with cloud features turned off, for an offline RAG stack.
 - [National Institute of Standards and Technology (NIST): Artificial Intelligence Risk Management Framework (AI RMF 1.0)](https://doi.org/10.6028/NIST.AI.100-1) - The AI RMF GOVERN function for data governance and access control of AI systems.
 - [OWASP Gen AI Security Project: OWASP GenAI LLM Top 10 2026](https://genai.owasp.org/resource/owasp-genai-llm-top-10-2026/) - LLM02:2026 Sensitive Information Disclosure: RAG leaking private data across users.
+- [Microsoft Learn: Filters for keyword search in Azure AI Search](https://learn.microsoft.com/azure/search/search-filters) - An existing field can't be made filterable; add a new field or rebuild the index, which is why Command 3 is a read-back check.
+- [Microsoft Learn: Enable or disable role-based access control in Azure AI Search](https://learn.microsoft.com/azure/search/search-security-enable-roles) - Turning on Bearer-token access for the data-plane index calls, which a new service rejects until `authOptions` allows it, with `--aad-auth-failure-mode http401WithBearerChallenge --auth-options aadOrApiKey`.
 
 ## Suggested video search
 

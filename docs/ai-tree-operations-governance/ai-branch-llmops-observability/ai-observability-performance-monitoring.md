@@ -56,10 +56,10 @@ az monitor app-insights component create -g rg-ai -a llm-app-insights -l swedenc
 
 ### Command 2
 
-Pull five-minute granularity latency, error and token metrics for dashboarding.
+Pull five-minute granularity request, latency and token metrics for dashboarding. These are the Azure OpenAI metrics: `AzureOpenAIRequests` counts calls, `AzureOpenAITTLTInMS` (Time to Last Byte) is end-to-end latency for streaming and non-streaming calls, and the token counts sit beside it because a latency rise without a token rise is the one worth investigating. The resource has no metric named `Errors`, and the legacy Cognitive Services `Latency`, `TotalErrors` and `ServerErrors` metrics are marked "Do not use for Azure OpenAI service" - Microsoft Learn warns that the legacy `Latency` gives misleading results for Azure OpenAI. For the error rate, query `AzureOpenAIRequests` on its own with `--dimension StatusCode` to split the count by status code; the latency metric has no StatusCode dimension to split on.
 
 ```text
-az monitor metrics list --resource $AOAI_ID --metric Latency,Errors,ProcessedPromptTokens,GeneratedTokens --interval PT5M
+az monitor metrics list --resource $AOAI_ID --metric AzureOpenAIRequests AzureOpenAITTLTInMS ProcessedPromptTokens GeneratedTokens --interval PT5M
 ```
 
 ### Command 3
@@ -323,6 +323,7 @@ Track them on the same timeline but as genuinely separate axes, because optimisi
 - [Google SRE (Site Reliability Engineering book): Monitoring Distributed Systems](https://sre.google/sre-book/monitoring-distributed-systems/) - Golden-signal monitoring and alerting principles for distributed systems.
 - [Google SRE (The Site Reliability Workbook): Monitoring (The Site Reliability Workbook, Chapter 4)](https://sre.google/workbook/monitoring/) - Practical monitoring guidance (metrics, structured logs, alerting) adapted to AI-specific signals.
 - [National Institute of Standards and Technology (NIST): Artificial Intelligence Risk Management Framework (AI RMF 1.0)](https://www.nist.gov/publications/artificial-intelligence-risk-management-framework-ai-rmf-10) - AI RMF MEASURE function: ongoing performance and impact monitoring.
+- [Microsoft Learn: Azure OpenAI monitoring data reference](https://learn.microsoft.com/azure/foundry/openai/monitor-openai-reference) - Metric REST names (`AzureOpenAIRequests`, `AzureOpenAITTLTInMS`, `ProcessedPromptTokens`, `GeneratedTokens`), their dimensions, and the warning against the legacy `Latency` metric.
 
 ## Suggested video search
 
