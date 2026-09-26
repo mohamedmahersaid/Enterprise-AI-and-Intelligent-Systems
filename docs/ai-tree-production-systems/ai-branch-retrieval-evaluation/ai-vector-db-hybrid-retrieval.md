@@ -14,7 +14,7 @@ branch: 'Retrieval and Evaluation'
 **Tree:** [Production AI Systems](../README.md)
 **Branch:** [Retrieval and Evaluation](README.md)
 **Forest:** [AI & Intelligent Systems](../../../README.md)
-**Readiness:** [Lab](../../../READINESS.md#lab) - checked offline, not yet run against a live service. A live run needs a local Ollama server.
+**Readiness:** [Lab](../../../READINESS.md#lab) - checked offline, not yet run against a live service. A live run needs only a stock CI runner.
 
 ## Explanation
 
@@ -94,18 +94,19 @@ SET hnsw.ef_search = 100;
 
 ### Command 3
 
-Confirm the planner uses the index and applies the tenant filter efficiently rather than after the scan
+Confirm the planner uses the index and applies the tenant filter efficiently rather than after the scan. Run it in psql: `\set` binds the query vector to a psql variable and `:'q'` interpolates it as a quoted literal, because a bare `$1` outside a prepared statement fails with "there is no parameter $1". Use a vector with the column's dimension.
 
 ```text
-EXPLAIN ANALYZE SELECT id FROM docs WHERE tenant_id = 42 ORDER BY embedding <=> $1 LIMIT 10;
+\set q '[0.1, 0.2, 0.3]'
+EXPLAIN ANALYZE SELECT id FROM docs WHERE tenant_id = 42 ORDER BY embedding <=> :'q' LIMIT 10;
 ```
 
 ### Command 4
 
-Qdrant search with a filter clause in the request body - filtering happens inside traversal
+Qdrant search with a filter clause in the request body - filtering happens inside traversal. This is the Query API (`/points/query`, available since Qdrant 1.10.0). The older `/points/search` endpoint is marked deprecated in Qdrant's OpenAPI specification from 1.13.3 and is absent from it from 1.19.0, so do not build on it. search.json holds the query vector, the filter and the limit - for example `{"query": [0.1, 0.2, 0.3], "filter": {"must": [{"key": "tenant_id", "match": {"value": 42}}]}, "limit": 10}` - and the hits come back under `result.points`.
 
 ```text
-curl -X POST localhost:6333/collections/docs/points/search -d @search.json
+curl -fsS -X POST localhost:6333/collections/docs/points/query -H "Content-Type: application/json" -d @search.json
 ```
 
 ### Command 5
@@ -121,7 +122,7 @@ SELECT count(*) FROM docs WHERE embedding IS NULL;
 Count rows present in the table but absent from the vector index - the silent backfill failure
 
 ```text
-psql -c "SELECT count(*) FROM documents WHERE embedding IS NULL;"
+psql -c "SELECT count(*) FROM docs WHERE embedding IS NULL;"
 ```
 
 ## Automation scripts
@@ -326,6 +327,9 @@ Reranking, in almost every case, and the reasoning is about where the error actu
 - [pgvector project (GitHub): pgvector/README.md at master · pgvector/pgvector](https://github.com/pgvector/pgvector/blob/master/README.md) - HNSW and IVFFlat indexing, distance operators, ef_search and filtered queries in pgvector.
 - [Qdrant: Indexing - Qdrant](https://qdrant.tech/documentation/manage-data/indexing/) - Filterable HNSW and payload indexing.
 - [Qdrant: Multitenancy - Qdrant](https://qdrant.tech/documentation/manage-data/multitenancy/) - Multi-tenant collections with payload-based tenant filtering.
+- [Qdrant: Search - Qdrant](https://qdrant.tech/documentation/search/search/) - The Query API (`/points/query`, available since v1.10.0) that Command 4 calls, with the `query`, `filter` and `limit` request fields.
+- [Qdrant: docs/redoc/master/openapi.json at v1.13.3](https://github.com/qdrant/qdrant/blob/v1.13.3/docs/redoc/master/openapi.json) - The OpenAPI specification that first marks `POST /collections/{collection_name}/points/search` as `deprecated`; the path is gone from the v1.19.0 specification.
+- [PostgreSQL: psql](https://www.postgresql.org/docs/current/app-psql.html) - `\set` variables and `:'name'` interpolation as a quoted literal, used to bind the query vector in Command 3.
 - [Milvus (LF AI & Data): Milvus Architecture Overview](https://milvus.io/docs/architecture_overview.md) - Milvus distributed architecture for large-scale deployments.
 - [Milvus (LF AI & Data): Index Explained](https://milvus.io/docs/index-explained.md) - Vector index selection in Milvus.
 - [ACM (SIGIR '09 Proceedings): Reciprocal rank fusion outperforms condorcet and individual rank learning methods](https://dl.acm.org/doi/abs/10.1145/1571941.1572114) - Original Reciprocal Rank Fusion paper, the fusion method used for hybrid dense+BM25 retrieval.

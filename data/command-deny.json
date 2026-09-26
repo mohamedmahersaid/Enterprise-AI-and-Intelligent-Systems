@@ -13,5 +13,35 @@
     "pattern": "semanticSearch\\.defaultConfiguration",
     "reason": "defaultConfiguration is an index property (semantic.defaultConfiguration in the index definition), not a search service property. Set the service's semantic ranker plan with az search service update --semantic-search free|standard, and the default semantic configuration in the index schema.",
     "source": "https://learn.microsoft.com/azure/search/semantic-how-to-enable-disable"
+  },
+  {
+    "pattern": "\\blanggraph\\.__version__\\b",
+    "reason": "The langgraph module has no __version__ attribute (langgraph 1.2.12 raises AttributeError). Read the installed version from package metadata: python -c \"from importlib.metadata import version; print(version('langgraph'))\".",
+    "source": "https://docs.python.org/3/library/importlib.metadata.html"
+  },
+  {
+    "pattern": "/api/embeddings\\b",
+    "reason": "Ollama's API reference marks /api/embeddings as superseded by /api/embed. POST {\"model\": ..., \"input\": ...} to /api/embed and read embeddings[0].",
+    "source": "https://github.com/ollama/ollama/blob/v0.34.4/docs/api.md"
+  },
+  {
+    "pattern": "/points/search\\b",
+    "reason": "Qdrant's OpenAPI specification marks POST /collections/{name}/points/search deprecated from 1.13.3 and drops it from 1.19.0. Use POST /collections/{name}/points/query with a {\"query\": [...], \"filter\": {...}, \"limit\": n} body.",
+    "source": "https://github.com/qdrant/qdrant/blob/v1.19.1/docs/redoc/master/openapi.json"
+  },
+  {
+    "pattern": "\\bgpu_cache_usage",
+    "reason": "vLLM 0.9.2 added vllm:kv_cache_usage_perc and deprecated vllm:gpu_cache_usage_perc; 0.11 hides the old name unless --show-hidden-metrics-for-version=0.10 is passed, and 0.12.0 removes it. Grep or alert on vllm:kv_cache_usage_perc.",
+    "source": "https://github.com/vllm-project/vllm/blob/v0.11.0/vllm/v1/metrics/loggers.py"
+  },
+  {
+    "pattern": "python3? -m ragas\\b",
+    "reason": "Ragas 0.4.3 has no ragas/__main__.py, and its ragas command has no evaluate subcommand. Score from Python with the metrics in ragas.metrics.collections.",
+    "source": "https://github.com/vibrantlabsai/ragas/blob/v0.4.3/src/ragas/cli.py"
+  },
+  {
+    "pattern": "@modelcontextprotocol/inspector(?!@)",
+    "reason": "An unpinned Inspector resolves to whatever npm tags latest; v1 (1.0.2) prints {\"tools\": ...} where v2 prints {\"result\": {\"tools\": ...}}, so a pinned tool-definition hash silently hashes empty input. Pin the version, for example npx @modelcontextprotocol/inspector@2.8.0.",
+    "source": "https://github.com/modelcontextprotocol/inspector/blob/main/docs/v1-to-v2-migration.md"
   }
 ]

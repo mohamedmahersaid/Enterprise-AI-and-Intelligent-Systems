@@ -80,10 +80,10 @@ pip install agent-framework
 
 ### Command 3
 
-Verify the orchestration framework version installed, since agent graph APIs change between major versions.
+Verify the orchestration framework version installed, since agent graph APIs change between major versions. Read it from the package metadata: the `langgraph` module has no `__version__` attribute (checked on langgraph 1.2.12), so `langgraph.__version__` raises `AttributeError`.
 
 ```text
-python -c "import langgraph; print(langgraph.__version__)"
+python -c "from importlib.metadata import version; print(version('langgraph'))"
 ```
 
 ### Command 4
@@ -423,6 +423,7 @@ Five things I do not consider optional. First, a hard maximum step count and wal
 
 - [LangChain: LangGraph overview](https://docs.langchain.com/oss/python/langgraph/overview) - LangGraph state-graph agent orchestration, including branching, cycles and human-in-the-loop checkpoints.
 - [LangChain overview](https://docs.langchain.com/oss/python/langchain/overview) - LangChain agents and tool/integration ecosystem.
+- [Python: importlib.metadata - Accessing package metadata](https://docs.python.org/3/library/importlib.metadata.html) - `version()`, which returns an installed distribution's version from its metadata, used in Command 3.
 - [Microsoft Learn: Microsoft Agent Framework](https://learn.microsoft.com/agent-framework/overview/) - Agent Framework as the direct successor to Semantic Kernel and AutoGen, its workflows for explicit multi-agent execution paths, and the model providers it supports.
 - [Microsoft Learn: Semantic Kernel to Agent Framework Migration Guide](https://learn.microsoft.com/agent-framework/migration-guide/from-semantic-kernel/) - The package change from semantic-kernel to agent-framework and converting a KernelFunction with as_agent_framework_tool.
 - [Microsoft Learn: AI agent orchestration patterns](https://learn.microsoft.com/azure/architecture/ai-ml/guide/ai-agent-design-patterns) - The sequential, concurrent, group chat, handoff and magentic pattern comparison, read-only group chat agents, and the rule to validate agent output before the next agent.

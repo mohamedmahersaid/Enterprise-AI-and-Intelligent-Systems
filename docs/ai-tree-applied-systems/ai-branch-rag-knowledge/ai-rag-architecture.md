@@ -59,10 +59,10 @@ ollama pull nomic-embed-text
 
 ### Command 2
 
-Generate an embedding vector locally without sending text to any external service.
+Generate an embedding vector locally without sending text to any external service. `/api/embed` takes `input` (a string or a list of strings) and returns an `embeddings` array of L2-normalised vectors; Ollama's API reference marks the older single-prompt `/api/embeddings` endpoint as superseded by it.
 
 ```text
-curl http://localhost:11434/api/embeddings -d "{\"model\":\"nomic-embed-text\",\"prompt\":\"chunk text here\"}"
+curl http://localhost:11434/api/embed -d "{\"model\":\"nomic-embed-text\",\"input\":\"chunk text here\"}"
 ```
 
 ### Command 3
@@ -123,11 +123,11 @@ CHUNK_OVERLAP = 75
 
 
 def embed(text):
-    body = json.dumps({"model": EMBED_MODEL, "prompt": text}).encode()
-    req = urllib.request.Request(OLLAMA + "/api/embeddings", data=body,
+    body = json.dumps({"model": EMBED_MODEL, "input": text}).encode()
+    req = urllib.request.Request(OLLAMA + "/api/embed", data=body,
                                  headers={"Content-Type": "application/json"})
     with urllib.request.urlopen(req, timeout=60) as resp:
-        return json.loads(resp.read().decode())["embedding"]
+        return json.loads(resp.read().decode())["embeddings"][0]
 
 
 def chunk_text(text, size=CHUNK_SIZE, overlap=CHUNK_OVERLAP):

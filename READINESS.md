@@ -61,8 +61,8 @@ data and diagrams. Tools called from inside a Python script are not detected.
 
 | Need | What it means | Leaves |
 | --- | --- | ---: |
-| Stock CI runner | Nothing beyond a GitHub-hosted Ubuntu runner: Python 3, Docker, packages installed from public registries, and services started in containers. | 4 |
-| Ollama | A local Ollama server with a small model pulled. A CPU is enough, so a CI runner can host it. | 14 |
+| Stock CI runner | Nothing beyond a GitHub-hosted Ubuntu runner: Python 3, Docker, packages installed from public registries, and services started in containers. | 5 |
+| Ollama | A local Ollama server with a small model pulled. A CPU is enough, so a CI runner can host it. | 13 |
 | NVIDIA GPU | An NVIDIA GPU with its driver and CUDA runtime. Not available on standard hosted runners. | 8 |
 | Azure subscription | An Azure subscription with rights to create the resources the leaf creates, and a budget for them. Runs cost money and need credentials, so none are automated here yet. | 15 |
 | Kubernetes cluster | A Kubernetes cluster and kubectl access to it. A disposable local cluster (kind, k3d) covers most leaves. | 5 |
@@ -105,7 +105,7 @@ at no cost. The rest need infrastructure or credentials this repository does not
 | [Feature Stores and Training-Serving Skew: Point-in-Time Correctness with Feast](docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/ai-feature-store-skew.md) | Advanced | Lab | Stock CI runner | none recorded |
 | [Fine-Tuning and PEFT: When to Tune, LoRA Adapters and Evaluation](docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/ai-fine-tuning-peft.md) | Intermediate | Lab | NVIDIA GPU | none recorded |
 | [From Notebook to a Reproducible Training Run: Environments, Seeds, Data Versions and Artifacts](docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/ai-reproducible-training-runs.md) | Beginner | Lab | Stock CI runner | none recorded |
-| [Vector Database Selection and Hybrid Retrieval: pgvector, Qdrant, Milvus and Reranking](docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/ai-vector-db-hybrid-retrieval.md) | Advanced | Lab | Ollama | none recorded |
+| [Vector Database Selection and Hybrid Retrieval: pgvector, Qdrant, Milvus and Reranking](docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/ai-vector-db-hybrid-retrieval.md) | Advanced | Lab | Stock CI runner | none recorded |
 | [LLM Evaluation Harnesses and Regression Gates for Production AI](docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/ai-evaluation-harness-gates.md) | Advanced | Lab | Ollama | none recorded |
 | [How Retrieval Finds Things: Keywords, Meaning and Why Each One Misses](docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/ai-how-retrieval-finds-things.md) | Beginner | Lab | Azure subscription | none recorded |
 | [Retrieval Test Collections: Graded Judgements, Pooling and Telling a Real Improvement from Noise](docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/ai-retrieval-test-collections.md) | Intermediate | Lab | Stock CI runner | none recorded |

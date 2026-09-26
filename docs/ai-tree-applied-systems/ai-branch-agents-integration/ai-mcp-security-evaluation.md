@@ -56,10 +56,10 @@ flowchart TD
 
 ### Command 1
 
-Run the MCP Inspector against a local server to enumerate its exposed tools, resources and prompts before trusting it.
+Run the MCP Inspector against a local server to enumerate its exposed tools, resources and prompts before trusting it. Every Inspector command here is pinned to 2.8.0, the npm `latest` tag in September 2026, which requires Node 22.19.0 or later. On a machine with no OS keychain, such as a container or CI runner, Inspector v2 writes stdio `env:` values and OAuth client secrets to a plaintext `~/.mcp-inspector/secrets.json`, so pass no secrets through it in CI.
 
 ```text
-npx @modelcontextprotocol/inspector node server.js
+npx @modelcontextprotocol/inspector@2.8.0 node server.js
 ```
 
 ### Command 2
@@ -72,10 +72,10 @@ pip install mcp
 
 ### Command 3
 
-At approval time, save the server's tool definitions with keys and tools sorted, and print the SHA-256 to pin as the protected pipeline variable MCP_TOOLS_SHA256.
+At approval time, save the server's tool definitions with keys and tools sorted, and print the SHA-256 to pin as the protected pipeline variable MCP_TOOLS_SHA256. The hash is valid only for the Inspector version that produced it: v2 wraps the reply as `{"result": {"tools": [...]}}`, while the v1 line (npm tag `v1-latest`, 1.0.2) prints `{"tools": [...]}`, so `.result.tools` is null there and `sha256sum` hashes empty input. Bumping the Inspector pin means re-capturing the file and re-approving the hash.
 
 ```text
-npx @modelcontextprotocol/inspector --cli node server.js --method tools/list --format json | jq -S '.result.tools | sort_by(.name)' | tee mcp-tools.approved.json | sha256sum
+npx @modelcontextprotocol/inspector@2.8.0 --cli node server.js --method tools/list --format json | jq -S '.result.tools | sort_by(.name)' | tee mcp-tools.approved.json | sha256sum
 ```
 
 ### Command 4
@@ -83,7 +83,7 @@ npx @modelcontextprotocol/inspector --cli node server.js --method tools/list --f
 In CI, list the tools again and fail the job if the hash differs from the pinned one, which catches a rug pull or any unreviewed definition change.
 
 ```text
-npx @modelcontextprotocol/inspector --cli node server.js --method tools/list --format json | jq -S '.result.tools | sort_by(.name)' | tee mcp-tools.current.json | sha256sum | grep -q "^$MCP_TOOLS_SHA256 "
+npx @modelcontextprotocol/inspector@2.8.0 --cli node server.js --method tools/list --format json | jq -S '.result.tools | sort_by(.name)' | tee mcp-tools.current.json | sha256sum | grep -q "^$MCP_TOOLS_SHA256 "
 ```
 
 ### Command 5
@@ -115,7 +115,7 @@ jq -e 'type == "array" and length > 0 and all(.[]; type == "object" and (.name |
 Call one tool and keep only the text content of its result, the part that would be appended to the model's context.
 
 ```text
-npx @modelcontextprotocol/inspector --cli node server.js --method tools/call --tool-name <tool> --tool-arg <key>=<value> --format json | jq -r '[.result.content[]? | select(.type == "text") | .text] | join("\n")' > tool-result.txt
+npx @modelcontextprotocol/inspector@2.8.0 --cli node server.js --method tools/call --tool-name <tool> --tool-arg <key>=<value> --format json | jq -r '[.result.content[]? | select(.type == "text") | .text] | join("\n")' > tool-result.txt
 ```
 
 ### Command 9
@@ -389,6 +389,8 @@ Governance has to be embedded in the same workflow teams already use, or it gets
 - [Microsoft Learn: Connect to Azure AI Search using roles](https://learn.microsoft.com/azure/search/search-security-rbac) - Troubleshooting note that a managed identity's new role on the search service might take several hours to take effect, behind the lab's advice to test with your own identity first.
 - [Microsoft Learn: Assign Azure roles using Azure CLI](https://learn.microsoft.com/azure/role-based-access-control/role-assignments-cli) - The az role assignment create and list commands used to scope the MCP server's managed identity.
 - [Model Context Protocol (GitHub): MCP Inspector CLI README](https://github.com/modelcontextprotocol/inspector/blob/main/clients/cli/README.md) - The `--cli`, `--method tools/list`, `--method tools/call` and `--format json` options used to pin tool definitions and capture tool results.
+- [Model Context Protocol (GitHub): Migrating from Inspector v1 to v2](https://github.com/modelcontextprotocol/inspector/blob/main/docs/v1-to-v2-migration.md) - The v2 `--format json` output as a single `{"result":...}` object, the Node engine bump and the changed CLI surface that make the tool-definition hash version-specific.
+- [Model Context Protocol (GitHub): MCP Inspector README](https://github.com/modelcontextprotocol/inspector/blob/main/README.md) - The Node 22.19.0 requirement, the v1 line kept on the `v1-latest` tag for security fixes only, and plaintext `secrets.json` storage on machines with no OS keychain.
 - [Microsoft Learn: Model Context Protocol bindings for Azure Functions overview](https://learn.microsoft.com/azure/azure-functions/functions-bindings-mcp) - Tool, resource and prompt triggers, the `/runtime/webhooks/mcp` endpoint, the `mcp_extension` system key that Command 15 reads, and `system.webhookAuthorizationLevel`.
 - [Microsoft Learn: Create remote Model Context Protocol (MCP) servers from Standard workflows (preview)](https://learn.microsoft.com/azure/logic-apps/create-model-context-protocol-server-standard) - Hosting, trigger and Response-action requirements for workflows as MCP tools, and Easy Auth OAuth or MCP API key authentication.
 - [Microsoft Learn: Expose REST API in API Management as an MCP server](https://learn.microsoft.com/azure/api-management/export-rest-mcp-server) - API operations as MCP tools, the tools-only limitation for managed REST APIs, and the caution against reading `context.Response.Body` in MCP policies.

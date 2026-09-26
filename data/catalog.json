@@ -374,7 +374,7 @@
       "level": "Advanced",
       "readiness": "lab",
       "needs": [
-        "ollama"
+        "runner"
       ],
       "tree": "Production AI Systems",
       "branch": "Retrieval and Evaluation",

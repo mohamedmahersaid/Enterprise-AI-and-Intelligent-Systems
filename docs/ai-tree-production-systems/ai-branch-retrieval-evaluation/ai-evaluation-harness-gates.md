@@ -95,10 +95,11 @@ promptfoo eval --no-cache --repeat 3
 
 ### Command 3
 
-Score a RAG system on faithfulness and retrieval-specific metrics, separating generation from retrieval failure
+Install Ragas for faithfulness and retrieval-specific metrics, which separate generation failure from retrieval failure, and confirm the three metrics import. Ragas 0.4.3 has no command that scores a JSONL file: there is no `python -m ragas` entry point, and the `ragas` command offers only `evals`, `quickstart` and `hello_world`. Scoring runs from Python, where `Faithfulness`, `AnswerRelevancy` and `ContextPrecision` each take an LLM judge (`AnswerRelevancy` also takes an embedding model) and score one sample per `score()` call; the `evaluate()` function is deprecated in 0.4.3 in favour of the `@experiment` decorator. The `langchain-community` pin matters: 0.4.2 dropped the `chat_models.vertexai` module that `ragas` 0.4.3 imports at start-up, so any import of it fails with `ModuleNotFoundError`.
 
 ```text
-python -m ragas evaluate --dataset eval.jsonl --metrics faithfulness,answer_relevancy,context_precision
+pip install "ragas==0.4.3" "langchain-community==0.4.1"
+python -c "from ragas.metrics.collections import Faithfulness, AnswerRelevancy, ContextPrecision; print('ok')"
 ```
 
 ### Command 4
@@ -324,6 +325,9 @@ It has to grow from production, not stay as assembled. Every real failure - a wr
 ## References
 
 - [Ragas (vibrantlabs / explodinggradients project docs): List of available metrics - Ragas](https://docs.ragas.io/en/stable/concepts/metrics/available_metrics/) - Faithfulness, answer relevancy and context precision metrics for RAG evaluation.
+- [Ragas (vibrantlabs / explodinggradients project docs): Faithfulness - Ragas](https://docs.ragas.io/en/stable/concepts/metrics/available_metrics/faithfulness/) - The `ragas.metrics.collections` Faithfulness metric, built with an `llm_factory` judge and scored one sample at a time with `score()` or `ascore()`, which Command 3 imports.
+- [Ragas (vibrantlabs / explodinggradients project docs): Experiments - Ragas](https://docs.ragas.io/en/stable/concepts/experimentation/) - The `@experiment` workflow that replaces the `evaluate()` function deprecated in Ragas 0.4.3.
+- [Ragas (GitHub): src/ragas/cli.py at v0.4.3](https://github.com/vibrantlabsai/ragas/blob/v0.4.3/src/ragas/cli.py) - The `ragas` command's `evals`, `quickstart` and `hello_world` subcommands, and no subcommand that reads a JSONL dataset.
 - [Promptfoo: Configuration Overview - Getting Started with Promptfoo](https://www.promptfoo.dev/docs/configuration/guide/) - Declarative promptfooconfig.yaml evaluation configuration with prompts, tests and assertions.
 - [Promptfoo: CI/CD Integration for LLM Eval and Security](https://www.promptfoo.dev/docs/integrations/ci-cd/) - Running Promptfoo evaluations in CI as a quality gate.
 - [Confident AI (DeepEval): Unit Testing in CI/CD | DeepEval - The LLM Evaluation Framework](https://deepeval.com/docs/evaluation-unit-testing-in-ci-cd) - Unit-test style assertions for LLM outputs run via deepeval test run in CI.
