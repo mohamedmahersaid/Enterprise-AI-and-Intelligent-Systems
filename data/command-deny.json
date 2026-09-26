@@ -1,0 +1,17 @@
+[
+  {
+    "pattern": "\\baz\\s+search\\s+index\\b",
+    "reason": "The Azure CLI has no az search index command group (az search covers the service, keys, networking and usage only). Create, update or read an index through the data-plane REST API, for example curl -X PUT \"$SEARCH/indexes/<name>?api-version=2026-04-01\" with a Bearer token from az account get-access-token --resource https://search.azure.com, or through an Azure SDK SearchIndexClient.",
+    "source": "https://learn.microsoft.com/cli/azure/search"
+  },
+  {
+    "pattern": "\\baz\\s+costmanagement\\s+query\\b",
+    "reason": "The costmanagement CLI extension has no query command (it has export and show-operation-result only). Call the Cost Management Query API with az rest --method post --url \"https://management.azure.com/<scope>/providers/Microsoft.CostManagement/query?api-version=2026-06-01\" --body <query definition>.",
+    "source": "https://learn.microsoft.com/cli/azure/costmanagement"
+  },
+  {
+    "pattern": "semanticSearch\\.defaultConfiguration",
+    "reason": "defaultConfiguration is an index property (semantic.defaultConfiguration in the index definition), not a search service property. Set the service's semantic ranker plan with az search service update --semantic-search free|standard, and the default semantic configuration in the index schema.",
+    "source": "https://learn.microsoft.com/azure/search/semantic-how-to-enable-disable"
+  }
+]

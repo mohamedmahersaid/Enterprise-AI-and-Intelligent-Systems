@@ -119,7 +119,7 @@ jq -r "select(.incident_tag == \"$INC\") | .user_id" trajectory.log | sort -u | 
 
 ### Command 3
 
-Pin the deployment to the last known-good model version as a containment step, before any root cause is known. The CLI has no update command: create with the deployment's existing name, model and SKU re-applies it, and it requires the model name and format
+Pin the deployment to the last known-good model version as a containment step, before any root cause is known. The core CLI has no update command for a deployment's model version or capacity: create with the deployment's existing name, model and SKU re-applies it, and it requires the model name and format. The `az cognitiveservices account deployment update` command in the preview foundry-cost-control extension only attaches or removes cost controls
 
 ```text
 az cognitiveservices account deployment create -g "$RG" -n "$ACCOUNT" --deployment-name prod --model-name "$MODEL" --model-version "$LAST_GOOD" --model-format OpenAI --sku-name "$SKU" --sku-capacity 50
@@ -373,6 +373,7 @@ That the fix bypassed every control the organisation has, and that speed is prec
 - [International Organization for Standardization (ISO) / IEC: ISO/IEC 42001:2023 - Information technology — Artificial intelligence — Management system](https://www.iso.org/standard/42001) - AI management system requirements for operational control, monitoring and incident handling.
 - [OpenTelemetry (open-telemetry/semantic-conventions-genai on GitHub): Semantic conventions for generative client AI spans](https://github.com/open-telemetry/semantic-conventions-genai/blob/main/docs/gen-ai/gen-ai-spans.md) - GenAI span and attribute model used for trajectory logging.
 - [OpenTelemetry (open-telemetry/semantic-conventions-genai on GitHub): Semantic Conventions for GenAI agent and framework spans](https://github.com/open-telemetry/semantic-conventions-genai/blob/main/docs/gen-ai/gen-ai-agent-spans.md) - Agent-level spans for logging multi-step agent trajectories.
+- [Microsoft Learn: az cognitiveservices account deployment](https://learn.microsoft.com/cli/azure/cognitiveservices/account/deployment) - Core deployment commands; re-running create with the same name is how Command 3 pins a model version, since the preview update command only manages cost controls.
 
 ## Suggested video search
 

@@ -75,10 +75,12 @@ az search service create -g rg-ai -n aisearch-prod --sku standard --partition-co
 
 ### Command 4
 
-Create an index with vector, text and metadata filter fields from a schema file.
+Create an index with vector, text and metadata filter fields from a schema file, which also carries the semantic configuration (`semantic.configurations` and `semantic.defaultConfiguration`). The Azure CLI has no `az search index` command group - `az search` manages the service, its keys and its networking, not indexes - so the index is created through the data-plane REST API, where PUT creates the index named in the URL, or updates it if it exists (only additive changes such as new fields or semantic configurations; changing a field's type or attributes needs a rebuild). The Bearer token is accepted only once role-based access is enabled on the service (`az search service update -g rg-ai -n aisearch-prod --aad-auth-failure-mode http401WithBearerChallenge --auth-options aadOrApiKey`; the CLI rejects `--auth-options aadOrApiKey` without `--aad-auth-failure-mode`) and the caller holds Search Service Contributor; a new service accepts API keys only.
 
 ```text
-az search index create --service-name aisearch-prod --name kb-index --fields @index-schema.json
+SEARCH=https://aisearch-prod.search.windows.net
+TOKEN=$(az account get-access-token --resource https://search.azure.com --query accessToken -o tsv)
+curl -sS -X PUT "$SEARCH/indexes/kb-index?api-version=2026-04-01" -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -H "Prefer: return=representation" -d @index-schema.json | jq -e -r ".name"
 ```
 
 ### Command 5
@@ -91,10 +93,10 @@ python -m pip install sentence-transformers chromadb
 
 ### Command 6
 
-Enable semantic re-ranking on an Azure AI Search service.
+Enable semantic re-ranking beyond the free monthly allowance by moving the service to the standard semantic ranker plan. The plan is a service setting (`--semantic-search` takes `free` or `standard`; every service starts on `free`, which returns a billing error once the allowance is used), while the default semantic configuration is an index property set in index-schema.json (Command 4) and can be edited later without rebuilding the index. From Search Service REST API 2026-04-01 this plan covers the semantic ranker only; agentic retrieval has its own `--knowledge-retrieval` plan.
 
 ```text
-az search service update -g rg-ai -n aisearch-prod --set semanticSearch.defaultConfiguration=default
+az search service update -g rg-ai -n aisearch-prod --semantic-search standard
 ```
 
 ## Automation scripts
@@ -315,6 +317,10 @@ Vector search with a bi-encoder embeds the query and every chunk independently, 
 - [Sentence Transformers (SBERT) documentation: Retrieve & Re-Rank](https://sbert.net/examples/sentence_transformer/applications/retrieve_rerank/README.html) - Bi-encoder retrieval followed by cross-encoder re-ranking pipeline.
 - [Sentence Transformers (SBERT) documentation: Usage (Cross Encoder)](https://sbert.net/docs/cross_encoder/usage/usage.html) - Using cross-encoder reranker models.
 - [arXiv (Yu. A. Malkov, D. A. Yashunin): Efficient and robust approximate nearest neighbor search using Hierarchical Navigable Small World graphs](https://arxiv.org/abs/1603.09320) - HNSW indexing fundamentals for approximate nearest neighbor vector search.
+- [Microsoft Learn: Indexes - Create Or Update](https://learn.microsoft.com/rest/api/searchservice/indexes/create-or-update) - Data-plane PUT that creates an index, or updates an existing one, at api-version 2026-04-01, used because the Azure CLI has no index commands; the index-level `semantic.defaultConfiguration` setting.
+- [Microsoft Learn: Allowed updates on existing indexes](https://learn.microsoft.com/azure/search/search-how-to-create-search-index#allowed-updates-on-existing-indexes) - Field names, types and searchable/filterable/facetable/sortable attributes are fixed once created; new fields and semantic configurations can be added without a rebuild.
+- [Microsoft Learn: Enable or disable role-based access control in Azure AI Search](https://learn.microsoft.com/azure/search/search-security-enable-roles) - The `az search service update --aad-auth-failure-mode http401WithBearerChallenge --auth-options aadOrApiKey` form that turns on Bearer-token access for the data-plane index call.
+- [Microsoft Learn: Enable or disable semantic ranker billing](https://learn.microsoft.com/azure/search/semantic-how-to-enable-disable) - The service-level free and standard semantic ranker plans set with `--semantic-search`, and the 2026-04-01 split from agentic retrieval billing.
 
 ## Suggested video search
 

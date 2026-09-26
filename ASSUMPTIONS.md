@@ -21,7 +21,7 @@ Each service versions independently - a date that differs between services is ex
 | Value | Used by |
 | --- | --- |
 | `Azure AI Content Safety 2024-09-01` | `ai-agents-orchestration`, `ai-content-safety-guardrails`, `ai-mcp-security-evaluation` |
-| `Azure AI Search 2026-04-01` | `ai-how-retrieval-finds-things` |
+| `Azure AI Search 2026-04-01` | `ai-how-retrieval-finds-things`, `ai-private-enterprise-rag`, `ai-rag-architecture` |
 
 ### Azure OpenAI API surface
 
@@ -136,8 +136,8 @@ Derived from the leading command in every `text` block. A leaf listing a tool as
 | `ai-prompt-engineering-ops` | Azure CLI, Ollama, Python 3, curl, git, jq |
 | `ai-provider-failover` | Azure CLI, curl, jq |
 | `ai-first-managed-endpoint` | curl, git, jq |
-| `ai-rag-architecture` | Azure CLI, Ollama, Python 3, curl |
-| `ai-private-enterprise-rag` | Azure CLI, Ollama, curl |
+| `ai-rag-architecture` | Azure CLI, Ollama, Python 3, curl, jq |
+| `ai-private-enterprise-rag` | Azure CLI, Ollama, curl, jq |
 | `ai-do-you-need-rag` | Python 3, curl, jq |
 | `ai-agents-orchestration` | Azure CLI, Python 3, curl, pip |
 | `ai-mcp-security-evaluation` | Azure CLI, Python 3, curl, jq, pip |

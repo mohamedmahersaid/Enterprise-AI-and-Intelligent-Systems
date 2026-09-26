@@ -83,10 +83,10 @@ az resource tag --tags useCaseStage=augmentation businessOwner=finance-ops --ids
 
 ### Command 5
 
-Break down AI spend by adoption stage to see where investment is concentrated versus where value is proven.
+Break down AI spend by adoption stage to see where investment is concentrated versus where value is proven. The `costmanagement` CLI extension has no `query` command - it covers exports and operation results only - so this calls the Cost Management Query REST API through `az rest`, which signs the request with the logged-in identity. The body is the query definition: `type`, `timeframe`, and a `dataset` that sums `PreTaxCost` (the aggregation column Microsoft Learn's Query samples use at both EA and MCA scopes) grouped by the `useCaseStage` tag. The response names its columns in `properties.columns` and returns the values in `properties.rows`.
 
 ```text
-az costmanagement query --type Usage --timeframe MonthToDate --scope /subscriptions/$SUB --dataset "{\"granularity\":\"Monthly\",\"aggregation\":{\"totalCost\":{\"name\":\"PreTaxCost\",\"function\":\"Sum\"}},\"grouping\":[{\"type\":\"TagKey\",\"name\":\"useCaseStage\"}]}"
+az rest --method post --url "https://management.azure.com/subscriptions/$SUB/providers/Microsoft.CostManagement/query?api-version=2026-06-01" --body "{\"type\":\"Usage\",\"timeframe\":\"MonthToDate\",\"dataset\":{\"granularity\":\"Monthly\",\"aggregation\":{\"totalCost\":{\"name\":\"PreTaxCost\",\"function\":\"Sum\"}},\"grouping\":[{\"type\":\"TagKey\",\"name\":\"useCaseStage\"}]}}" --query "{columns: properties.columns[].name, rows: properties.rows}"
 ```
 
 ## Automation scripts
@@ -275,6 +275,8 @@ The most common failure is at the portfolio level rather than the technical leve
 - [McKinsey & Company: The State of AI: Global Survey 2025](https://www.mckinsey.com/capabilities/quantumblack/our-insights/the-state-of-ai) - Enterprise AI adoption survey data on how far organisations have scaled AI from pilots to enterprise use.
 - [Gartner Survey Finds 45% of Organizations With High AI Maturity Keep AI Projects Operational for at Least Three Years](https://www.gartner.com/en/newsroom/press-releases/2025-06-30-gartner-survey-finds-forty-five-percent-of-organizations-with-high-artificial-intelligence-maturity-keep-artificial-intelligence-projects-operational-for-at-least-three-years) - Enterprise AI maturity survey findings linking maturity, business trust and sustained production use.
 - [International Organization for Standardization (ISO): ISO/IEC 42001:2023 - AI management systems](https://www.iso.org/standard/42001) - AI management system standard and its Annex A controls covering the AI system lifecycle.
+- [Microsoft Learn: Query - Usage](https://learn.microsoft.com/rest/api/cost-management/query/usage) - Cost Management Query API at api-version 2026-06-01: request body, TagKey grouping and the `PreTaxCost` aggregation used by Command 5.
+- [Microsoft Learn: az costmanagement](https://learn.microsoft.com/cli/azure/costmanagement) - The costmanagement CLI extension's command list, which has exports and no query command.
 
 ## Suggested video search
 
