@@ -2,6 +2,7 @@
 id: 'ai-feature-store-skew'
 title: 'Feature Stores and Training-Serving Skew: Point-in-Time Correctness with Feast'
 level: 'Advanced'
+readiness: 'lab'
 forest: 'AI & Intelligent Systems'
 tree: 'AI Platform Engineering'
 branch: 'Model and Feature Lifecycle'
@@ -13,6 +14,7 @@ branch: 'Model and Feature Lifecycle'
 **Tree:** [AI Platform Engineering](../README.md)
 **Branch:** [Model and Feature Lifecycle](README.md)
 **Forest:** [AI & Intelligent Systems](../../../README.md)
+**Readiness:** [Lab](../../../READINESS.md#lab) - checked offline, not yet run against a live service. A live run needs only a stock CI runner.
 
 ## Explanation
 

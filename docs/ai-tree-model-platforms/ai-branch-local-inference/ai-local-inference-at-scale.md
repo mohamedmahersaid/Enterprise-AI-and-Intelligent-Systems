@@ -2,6 +2,7 @@
 id: 'ai-local-inference-at-scale'
 title: 'Local Inference at Production Scale: Batching, KV Cache and the Point It Stops Being Cheaper'
 level: 'Advanced'
+readiness: 'lab'
 forest: 'AI & Intelligent Systems'
 tree: 'Running and Integrating Models'
 branch: 'Local and Private Inference'
@@ -13,6 +14,7 @@ branch: 'Local and Private Inference'
 **Tree:** [Running and Integrating Models](../README.md)
 **Branch:** [Local and Private Inference](README.md)
 **Forest:** [AI & Intelligent Systems](../../../README.md)
+**Readiness:** [Lab](../../../READINESS.md#lab) - checked offline, not yet run against a live service. A live run needs an NVIDIA GPU.
 
 ## Explanation
 

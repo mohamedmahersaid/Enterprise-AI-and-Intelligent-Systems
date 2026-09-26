@@ -19,6 +19,10 @@
       "id": "ai-ollama-local-inference",
       "name": "Ollama and Local Model Serving",
       "level": "Beginner",
+      "readiness": "lab",
+      "needs": [
+        "ollama"
+      ],
       "tree": "Running and Integrating Models",
       "branch": "Local and Private Inference",
       "path": "docs/ai-tree-model-platforms/ai-branch-local-inference/ai-ollama-local-inference.md"
@@ -27,6 +31,12 @@
       "id": "ai-model-selection-cost",
       "name": "Model Selection, Sizing and Cost Control",
       "level": "Intermediate",
+      "readiness": "lab",
+      "needs": [
+        "ollama",
+        "gpu",
+        "azure"
+      ],
       "tree": "Running and Integrating Models",
       "branch": "Local and Private Inference",
       "path": "docs/ai-tree-model-platforms/ai-branch-local-inference/ai-model-selection-cost.md"
@@ -35,6 +45,10 @@
       "id": "ai-local-inference-at-scale",
       "name": "Local Inference at Production Scale: Batching, KV Cache and the Point It Stops Being Cheaper",
       "level": "Advanced",
+      "readiness": "lab",
+      "needs": [
+        "gpu"
+      ],
       "tree": "Running and Integrating Models",
       "branch": "Local and Private Inference",
       "path": "docs/ai-tree-model-platforms/ai-branch-local-inference/ai-local-inference-at-scale.md"
@@ -43,6 +57,10 @@
       "id": "ai-azure-openai-integration",
       "name": "Azure OpenAI Enterprise Integration",
       "level": "Advanced",
+      "readiness": "lab",
+      "needs": [
+        "azure"
+      ],
       "tree": "Running and Integrating Models",
       "branch": "Managed Model Services and Prompt Discipline",
       "path": "docs/ai-tree-model-platforms/ai-branch-managed-model-services/ai-azure-openai-integration.md"
@@ -51,6 +69,11 @@
       "id": "ai-prompt-engineering-ops",
       "name": "Prompt Engineering for IT Operations",
       "level": "Intermediate",
+      "readiness": "lab",
+      "needs": [
+        "ollama",
+        "azure"
+      ],
       "tree": "Running and Integrating Models",
       "branch": "Managed Model Services and Prompt Discipline",
       "path": "docs/ai-tree-model-platforms/ai-branch-managed-model-services/ai-prompt-engineering-ops.md"
@@ -59,6 +82,12 @@
       "id": "ai-provider-failover",
       "name": "When the Provider Fails: Fallback Tiers, Graceful Degradation and Model Deprecation",
       "level": "Intermediate",
+      "readiness": "lab",
+      "needs": [
+        "azure",
+        "hosted-api",
+        "own-service"
+      ],
       "tree": "Running and Integrating Models",
       "branch": "Managed Model Services and Prompt Discipline",
       "path": "docs/ai-tree-model-platforms/ai-branch-managed-model-services/ai-provider-failover.md"
@@ -67,6 +96,10 @@
       "id": "ai-first-managed-endpoint",
       "name": "Your First Managed Endpoint: Keys, Quotas and Responses You Cannot Trust",
       "level": "Beginner",
+      "readiness": "lab",
+      "needs": [
+        "hosted-api"
+      ],
       "tree": "Running and Integrating Models",
       "branch": "Managed Model Services and Prompt Discipline",
       "path": "docs/ai-tree-model-platforms/ai-branch-managed-model-services/ai-first-managed-endpoint.md"
@@ -75,6 +108,11 @@
       "id": "ai-rag-architecture",
       "name": "RAG Architecture: Embeddings, Chunking and Vector Search",
       "level": "Advanced",
+      "readiness": "lab",
+      "needs": [
+        "ollama",
+        "azure"
+      ],
       "tree": "Applied AI Systems",
       "branch": "RAG & Knowledge Systems",
       "path": "docs/ai-tree-applied-systems/ai-branch-rag-knowledge/ai-rag-architecture.md"
@@ -83,6 +121,11 @@
       "id": "ai-private-enterprise-rag",
       "name": "Grounding Enterprise Data Privately: Offline RAG and Access Control",
       "level": "Enterprise",
+      "readiness": "lab",
+      "needs": [
+        "ollama",
+        "azure"
+      ],
       "tree": "Applied AI Systems",
       "branch": "RAG & Knowledge Systems",
       "path": "docs/ai-tree-applied-systems/ai-branch-rag-knowledge/ai-private-enterprise-rag.md"
@@ -91,6 +134,10 @@
       "id": "ai-do-you-need-rag",
       "name": "Do You Need RAG? Context Windows, Grounding and the Cheapest Thing That Works",
       "level": "Beginner",
+      "readiness": "lab",
+      "needs": [
+        "hosted-api"
+      ],
       "tree": "Applied AI Systems",
       "branch": "RAG & Knowledge Systems",
       "path": "docs/ai-tree-applied-systems/ai-branch-rag-knowledge/ai-do-you-need-rag.md"
@@ -99,6 +146,11 @@
       "id": "ai-agents-orchestration",
       "name": "AI Agents and Orchestration Patterns",
       "level": "Advanced",
+      "readiness": "lab",
+      "needs": [
+        "ollama",
+        "azure"
+      ],
       "tree": "Applied AI Systems",
       "branch": "Agents & Enterprise Integration",
       "path": "docs/ai-tree-applied-systems/ai-branch-agents-integration/ai-agents-orchestration.md"
@@ -107,6 +159,11 @@
       "id": "ai-mcp-security-evaluation",
       "name": "MCP Servers, AI Security and Evaluation",
       "level": "Expert",
+      "readiness": "lab",
+      "needs": [
+        "ollama",
+        "azure"
+      ],
       "tree": "Applied AI Systems",
       "branch": "Agents & Enterprise Integration",
       "path": "docs/ai-tree-applied-systems/ai-branch-agents-integration/ai-mcp-security-evaluation.md"
@@ -115,6 +172,10 @@
       "id": "ai-content-safety-guardrails",
       "name": "Content Safety and Guardrails: Input Filtering, Output Classification and Refusal Design",
       "level": "Intermediate",
+      "readiness": "lab",
+      "needs": [
+        "azure"
+      ],
       "tree": "Applied AI Systems",
       "branch": "Agents & Enterprise Integration",
       "path": "docs/ai-tree-applied-systems/ai-branch-agents-integration/ai-content-safety-guardrails.md"
@@ -123,6 +184,10 @@
       "id": "ai-do-you-need-an-agent",
       "name": "Do You Need an Agent? Loops, Tools and the Cost of Letting a Model Decide",
       "level": "Beginner",
+      "readiness": "lab",
+      "needs": [
+        "ollama"
+      ],
       "tree": "Applied AI Systems",
       "branch": "Agents & Enterprise Integration",
       "path": "docs/ai-tree-applied-systems/ai-branch-agents-integration/ai-do-you-need-an-agent.md"
@@ -131,6 +196,11 @@
       "id": "ai-llmops-deployment-lifecycle",
       "name": "LLMOps: Deployment, Versioning and Drift Detection",
       "level": "Intermediate",
+      "readiness": "lab",
+      "needs": [
+        "azure",
+        "kubernetes"
+      ],
       "tree": "AI Operations & Governance",
       "branch": "LLMOps and Production Observability",
       "path": "docs/ai-tree-operations-governance/ai-branch-llmops-observability/ai-llmops-deployment-lifecycle.md"
@@ -139,6 +209,13 @@
       "id": "ai-observability-performance-monitoring",
       "name": "AI Observability and Production Performance Monitoring",
       "level": "Advanced",
+      "readiness": "lab",
+      "needs": [
+        "ollama",
+        "gpu",
+        "azure",
+        "kubernetes"
+      ],
       "tree": "AI Operations & Governance",
       "branch": "LLMOps and Production Observability",
       "path": "docs/ai-tree-operations-governance/ai-branch-llmops-observability/ai-observability-performance-monitoring.md"
@@ -147,6 +224,12 @@
       "id": "ai-incident-response",
       "name": "AI Incident Response: Detection, Containment and Postmortems for Non-Deterministic Systems",
       "level": "Advanced",
+      "readiness": "lab",
+      "needs": [
+        "ollama",
+        "azure",
+        "own-service"
+      ],
       "tree": "AI Operations & Governance",
       "branch": "LLMOps and Production Observability",
       "path": "docs/ai-tree-operations-governance/ai-branch-llmops-observability/ai-incident-response.md"
@@ -155,6 +238,10 @@
       "id": "ai-what-to-log",
       "name": "What to Log When Your AI Feature Goes Live",
       "level": "Beginner",
+      "readiness": "lab",
+      "needs": [
+        "ollama"
+      ],
       "tree": "AI Operations & Governance",
       "branch": "LLMOps and Production Observability",
       "path": "docs/ai-tree-operations-governance/ai-branch-llmops-observability/ai-what-to-log.md"
@@ -163,6 +250,10 @@
       "id": "ai-governance-compliance-framework",
       "name": "AI Governance and Compliance: ISO 42001, EU AI Act and Data Residency",
       "level": "Enterprise",
+      "readiness": "lab",
+      "needs": [
+        "azure"
+      ],
       "tree": "AI Operations & Governance",
       "branch": "Governance, Compliance and Enterprise Adoption",
       "path": "docs/ai-tree-operations-governance/ai-branch-governance-adoption/ai-governance-compliance-framework.md"
@@ -171,6 +262,10 @@
       "id": "ai-enterprise-adoption-patterns",
       "name": "Enterprise AI Adoption Patterns and Use-Case Selection",
       "level": "Expert",
+      "readiness": "lab",
+      "needs": [
+        "azure"
+      ],
       "tree": "AI Operations & Governance",
       "branch": "Governance, Compliance and Enterprise Adoption",
       "path": "docs/ai-tree-operations-governance/ai-branch-governance-adoption/ai-enterprise-adoption-patterns.md"
@@ -179,6 +274,10 @@
       "id": "ai-inventory-acceptable-use",
       "name": "Before the Framework: AI Inventory, Acceptable Use and Who Decides",
       "level": "Beginner",
+      "readiness": "lab",
+      "needs": [
+        "own-service"
+      ],
       "tree": "AI Operations & Governance",
       "branch": "Governance, Compliance and Enterprise Adoption",
       "path": "docs/ai-tree-operations-governance/ai-branch-governance-adoption/ai-inventory-acceptable-use.md"
@@ -187,6 +286,10 @@
       "id": "ai-mlops-mlflow-registry",
       "name": "MLOps with MLflow: Experiment Tracking, Model Registry and Promotion Gates",
       "level": "Advanced",
+      "readiness": "lab",
+      "needs": [
+        "runner"
+      ],
       "tree": "AI Platform Engineering",
       "branch": "Model and Feature Lifecycle",
       "path": "docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/ai-mlops-mlflow-registry.md"
@@ -195,6 +298,11 @@
       "id": "ai-distributed-training-kubeflow-ray",
       "name": "Distributed Training on Kubernetes with Kubeflow Pipelines and Ray",
       "level": "Advanced",
+      "readiness": "lab",
+      "needs": [
+        "gpu",
+        "kubernetes"
+      ],
       "tree": "AI Platform Engineering",
       "branch": "Training and GPU Infrastructure",
       "path": "docs/ai-tree-platform-engineering/ai-branch-training-gpu-infrastructure/ai-distributed-training-kubeflow-ray.md"
@@ -203,6 +311,10 @@
       "id": "ai-quantisation-gpu-sharing",
       "name": "Model Quantisation and GPU Sharing: Precision, MIG Partitioning and KV Cache Sizing",
       "level": "Advanced",
+      "readiness": "lab",
+      "needs": [
+        "gpu"
+      ],
       "tree": "AI Platform Engineering",
       "branch": "Training and GPU Infrastructure",
       "path": "docs/ai-tree-platform-engineering/ai-branch-training-gpu-infrastructure/ai-quantisation-gpu-sharing.md"
@@ -211,6 +323,11 @@
       "id": "ai-first-gpu-job",
       "name": "Your First GPU Job: What You Are Renting, Why It Queues and How Not to Waste It",
       "level": "Beginner",
+      "readiness": "lab",
+      "needs": [
+        "gpu",
+        "slurm"
+      ],
       "tree": "AI Platform Engineering",
       "branch": "Training and GPU Infrastructure",
       "path": "docs/ai-tree-platform-engineering/ai-branch-training-gpu-infrastructure/ai-first-gpu-job.md"
@@ -219,6 +336,10 @@
       "id": "ai-feature-store-skew",
       "name": "Feature Stores and Training-Serving Skew: Point-in-Time Correctness with Feast",
       "level": "Advanced",
+      "readiness": "lab",
+      "needs": [
+        "runner"
+      ],
       "tree": "AI Platform Engineering",
       "branch": "Model and Feature Lifecycle",
       "path": "docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/ai-feature-store-skew.md"
@@ -227,6 +348,10 @@
       "id": "ai-fine-tuning-peft",
       "name": "Fine-Tuning and PEFT: When to Tune, LoRA Adapters and Evaluation",
       "level": "Intermediate",
+      "readiness": "lab",
+      "needs": [
+        "gpu"
+      ],
       "tree": "AI Platform Engineering",
       "branch": "Model and Feature Lifecycle",
       "path": "docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/ai-fine-tuning-peft.md"
@@ -235,6 +360,10 @@
       "id": "ai-reproducible-training-runs",
       "name": "From Notebook to a Reproducible Training Run: Environments, Seeds, Data Versions and Artifacts",
       "level": "Beginner",
+      "readiness": "lab",
+      "needs": [
+        "runner"
+      ],
       "tree": "AI Platform Engineering",
       "branch": "Model and Feature Lifecycle",
       "path": "docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/ai-reproducible-training-runs.md"
@@ -243,6 +372,10 @@
       "id": "ai-vector-db-hybrid-retrieval",
       "name": "Vector Database Selection and Hybrid Retrieval: pgvector, Qdrant, Milvus and Reranking",
       "level": "Advanced",
+      "readiness": "lab",
+      "needs": [
+        "ollama"
+      ],
       "tree": "Production AI Systems",
       "branch": "Retrieval and Evaluation",
       "path": "docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/ai-vector-db-hybrid-retrieval.md"
@@ -251,6 +384,10 @@
       "id": "ai-evaluation-harness-gates",
       "name": "LLM Evaluation Harnesses and Regression Gates for Production AI",
       "level": "Advanced",
+      "readiness": "lab",
+      "needs": [
+        "ollama"
+      ],
       "tree": "Production AI Systems",
       "branch": "Retrieval and Evaluation",
       "path": "docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/ai-evaluation-harness-gates.md"
@@ -259,6 +396,10 @@
       "id": "ai-how-retrieval-finds-things",
       "name": "How Retrieval Finds Things: Keywords, Meaning and Why Each One Misses",
       "level": "Beginner",
+      "readiness": "lab",
+      "needs": [
+        "azure"
+      ],
       "tree": "Production AI Systems",
       "branch": "Retrieval and Evaluation",
       "path": "docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/ai-how-retrieval-finds-things.md"
@@ -267,6 +408,12 @@
       "id": "ai-agent-orchestration-guardrails",
       "name": "Agent Orchestration with LangGraph: State, Guardrails and Tool Authorisation",
       "level": "Advanced",
+      "readiness": "lab",
+      "needs": [
+        "ollama",
+        "kubernetes",
+        "own-service"
+      ],
       "tree": "Production AI Systems",
       "branch": "Agent Runtime and Cost Control",
       "path": "docs/ai-tree-production-systems/ai-branch-agent-runtime-cost/ai-agent-orchestration-guardrails.md"
@@ -275,6 +422,11 @@
       "id": "ai-finops-build-vs-buy",
       "name": "AI FinOps: Token Cost Attribution, GPU Utilisation and Build-versus-Buy Crossover",
       "level": "Advanced",
+      "readiness": "lab",
+      "needs": [
+        "gpu",
+        "kubernetes"
+      ],
       "tree": "Production AI Systems",
       "branch": "Agent Runtime and Cost Control",
       "path": "docs/ai-tree-production-systems/ai-branch-agent-runtime-cost/ai-finops-build-vs-buy.md"
@@ -283,6 +435,10 @@
       "id": "ai-prototype-to-production",
       "name": "From Prototype to Production: Gateway, Limits, Logging and Rollback",
       "level": "Beginner",
+      "readiness": "lab",
+      "needs": [
+        "hosted-api"
+      ],
       "tree": "Production AI Systems",
       "branch": "Agent Runtime and Cost Control",
       "path": "docs/ai-tree-production-systems/ai-branch-agent-runtime-cost/ai-prototype-to-production.md"

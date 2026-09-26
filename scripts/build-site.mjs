@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Build a static site from the curriculum.
 //
-// Every page is derived: navigation, breadcrumbs, level badges and the search
+// Every page is derived: navigation, breadcrumbs, level and readiness badges and the search
 // index all come from data/catalog.json, and page bodies come from the markdown
 // files it points at. Nothing about the site is maintained by hand, so it cannot
 // drift from the catalog the way a second copy of the taxonomy would.
@@ -9,12 +9,13 @@
 // Output goes to site/ and is not committed - CI builds it and GitHub Pages
 // serves it.
 
-import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
-import { dirname, join, relative, sep } from 'node:path';
+import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { dirname, join, normalize, relative, sep } from 'node:path';
 import { marked } from 'marked';
 
 import { readCatalog, group, slug } from './lib/derive.mjs';
 import { STYLE, SCRIPT } from './lib/site-assets.mjs';
+import { LEVELS, VALIDATION_PATH, needsSentence } from './lib/readiness.mjs';
 
 const OUT = 'site';
 const SKIP_DIRS = new Set(['node_modules', '.git', '.github', '.venv', OUT]);
@@ -128,6 +129,7 @@ function buildSidebar(grouped) {
     const top = [
       ['Learning paths', 'PATHS.html'],
       ['Full catalog', 'CATALOG.html'],
+      ['Readiness', 'READINESS.html'],
     ].map(([label, href]) => {
       const active = current === href ? ' class="current"' : '';
       return `<li><a href="${base}${href}"${active}>${escapeHtml(label)}</a></li>`;
@@ -194,7 +196,17 @@ function leafHeader(leaf, base) {
     `<a href="${base}${treeIndex}">${escapeHtml(leaf.tree)}</a> / ` +
     `<a href="${base}${branchIndex}">${escapeHtml(leaf.branch)}</a>` +
     `</div>\n` +
-    `<div class="meta"><span class="badge lv-${escapeHtml(leaf.level)}">${escapeHtml(leaf.level)}</span></div>\n`;
+    `<div class="meta"><span class="badge lv-${escapeHtml(leaf.level)}">${escapeHtml(leaf.level)}</span>` +
+    readinessBadge(leaf, base) + `</div>\n`;
+}
+
+// The badge links to the page that says what the level does and does not
+// prove; its tooltip says what a live run of this leaf would need.
+function readinessBadge(leaf, base) {
+  const level = LEVELS[leaf.readiness];
+  const tip = leaf.readiness === 'lab' ? `${level.summary}. ${needsSentence(leaf.needs)}` : level.summary;
+  return ` <a class="badge rd-${escapeHtml(leaf.readiness)}" href="${base}READINESS.html#${escapeHtml(leaf.readiness)}"` +
+    ` title="${escapeHtml(tip)}">${escapeHtml(level.label)}</a>`;
 }
 
 function pager(leaf, ordered, base) {
@@ -220,6 +232,7 @@ function landing(catalog, grouped, base) {
     ['Trees', catalog.treeCount],
     ['Branches', catalog.branchCount],
     ...levels,
+    ['Validated live', catalog.leaves.filter((l) => l.readiness === 'validated').length],
   ];
   const cards = [...grouped].map(([tree, branches]) => {
     const treeIndex = treeDirOf(branches) + '/index.html';
@@ -255,9 +268,30 @@ ${cards}
 <p>Each leaf carries an explanation, an architecture diagram, commands, an automation
 script, a lab with evidence-based validation criteria, operational practices,
 troubleshooting scenarios, interview questions, certification alignment and primary-source
-references. Commands and labs are written for an isolated environment and must be
-validated against current vendor documentation before production use.</p>
+references. Commands and labs are written for an isolated environment. Each leaf's
+<a href="${base}READINESS.html">readiness</a> says whether its commands have been run
+against the live service or only checked offline, and what a live run would need.</p>
 `;
+}
+
+// ---------------------------------------------------------------------------
+// output check
+
+function deadLinks(dir, found = []) {
+  for (const entry of readdirSync(dir)) {
+    const full = join(dir, entry);
+    if (statSync(full).isDirectory()) {
+      deadLinks(full, found);
+      continue;
+    }
+    if (!entry.endsWith('.html')) continue;
+    for (const m of readFileSync(full, 'utf8').matchAll(/\bhref="([^"#?]*)/g)) {
+      const target = m[1];
+      if (!target || /^[a-z][a-z0-9+.-]*:/i.test(target) || target.startsWith('//')) continue;
+      if (!existsSync(normalize(join(dirname(full), target)))) found.push(`  ${full} -> ${target}`);
+    }
+  }
+  return found;
 }
 
 // ---------------------------------------------------------------------------
@@ -310,15 +344,31 @@ function main() {
   const index = catalog.leaves.map((leaf) => ({
     title: leaf.name,
     level: leaf.level,
+    readiness: LEVELS[leaf.readiness].label,
     branch: leaf.branch,
     url: leaf.path.replace(/\.md$/, '.html'),
-    haystack: [leaf.name, leaf.level, leaf.tree, leaf.branch, leaf.id].join(' ').toLowerCase(),
+    haystack: [leaf.name, leaf.level, LEVELS[leaf.readiness].label, leaf.tree, leaf.branch, leaf.id].join(' ').toLowerCase(),
   }));
   writeFileSync(join(OUT, 'search-index.json'), JSON.stringify(index));
 
   // Pages would otherwise run the output through Jekyll and drop nothing here,
   // but underscore-prefixed paths are a silent trap; disable it explicitly.
   writeFileSync(join(OUT, '.nojekyll'), '');
+
+  // READINESS.md sends readers to the run records as the evidence behind each
+  // level, so the site publishes them; otherwise the link works on GitHub and
+  // is a 404 here.
+  mkdirSync(join(OUT, 'data'), { recursive: true });
+  copyFileSync(VALIDATION_PATH, join(OUT, VALIDATION_PATH));
+
+  // validate-content resolves relative links in the markdown, but a page can
+  // still link to a file the site never publishes. Fail the build rather
+  // than ship a dead link.
+  const dead = deadLinks(OUT);
+  if (dead.length) {
+    console.error(`${dead.length} relative link(s) in the built site do not resolve:\n${dead.join('\n')}`);
+    return 1;
+  }
 
   console.log(`Built ${written} pages into ${OUT}/ (${index.length} leaves indexed for search).`);
   return 0;

@@ -2,6 +2,7 @@
 id: 'ai-do-you-need-an-agent'
 title: 'Do You Need an Agent? Loops, Tools and the Cost of Letting a Model Decide'
 level: 'Beginner'
+readiness: 'lab'
 forest: 'AI & Intelligent Systems'
 tree: 'Applied AI Systems'
 branch: 'Agents & Enterprise Integration'
@@ -13,6 +14,7 @@ branch: 'Agents & Enterprise Integration'
 **Tree:** [Applied AI Systems](../README.md)
 **Branch:** [Agents & Enterprise Integration](README.md)
 **Forest:** [AI & Intelligent Systems](../../../README.md)
+**Readiness:** [Lab](../../../READINESS.md#lab) - checked offline, not yet run against a live service. A live run needs a local Ollama server.
 
 ## Explanation
 

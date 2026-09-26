@@ -2,6 +2,7 @@
 id: 'ai-enterprise-adoption-patterns'
 title: 'Enterprise AI Adoption Patterns and Use-Case Selection'
 level: 'Expert'
+readiness: 'lab'
 forest: 'AI & Intelligent Systems'
 tree: 'AI Operations & Governance'
 branch: 'Governance, Compliance and Enterprise Adoption'
@@ -13,6 +14,7 @@ branch: 'Governance, Compliance and Enterprise Adoption'
 **Tree:** [AI Operations & Governance](../README.md)
 **Branch:** [Governance, Compliance and Enterprise Adoption](README.md)
 **Forest:** [AI & Intelligent Systems](../../../README.md)
+**Readiness:** [Lab](../../../READINESS.md#lab) - checked offline, not yet run against a live service. A live run needs an Azure subscription.
 
 ## Explanation
 

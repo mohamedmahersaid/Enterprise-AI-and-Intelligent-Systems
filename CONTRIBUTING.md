@@ -14,7 +14,7 @@ Never include real credentials, internal URLs, customer data, private reports, o
 
 ## Adding a leaf
 
-`data/catalog.json` is the source of truth. `CATALOG.md`, `README.md` and every
+`data/catalog.json` is the source of truth. `CATALOG.md`, `README.md`, `READINESS.md` and every
 tree and branch README are derived from it, and CI asserts they agree — so do
 not edit them by hand. `ASSUMPTIONS.md` is derived too, but from the leaf bodies
 rather than the catalog: it records the tools and pinned versions the commands
@@ -59,6 +59,38 @@ against roughly 2,900 for Advanced. A reader without the vocabulary needs it bui
 before a point can land; an Advanced reader already has it and wants the
 trade-off. Write to the level, and expect an introductory leaf to cost more
 words than an expert one, not fewer.
+
+### Readiness
+
+Every leaf has a readiness level in `data/catalog.json`, its frontmatter and a
+`**Readiness:**` line under its title, and CI checks the three agree. The levels
+are defined in [READINESS.md](READINESS.md):
+
+- `lab` - checked offline, never run live here. Every leaf starts here.
+- `validated` - also run end-to-end against the live service by a CI run
+  recorded in `data/validation.json`. A leaf is validated only while its latest
+  recorded run passed; a recorded failure puts it back to `lab`.
+
+There is no production level: whether a pattern is fit for production depends
+on the reader's environment, which the repository cannot see.
+
+Each leaf also lists what a live run `needs` - `runner`, `ollama`, `gpu`,
+`azure`, `kubernetes`, `slurm`, `hosted-api` or `own-service`. The list is yours
+to judge, with a floor: shell commands that call `az`, `kubectl`/`helm`,
+`nvidia-smi`/`vllm`, a Slurm command or `ollama` - anywhere in the line, in any
+fence other than code, data or a diagram - must list the matching need, and the
+check says which is missing. Tools a Python script calls are not detected, so
+list those yourself. Pass `--needs azure,kubernetes` to
+`new-leaf`, or leave it to default to `runner` and let the check raise it.
+
+To record a live run, add it to `data/validation.json` (leaf, date, workflow,
+run URL, environment, what it covered, pass or fail), set the leaf to
+`validated` in the catalog and its frontmatter, update its readiness line to
+the one the check prints, and run `npm run regen`. The check confirms the
+record is complete, dated no later than today, and names an existing workflow and
+a run in this repository; review confirms the run covered what the record says
+and that the job running the commands held no write token. Recording is a pull
+request, never a commit from the workflow itself.
 
 ### References
 
@@ -109,7 +141,7 @@ run `npm run regen` to rewrite the derived files, rather than editing them.
 
 | Command | What it enforces |
 | --- | --- |
-| `npm run validate:content` | Heading hierarchy, required sections, frontmatter and catalog agreement, catalog self-consistency, unresolved TODOs, relative link resolution, CATALOG.md coverage, README figures, certifications and OWASP IDs against `data/certifications.json`, every reference linking its source |
+| `npm run validate:content` | Heading hierarchy, required sections, frontmatter and catalog agreement, catalog self-consistency, unresolved TODOs, relative link resolution, CATALOG.md coverage, README figures, certifications and OWASP IDs against `data/certifications.json`, every reference linking its source, each readiness level backed by `data/validation.json` and every need its commands prove listed |
 | `npm run validate:mermaid` | Every mermaid diagram parses |
 | `npm run validate:python` | Every python block in a leaf compiles, and every third-party module it imports is named by a `pip install` in the same leaf (parsed, never executed) |
 | `npm run validate:scripts` | Every python block, run with no arguments in an empty directory, completes or stops with its own message rather than a traceback |
@@ -180,10 +212,12 @@ npm run serve:site   # serve it at http://localhost:4173
 
 On Windows, `run.bat site` does both and opens your browser.
 
-Navigation, breadcrumbs, level badges and the search index are all derived from the
-catalog, so the site cannot disagree with it — there is no second copy of the taxonomy
-to keep in step. Page bodies are the leaf markdown rendered to HTML, with links to
-`.md` files rewritten to their generated pages.
+Navigation, breadcrumbs, level and readiness badges and the search index are all
+derived from the catalog, so the site cannot disagree with it — there is no second copy
+of the taxonomy to keep in step. Page bodies are the leaf markdown rendered to HTML,
+with links to `.md` files rewritten to their generated pages. `data/validation.json`
+is published alongside, because `READINESS.md` links it as the evidence behind each
+level, and the build fails if any relative link in the output does not resolve.
 
 `site/` is not committed. CI builds it on every pull request, so a structural break
 fails the build, and publishes it to GitHub Pages on merge to `main`.

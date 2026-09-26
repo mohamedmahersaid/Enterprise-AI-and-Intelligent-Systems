@@ -17,6 +17,7 @@ Enterprise AI engineering: local and offline inference with Ollama, Azure OpenAI
 - Troubleshooting scenarios and resolutions
 - Interview questions with evidence-based answers
 - Certification alignment, references, and further-study query
+- A readiness level: whether its commands have been run against the live service or only checked offline, and what a live run needs
 
 ## Curriculum map
 
@@ -31,6 +32,8 @@ Enterprise AI engineering: local and offline inference with Ollama, Azure OpenAI
 **Total:** 5 trees · 10 branches · 34 leaves
 
 **Level distribution:** Advanced: 14 · Beginner: 10 · Enterprise: 2 · Expert: 2 · Intermediate: 6
+
+**Readiness:** Lab: 34 · Validated: 0 ([what that means](READINESS.md))
 
 Browse the complete [leaf catalog](CATALOG.md), or follow a [learning path](PATHS.md)
 if you would rather be told what to read in what order. The catalog lists every leaf
@@ -52,7 +55,7 @@ verify the ones you depend on.
 
 ## Coverage statement
 
-Catalog coverage is 100%: all 34 authoritative leaves are present. Coverage indicates documentation completeness, not universal production validation. Product behavior changes across releases and environments.
+Catalog coverage is 100%: all 34 authoritative leaves are present. Coverage indicates documentation completeness, not universal production validation; [READINESS.md](READINESS.md) records which leaves have been run against a live service and what each of the rest would need. Product behavior changes across releases and environments.
 
 ## Contributing and security
 

@@ -1,12 +1,13 @@
 /**
  * Single source of truth for every file derived from data/catalog.json:
- * CATALOG.md, the README curriculum map and figures, and the tree and branch
- * READMEs. validate-content.mjs asserts these agree with the catalog; this
+ * CATALOG.md, the README curriculum map and figures, the tree and branch
+ * READMEs, and READINESS.md. validate-content.mjs asserts these agree with the catalog; this
  * module is what makes them agree, so a leaf can be added without hand-editing
  * six navigation files and getting one of them subtly wrong.
  */
 import fs from 'node:fs';
 import { deriveAssumptions, renderAssumptionsMd } from './assumptions.mjs';
+import { LEVELS, writeReadinessMd } from './readiness.mjs';
 import path from 'node:path';
 
 export const CATALOG_PATH = 'data/catalog.json';
@@ -156,6 +157,13 @@ function writePathsMd(catalog) {
   fs.writeFileSync('PATHS.md', `${out.join('\n')}\n`);
 }
 
+/** "Lab: 34 · Validated: 0" - every level, including the empty ones. */
+export function readinessSummary(catalog) {
+  return Object.entries(LEVELS)
+    .map(([id, l]) => `${l.label}: ${catalog.leaves.filter((leaf) => leaf.readiness === id).length}`)
+    .join(' · ');
+}
+
 function writeReadme(catalog, trees) {
   let readme = fs.readFileSync('README.md', 'utf8');
   const leafCount = catalog.leaves.length;
@@ -168,6 +176,7 @@ function writeReadme(catalog, trees) {
   }).join('\n');
 
   const levels = Object.entries(catalog.levelCounts).map(([k, v]) => `${k}: ${v}`).join(' · ');
+  const readiness = readinessSummary(catalog);
 
   readme = readme
     .replace(/(badge\/leaves-)\d+(-)/, `$1${leafCount}$2`)
@@ -177,7 +186,8 @@ function writeReadme(catalog, trees) {
     .replace(/(\| Tree \| Branches \| Leaves \|\n\| --- \| ---: \| ---: \|\n)(?:\|.*\n)+/, `$1${rows}\n`)
     .replace(/\*\*Total:\*\* \d+ trees · \d+ branches · \d+ leaves/,
       `**Total:** ${catalog.treeCount} trees · ${catalog.branchCount} branches · ${leafCount} leaves`)
-    .replace(/(\*\*Level distribution:\*\* ).+/, `$1${levels}`);
+    .replace(/(\*\*Level distribution:\*\* ).+/, `$1${levels}`)
+    .replace(/(\*\*Readiness:\*\* ).+?( \(\[what that means\])/, `$1${readiness}$2`);
 
   fs.writeFileSync('README.md', readme);
 }
@@ -198,5 +208,6 @@ export function regenerate(catalog) {
   writeCatalogMd(catalog, trees);
   writePathsMd(catalog);
   writeReadme(catalog, trees);
+  writeReadinessMd(catalog);
   writeAssumptionsMd(catalog);
 }
