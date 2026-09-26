@@ -1,0 +1,5 @@
+{
+ "mobile": ["phone"], "code": ["authenticator"],
+ "blocked": ["lockout", "locked"], "secret": ["password"], "login": ["password", "sign-in"],
+ "storage": ["disk"], "kicking": ["evicts"], "drive": ["disk"], "bigger": ["resize", "grow"]
+}

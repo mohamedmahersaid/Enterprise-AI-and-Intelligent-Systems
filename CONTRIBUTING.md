@@ -249,7 +249,9 @@ derived from the catalog, so the site cannot disagree with it — there is no se
 of the taxonomy to keep in step. Page bodies are the leaf markdown rendered to HTML,
 with links to `.md` files rewritten to their generated pages. `data/validation.json`
 is published alongside, because `READINESS.md` links it as the evidence behind each
-level, and the build fails if any relative link in the output does not resolve.
+level. Non-markdown files under a `fixtures/` directory in `docs/` are copied as-is,
+so a lab's data can be downloaded from the site; link each one from the fixtures
+`README.md`. The build fails if any relative link in the output does not resolve.
 
 `site/` is not committed. CI builds it on every pull request, so a structural break
 fails the build, and publishes it to GitHub Pages on merge to `main`.

@@ -1,0 +1,60 @@
+{"qid": "D01", "stratum": "id", "query": "HL-1043 when signing in"}
+{"qid": "D02", "stratum": "para", "query": "got a new mobile and the code app stopped working"}
+{"qid": "D03", "stratum": "multi", "query": "change a gateway certificate safely, steps before and after"}
+{"qid": "D04", "stratum": "none", "query": "order a replacement office chair"}
+{"qid": "D05", "stratum": "id", "query": "error HL-1050?"}
+{"qid": "D06", "stratum": "para", "query": "too many wrong passwords and now I am blocked"}
+{"qid": "D07", "stratum": "multi", "query": "backup failing and how long backups are kept"}
+{"qid": "D08", "stratum": "none", "query": "reset the HSM quorum cards"}
+{"qid": "D09", "stratum": "id", "query": "NW-DISK-17 alert on a node"}
+{"qid": "D10", "stratum": "para", "query": "forgot my login secret"}
+{"qid": "D11", "stratum": "multi", "query": "restore a database and prove the recovery time"}
+{"qid": "D12", "stratum": "none", "query": "error HL-9999"}
+{"qid": "D13", "stratum": "id", "query": "BKP-E221 nightly backup failed"}
+{"qid": "D14", "stratum": "para", "query": "machine keeps kicking workloads off because storage is almost full"}
+{"qid": "D15", "stratum": "multi", "query": "pod killed for memory: how to diagnose and what limit to set"}
+{"qid": "D16", "stratum": "none", "query": "configure the guest wifi"}
+{"qid": "D17", "stratum": "id", "query": "VPN-809 cannot connect"}
+{"qid": "D18", "stratum": "para", "query": "make a server's extra drive bigger"}
+{"qid": "D19", "stratum": "multi", "query": "disk full on an application server or a kubernetes node"}
+{"qid": "D20", "stratum": "none", "query": "how many vacation days carry over"}
+{"qid": "T01", "stratum": "id", "query": "getting VPN-13801"}
+{"qid": "T02", "stratum": "para", "query": "bring a database back to how it looked yesterday afternoon"}
+{"qid": "T03", "stratum": "multi", "query": "user lost their phone and is also locked out"}
+{"qid": "T04", "stratum": "none", "query": "BKP-E999 error"}
+{"qid": "T05", "stratum": "id", "query": "CERT-EXP-30 alert"}
+{"qid": "T06", "stratum": "para", "query": "remote connection fails from a hotel"}
+{"qid": "T07", "stratum": "multi", "query": "stolen laptop: wipe it and what happens to the recovery key"}
+{"qid": "T08", "stratum": "none", "query": "rotate the database encryption key"}
+{"qid": "T09", "stratum": "id", "query": "MAIL-451 deferred"}
+{"qid": "T10", "stratum": "para", "query": "internet works but company sites do not while connected from home"}
+{"qid": "T11", "stratum": "multi", "query": "grant application access and review it later"}
+{"qid": "T12", "stratum": "none", "query": "mainframe batch job abend"}
+{"qid": "T13", "stratum": "id", "query": "exit code 137"}
+{"qid": "T14", "stratum": "para", "query": "container keeps restarting over and over"}
+{"qid": "T15", "stratum": "multi", "query": "VPN connected but internal names fail to resolve"}
+{"qid": "T16", "stratum": "none", "query": "restore a deleted chat channel"}
+{"qid": "T17", "stratum": "id", "query": "DNS-OUT-2 fired"}
+{"qid": "T18", "stratum": "para", "query": "website gives bad gateway while we deploy"}
+{"qid": "T19", "stratum": "multi", "query": "noisy alert: silence it or rewrite the rule"}
+{"qid": "T20", "stratum": "none", "query": "printer shows offline"}
+{"qid": "T21", "stratum": "id", "query": "UPD-5005 on install"}
+{"qid": "T22", "stratum": "para", "query": "company hostnames do not look up but outside sites do"}
+{"qid": "T23", "stratum": "multi", "query": "patch window and rolling back an emergency fix"}
+{"qid": "T24", "stratum": "none", "query": "VPN-999 error"}
+{"qid": "T25", "stratum": "id", "query": "HL-CPU-90 build agent"}
+{"qid": "T26", "stratum": "para", "query": "get into another team's app"}
+{"qid": "T27", "stratum": "multi", "query": "phishing email reported: who handles it and how long mail is kept"}
+{"qid": "T28", "stratum": "none", "query": "expense report approval"}
+{"qid": "T29", "stratum": "id", "query": "who works the SEC-TRIAGE queue"}
+{"qid": "T30", "stratum": "para", "query": "someone quit, what happens to their stuff"}
+{"qid": "T31", "stratum": "multi", "query": "admin rights and disabling accounts of leavers"}
+{"qid": "T32", "stratum": "none", "query": "upgrade the cluster a major version tonight"}
+{"qid": "T33", "stratum": "id", "query": "_acme-challenge record missing"}
+{"qid": "T34", "stratum": "para", "query": "a fix from this month broke our service"}
+{"qid": "T35", "stratum": "multi", "query": "resolver outage and adding a new record"}
+{"qid": "T36", "stratum": "none", "query": "badge access to the data centre"}
+{"qid": "T37", "stratum": "id", "query": "10.40.0.53 resolver"}
+{"qid": "T38", "stratum": "para", "query": "laptop wants a long number after a BIOS upgrade"}
+{"qid": "T39", "stratum": "multi", "query": "VPN certificate expired and requesting one from the internal CA"}
+{"qid": "T40", "stratum": "none", "query": "mobile phone contract upgrade"}

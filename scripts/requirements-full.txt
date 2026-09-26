@@ -1158,6 +1158,7 @@ numpy==2.5.3 \
     #   dask
     #   feast
     #   pandas
+    #   rank-bm25
 opentelemetry-api==1.45.0 \
     --hash=sha256:711ede81773c8025c2c03dac0450bc89f3d30aea6eabcc815c570d4e35a963f7 \
     --hash=sha256:80e068aba7cd56c8b58512d6a36f8d25cb1dfaa0c0a4cc1c938ccf9f362d9cb3
@@ -1711,6 +1712,10 @@ pyyaml==6.0.3 \
     #   langchain-core
     #   mlflow-skinny
     #   uvicorn
+rank-bm25==0.2.2 \
+    --hash=sha256:096ccef76f8188563419aaf384a02f0ea459503fdf77901378d4fd9d87e5e51d \
+    --hash=sha256:7bd4a95571adadfc271746fa146a4bcfd89c0cf731e49c3d1ad863290adbe8ae
+    # via -r requirements-full.in
 requests==2.34.2 \
     --hash=sha256:2a0d60c172f83ac6ab31e4554906c0f3b3588d37b5cb939b1c061f4907e278e0 \
     --hash=sha256:f288924cae4e29463698d6d60bc6a4da69c89185ad1e0bcc4104f584e960b9ed

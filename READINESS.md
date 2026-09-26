@@ -6,7 +6,7 @@ Every leaf says how far its content has been proven. The level is a claim the
 repository backs with evidence, and `npm run validate` fails when a leaf claims
 more than its evidence supports.
 
-**34 leaves:** Lab: 33 · Validated: 1
+**35 leaves:** Lab: 34 · Validated: 1
 
 ## Lab
 
@@ -61,7 +61,7 @@ data and diagrams. Tools called from inside a Python script are not detected.
 
 | Need | What it means | Leaves |
 | --- | --- | ---: |
-| Stock CI runner | Nothing beyond a GitHub-hosted Ubuntu runner: Python 3, Docker, packages installed from public registries, and services started in containers. | 3 |
+| Stock CI runner | Nothing beyond a GitHub-hosted Ubuntu runner: Python 3, Docker, packages installed from public registries, and services started in containers. | 4 |
 | Ollama | A local Ollama server with a small model pulled. A CPU is enough, so a CI runner can host it. | 14 |
 | NVIDIA GPU | An NVIDIA GPU with its driver and CUDA runtime. Not available on standard hosted runners. | 8 |
 | Azure subscription | An Azure subscription with rights to create the resources the leaf creates, and a budget for them. Runs cost money and need credentials, so none are automated here yet. | 15 |
@@ -70,7 +70,7 @@ data and diagrams. Tools called from inside a Python script are not detected.
 | Hosted model API | An API key for a hosted model provider other than Azure. | 4 |
 | Your own service | A system the leaf assumes you run already - a gateway, an application, an inventory export - which its commands address only through a placeholder. | 4 |
 
-8 of 34 leaves need only a stock runner or Ollama, so CI can validate them
+9 of 35 leaves need only a stock runner or Ollama, so CI can validate them
 at no cost. The rest need infrastructure or credentials this repository does not hold.
 
 ## Every leaf
@@ -108,6 +108,7 @@ at no cost. The rest need infrastructure or credentials this repository does not
 | [Vector Database Selection and Hybrid Retrieval: pgvector, Qdrant, Milvus and Reranking](docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/ai-vector-db-hybrid-retrieval.md) | Advanced | Lab | Ollama | none recorded |
 | [LLM Evaluation Harnesses and Regression Gates for Production AI](docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/ai-evaluation-harness-gates.md) | Advanced | Lab | Ollama | none recorded |
 | [How Retrieval Finds Things: Keywords, Meaning and Why Each One Misses](docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/ai-how-retrieval-finds-things.md) | Beginner | Lab | Azure subscription | none recorded |
+| [Retrieval Test Collections: Graded Judgements, Pooling and Telling a Real Improvement from Noise](docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/ai-retrieval-test-collections.md) | Intermediate | Lab | Stock CI runner | none recorded |
 | [Agent Orchestration with LangGraph: State, Guardrails and Tool Authorisation](docs/ai-tree-production-systems/ai-branch-agent-runtime-cost/ai-agent-orchestration-guardrails.md) | Advanced | Lab | Ollama, Kubernetes cluster, Your own service | none recorded |
 | [AI FinOps: Token Cost Attribution, GPU Utilisation and Build-versus-Buy Crossover](docs/ai-tree-production-systems/ai-branch-agent-runtime-cost/ai-finops-build-vs-buy.md) | Advanced | Lab | NVIDIA GPU, Kubernetes cluster | none recorded |
 | [From Prototype to Production: Gateway, Limits, Logging and Rollback](docs/ai-tree-production-systems/ai-branch-agent-runtime-cost/ai-prototype-to-production.md) | Beginner | Lab | Hosted model API | none recorded |

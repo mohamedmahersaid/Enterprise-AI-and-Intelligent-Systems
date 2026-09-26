@@ -1,0 +1,11 @@
+{
+ "mobile": ["phone"], "code": ["authenticator"], "blocked": ["lockout", "locked"],
+ "secret": ["password"], "login": ["password", "sign-in"], "storage": ["disk"],
+ "kicking": ["evicts"], "drive": ["disk"], "bigger": ["resize", "grow"],
+ "restarting": ["crashloopbackoff"], "bad": ["502"], "deploy": ["rolling", "update"],
+ "hostnames": ["names", "dns"], "look": ["resolve"], "app": ["application", "access"],
+ "quit": ["leaves", "leaver"], "stuff": ["mailbox", "files"], "fix": ["update"],
+ "broke": ["breaks"], "bios": ["firmware"], "number": ["recovery", "key"],
+ "remote": ["vpn"], "company": ["internal"], "yesterday": ["point-in-time", "restore"],
+ "home": ["vpn", "tunnel"]
+}
