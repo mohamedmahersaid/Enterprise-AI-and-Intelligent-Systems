@@ -29,6 +29,35 @@ escalation handles the residue, because some decisions should not be automated a
 Teams that treat safety as a single vendor toggle are relying on the one layer with no
 knowledge of their context.
 
+Layers say who decides; **intervention points** say where a check runs. Microsoft
+Foundry guardrails name four: user input, tool call, tool response and output. This leaf
+already filters three places: user input and retrieved context on one path (Commands
+3-5) and output. Reading those as Foundry's user input and output points is the author's
+mapping, not the page's. An agent adds the other two, both marked preview and "Agents
+only": the tool call, "the action and data the agent proposes to send to a tool", and the
+tool response, "the content returned from a tool to the agent". When a tool response
+control finds an indirect attack, "the agent stops operating immediately".
+
+Several facts limit what the platform does for you. "Agent guardrails are in preview", and
+"The guardrail system currently applies only to agents developed in the Foundry Agent
+Service, not to other agents registered in the Foundry Control Plane". So the LangGraph
+agent in [Agent Orchestration with LangGraph](../../ai-tree-production-systems/ai-branch-agent-runtime-cost/ai-agent-orchestration-guardrails.md)
+and the Ollama agents in [AI Agents and Orchestration Patterns](ai-agents-orchestration.md)
+and [MCP Servers, AI Security and Evaluation](ai-mcp-security-evaluation.md) keep their
+in-code checks: `authorise()` before a tool runs, `shield_verdict()` on each tool result,
+and the Prompt Shields scan of a tool result before it enters context. Even for a Foundry
+agent, tool call and tool response controls need moderation support from the tool. The
+supported tools are Azure AI Search, Azure Functions, OpenAPI, SharePoint Grounding,
+Fabric Data Agent, Bing Grounding, Bing Custom Search and Browser Automation, and for any
+other tool those controls "won't take effect". "The agentic guardrail fully overrides the
+model's guardrail", so a stricter threshold on the model deployment does not carry over
+to an agent that has its own guardrail. Agents also take only **Annotate and block**
+(Annotate alone is not applicable to agents), and Spotlighting and Groundedness, both
+preview, are not applicable to agents, so an agent guardrail cannot supply the
+Spotlighting containment or the groundedness output check this leaf describes. Each
+point adds "approximately 50-100ms of latency", and the tool call point runs "every time
+the agent is about to execute a tool call", so a multi-step run pays it more than once.
+
 ### Input and output filtering solve different problems
 
 Input filtering rejects a request before it costs anything - a policy-violating ask, or
@@ -405,6 +434,7 @@ That people stop using the system, which makes the estate less safe while the da
 ## Certification alignment
 
 - **Microsoft Certified: Azure AI Apps and Agents Developer Associate (AI-103)** - Implement generative AI and agentic solutions: layering input filtering, Prompt Shields for user prompts and retrieved documents, and output filtering around a RAG assistant, with severity thresholds set per application tier.
+- **Microsoft Certified: Multi-Agent AI Solutions Expert (AI-500, beta)** - Secure, govern, and deploy multi-agent solutions: guardrails at the four intervention points (user input, tool call, tool response and output), with the Foundry agent guardrails (preview) limited to Foundry Agent Service agents and in-code checks kept for other agents.
 - **Microsoft Certified: Cybersecurity Architect Expert (SC-100)** - Design security solutions for applications and data: treating retrieved documents as untrusted input, filtering every source of model-visible text, and logging filter decisions without the blocked content.
 - **Google Cloud Professional Machine Learning Engineer** - responsible AI practices, safety evaluation and production monitoring.
 - **Vendor-neutral** - OWASP GenAI LLM Top 10 2026: LLM01:2026 Prompt Injection and LLM10:2026 Improper Output Handling, mapped to NIST AI RMF MANAGE.
@@ -414,6 +444,8 @@ That people stop using the system, which makes the estate less safe while the da
 - [Microsoft Learn: Harm categories and severity levels](https://learn.microsoft.com/azure/ai-services/content-safety/concepts/harm-categories) - Harm categories and per-category severity levels used for threshold tuning.
 - [Microsoft Learn: Prompt Shields](https://learn.microsoft.com/azure/ai-services/content-safety/concepts/jailbreak-detection) - Prompt Shields for user prompts and retrieved documents, and the Spotlighting preview with its base64 and token-count caveats.
 - [Microsoft Learn: What is Azure AI Content Safety?](https://learn.microsoft.com/azure/ai-services/content-safety/overview) - Prompt Shields input limits (a 10K-character prompt, and up to five documents totalling 10K characters per call), Microsoft Entra ID authentication and the Cognitive Services User role used by the commands and the tuner script.
+- [Microsoft Learn: Intervention points](https://learn.microsoft.com/azure/foundry/guardrails/intervention-points) - The four intervention points, the tool response behaviour on an indirect attack, the tools with moderation support and the 50-100ms latency per point.
+- [Microsoft Learn: Guardrails and controls overview in Microsoft Foundry](https://learn.microsoft.com/azure/foundry/guardrails/guardrails-overview) - Agent guardrails in preview and only for Foundry Agent Service agents, the agentic guardrail overriding the model's, and the risks, points and actions applicable to agents.
 - [Microsoft Learn: Defend against indirect prompt injection attacks](https://learn.microsoft.com/security/zero-trust/sfi/defend-indirect-prompt-injection) - Delimiting and data marking of retrieved content as containment behind detection.
 - [OWASP Gen AI Security Project: OWASP GenAI LLM Top 10 2026](https://genai.owasp.org/resource/owasp-genai-llm-top-10-2026/) - LLM01:2026 Prompt Injection, LLM10:2026 Improper Output Handling and associated mitigations.
 - [National Institute of Standards and Technology (NIST): Artificial Intelligence Risk Management Framework (AI RMF 1.0)](https://doi.org/10.6028/NIST.AI.100-1) - MEASURE and MANAGE functions for operational safeguards.

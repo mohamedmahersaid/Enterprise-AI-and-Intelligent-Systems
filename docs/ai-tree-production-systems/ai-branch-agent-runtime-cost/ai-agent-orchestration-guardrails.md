@@ -316,7 +316,7 @@ app = graph.compile()
 
 **Likely cause:** Confused deputy - the agent used its own privileged service account rather than the invoking user's identity.
 
-**Resolution:** Derive tool scopes from the invoking user at request time and require explicit confirmation for irreversible actions. Treat prompt injection in retrieved content as the expected delivery mechanism rather than an edge case, which means the authorisation boundary cannot depend on the agent behaving well or on instructions telling it to refuse. Audit what the service account can reach in the interim, since the exposure is its full permission set, not the single observed action.
+**Resolution:** Derive tool scopes from the invoking user at request time and require explicit confirmation for irreversible actions. Treat prompt injection in retrieved content as the expected delivery mechanism rather than an edge case, which means the authorisation boundary cannot depend on the agent behaving well or on instructions telling it to refuse. Audit what the service account can reach in the interim, since the exposure is its full permission set, not the single observed action. Platform guardrails at the tool call and tool response points (preview) are a complementary layer rather than a replacement: they scan content for risks rather than checking the user's authority, and they apply only to Foundry Agent Service agents, so this LangGraph agent keeps `authorise()` - see [Content Safety and Guardrails](../../ai-tree-applied-systems/ai-branch-agents-integration/ai-content-safety-guardrails.md#guardrails-are-layers-not-a-switch).
 
 ### Scenario 3: A wrong answer cannot be diagnosed because the reasoning path is opaque.
 
@@ -370,6 +370,7 @@ From the trace, which has to exist before the incident. I want every prompt, eve
 - [Model Context Protocol: Authorization - Model Context Protocol](https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization) - MCP authorisation boundaries for tools exposed to agents.
 - [Microsoft Learn: How toolbox authentication works in Microsoft Foundry](https://learn.microsoft.com/azure/foundry/agents/how-to/tools/tool-authentication) - Agent tool calling with identity-scoped (per-user) access instead of a shared service account.
 - [Microsoft Learn: Agent identity concepts in Microsoft Foundry](https://learn.microsoft.com/azure/foundry/agents/concepts/agent-identity) - Identity-scoped access for agents via the on-behalf-of flow, and resource-scoped roles for an agent's own identity instead of subscription-wide access.
+- [Microsoft Learn: Guardrails and controls overview in Microsoft Foundry](https://learn.microsoft.com/azure/foundry/guardrails/guardrails-overview) - Tool call and tool response intervention points (preview) that apply only to Foundry Agent Service agents, as a layer beside edge authorisation.
 - [Microsoft Learn: Defend against indirect prompt injection attacks](https://learn.microsoft.com/security/zero-trust/sfi/defend-indirect-prompt-injection) - Least privilege with short-lived privileges and human approval as layered defences against injected instructions.
 - [National Institute of Standards and Technology (NIST AI 100-1): Artificial Intelligence Risk Management Framework (AI RMF 1.0)](https://doi.org/10.6028/NIST.AI.100-1) - MANAGE function guidance on bounding autonomy and human oversight.
 
