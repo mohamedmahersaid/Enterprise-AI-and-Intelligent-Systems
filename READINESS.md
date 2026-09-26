@@ -15,8 +15,10 @@ describes. For a lab leaf, the checks establish that:
 
 - every command block is free of literal credentials, destructive operations,
   `curl | sh` and plaintext `http://`
-- every Python script compiles, declares its third-party dependencies, and when
-  started bare prints a usage line or names what to set rather than crashing
+- every Python script compiles and declares its third-party dependencies, and
+  when started bare prints a usage line or names what to set rather than
+  crashing - except a script whose dependency CI does not install, which is
+  reported as skipped by name rather than counted as passing
 - every diagram parses, every internal link resolves, and every reference links
   the source it names
 - every pinned model, API version and image is recorded in
@@ -50,10 +52,12 @@ of each leaf are inputs to that decision, not a substitute for it.
 ## What a live run needs
 
 Each leaf records what running its commands end-to-end requires. The list is
-editorial, with a floor the check enforces: a leaf whose commands call `az` must
-list an Azure subscription, `kubectl` or `helm` a Kubernetes cluster,
-`nvidia-smi` or `vllm` a GPU, a Slurm command a Slurm cluster, and `ollama` an
-Ollama server.
+editorial, with a floor the check enforces: a leaf whose shell commands call
+`az` must list an Azure subscription, `kubectl` or `helm` a Kubernetes cluster,
+`nvidia-smi` or `vllm` a GPU, a Slurm command (`sbatch`, `srun`, `squeue`,
+`sinfo`, `scontrol`, `sacct`, `scancel`) a Slurm cluster, and `ollama` an Ollama
+server - wherever in a line the tool appears, and in any fence other than code,
+data and diagrams. Tools called from inside a Python script are not detected.
 
 | Need | What it means | Leaves |
 | --- | --- | ---: |
@@ -111,7 +115,8 @@ at no cost. The rest need infrastructure or credentials this repository does not
 ## How a leaf becomes validated
 
 1. A workflow under `.github/workflows/` runs the leaf's commands against the
-   live service, from a job that holds no write token.
+   live service, from a job that holds no write token. The check confirms the
+   workflow file exists; that its job holds no write token is confirmed in review.
 2. A passing run is recorded in `data/validation.json`: the leaf, date, workflow, run URL,
    environment and the commands covered.
 3. The leaf's readiness is set to `validated` in `data/catalog.json` and its

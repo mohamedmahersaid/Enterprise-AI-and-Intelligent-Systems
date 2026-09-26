@@ -76,16 +76,21 @@ on the reader's environment, which the repository cannot see.
 
 Each leaf also lists what a live run `needs` - `runner`, `ollama`, `gpu`,
 `azure`, `kubernetes`, `slurm`, `hosted-api` or `own-service`. The list is yours
-to judge, with a floor: commands that call `az`, `kubectl`/`helm`,
-`nvidia-smi`/`vllm`, a Slurm command or `ollama` must list the matching need,
-and the check says which is missing. Pass `--needs azure,kubernetes` to
+to judge, with a floor: shell commands that call `az`, `kubectl`/`helm`,
+`nvidia-smi`/`vllm`, a Slurm command or `ollama` - anywhere in the line, in any
+fence other than code, data or a diagram - must list the matching need, and the
+check says which is missing. Tools a Python script calls are not detected, so
+list those yourself. Pass `--needs azure,kubernetes` to
 `new-leaf`, or leave it to default to `runner` and let the check raise it.
 
 To record a live run, add it to `data/validation.json` (leaf, date, workflow,
 run URL, environment, what it covered, pass or fail), set the leaf to
 `validated` in the catalog and its frontmatter, update its readiness line to
-the one the check prints, and run `npm run regen`. Recording is a pull request,
-never a commit from the workflow itself.
+the one the check prints, and run `npm run regen`. The check confirms the
+record is complete, dated no later than today, and names an existing workflow and
+a run in this repository; review confirms the run covered what the record says
+and that the job running the commands held no write token. Recording is a pull
+request, never a commit from the workflow itself.
 
 ### References
 

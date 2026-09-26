@@ -124,7 +124,7 @@ const PINNED = [
 ];
 
 /** Command blocks are fenced as ```text; python blocks are checked elsewhere. */
-export function commandLines(body) {
+function commandLines(body) {
   const out = [];
   let inside = false;
   for (const line of body.split('\n')) {

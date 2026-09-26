@@ -31,7 +31,6 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
-import { commandLines } from './assumptions.mjs';
 
 export const VALIDATION_PATH = 'data/validation.json';
 
@@ -97,8 +96,8 @@ export const NEEDS = {
 };
 
 /**
- * The floor: a leading command token that proves a need. Only tools whose need
- * is unambiguous are listed. `curl` is not, because the same curl can address
+ * The floor: a command that proves a need. Only tools whose need is
+ * unambiguous are listed. `curl` is not, because the same curl can address
  * Ollama, Azure or an internal gateway.
  */
 const TOOL_NEEDS = {
@@ -110,8 +109,18 @@ const TOOL_NEEDS = {
   sbatch: 'slurm',
   squeue: 'slurm',
   srun: 'slurm',
+  sinfo: 'slurm',
+  scontrol: 'slurm',
+  sacct: 'slurm',
+  scancel: 'slurm',
   ollama: 'ollama',
 };
+
+/** Fences whose contents are not shell: diagrams, code, data and queries. */
+const NOT_SHELL = new Set(['mermaid', 'python', 'py', 'json', 'jsonl', 'yaml', 'yml', 'sql', 'kql', 'dockerfile', 'toml', 'ini']);
+
+/** Words that run the command after them rather than being the command. */
+const WRAPPERS = new Set(['sudo', 'env', 'time', 'exec', 'nohup', 'watch', 'command']);
 
 const ORDER = Object.keys(NEEDS);
 
@@ -119,24 +128,69 @@ export function loadValidation() {
   return JSON.parse(fs.readFileSync(VALIDATION_PATH, 'utf8'));
 }
 
+/**
+ * The lines of every fenced block that could hold a shell command - text,
+ * bash, sh, powershell or unlabelled, indented or not. The floor is only a
+ * floor if it cannot be stepped around by choosing a different fence label.
+ */
+function shellLines(body) {
+  const out = [];
+  let fence = null;
+  for (const line of body.split('\n')) {
+    const open = line.match(/^\s*(`{3,}|~{3,})\s*([\w+-]*)/);
+    if (!fence && open) {
+      fence = { mark: open[1], shell: !NOT_SHELL.has(open[2].toLowerCase()) };
+    } else if (fence && line.trim().startsWith(fence.mark)) {
+      fence = null;
+    } else if (fence?.shell) {
+      out.push(line);
+    }
+  }
+  return out;
+}
+
+/**
+ * The tools a line runs: every command in it, not only the first word, so
+ * `sudo az ...`, `X=1 kubectl ...`, `cat f | kubectl apply -f -` and
+ * `$(kubectl get nodes)` all count, and `/usr/bin/kubectl` is kubectl.
+ */
+function toolsIn(line) {
+  const text = line.trim().replace(/^(?:\$|PS>|>)\s+/, '');
+  if (!text || text.startsWith('#')) return [];
+  const tools = [];
+  for (const segment of text.split(/\|\||&&|[|;&`]|\$\(|\(/)) {
+    const words = segment.trim().split(/\s+/).filter(Boolean);
+    while (words.length && (/^[A-Za-z_][A-Za-z0-9_]*=/.test(words[0]) || WRAPPERS.has(words[0]))) words.shift();
+    if (words.length) tools.push(path.posix.basename(words[0].replace(/\\/g, '/')).replace(/\.exe$/i, ''));
+  }
+  return tools;
+}
+
 /** The needs a leaf's own commands prove, in canonical order. */
 export function impliedNeeds(body) {
   const found = new Set();
-  for (const line of commandLines(body)) {
-    const text = line.trim();
-    if (!text || text.startsWith('#')) continue;
-    const need = TOOL_NEEDS[text.split(/\s+/)[0]];
-    if (need) found.add(need);
+  for (const line of shellLines(body)) {
+    for (const tool of toolsIn(line)) {
+      if (TOOL_NEEDS[tool]) found.add(TOOL_NEEDS[tool]);
+    }
   }
   return ORDER.filter((n) => found.has(n));
 }
 
-/** The latest recorded run for each leaf, by date. */
+/** The Actions run id in a run URL, which GitHub issues in increasing order. */
+const runId = (run) => Number(String(run.run ?? '').match(/\/actions\/runs\/(\d+)/)?.[1] ?? 0);
+
+/**
+ * The latest recorded run for each leaf: by date, then by run id, so two runs
+ * on one day are ordered by when they ran rather than where they sit in the
+ * file.
+ */
 export function latestRuns(validation) {
   const latest = new Map();
   for (const run of validation.runs ?? []) {
     const seen = latest.get(run.leaf);
-    if (!seen || run.date >= seen.date) latest.set(run.leaf, run);
+    const later = !seen || run.date > seen.date || (run.date === seen.date && runId(run) > runId(seen));
+    if (later) latest.set(run.leaf, run);
   }
   return latest;
 }
@@ -164,6 +218,20 @@ export function readinessLine(leaf, run) {
 }
 
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
+const WORKFLOW = /^\.github\/workflows\/[^/]+\.ya?ml$/;
+
+/**
+ * A real calendar date no later than today (UTC). A typo into the future
+ * would otherwise count as the latest run for years, and hide every real
+ * failure recorded after it.
+ */
+function dateProblem(date, today) {
+  if (!DATE.test(date)) return 'is not YYYY-MM-DD';
+  const parsed = new Date(`${date}T00:00:00Z`);
+  if (Number.isNaN(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== date) return 'is not a calendar date';
+  if (date > today) return `is after today (${today})`;
+  return null;
+}
 const RUN_FIELDS = ['leaf', 'date', 'workflow', 'run', 'environment', 'covered', 'result'];
 
 /**
@@ -172,12 +240,18 @@ const RUN_FIELDS = ['leaf', 'date', 'workflow', 'run', 'environment', 'covered',
  * 1. Every leaf has a known readiness and a non-empty, ordered, known needs
  *    list; `runner` stands alone, because any other need already implies one.
  * 2. Every need a leaf's commands prove is listed.
- * 3. Every run record is complete: a known leaf, a date, a workflow file that
- *    exists, a run URL in this repository's Actions, and a pass or fail.
+ * 3. Every run record is complete: a known leaf, a real date no later than
+ *    today, a workflow under .github/workflows/ that exists, a run URL in this
+ *    repository's Actions, and a pass or fail.
  * 4. A leaf is validated exactly when its latest recorded run passed. A leaf
  *    whose latest run failed is back to lab until a new pass is recorded.
  */
-export function checkReadiness(catalog, validation = loadValidation(), repository = 'mohamedmahersaid/Enterprise-AI-and-Intelligent-Systems') {
+export function checkReadiness(
+  catalog,
+  validation = loadValidation(),
+  repository = 'mohamedmahersaid/Enterprise-AI-and-Intelligent-Systems',
+  today = new Date().toISOString().slice(0, 10),
+) {
   const errors = [];
   const ids = new Set(catalog.leaves.map((l) => l.id));
 
@@ -188,8 +262,13 @@ export function checkReadiness(catalog, validation = loadValidation(), repositor
       if (!run[field]) errors.push(`${at} has no "${field}".`);
     }
     if (run.leaf && !ids.has(run.leaf)) errors.push(`${at} names no leaf in the catalog.`);
-    if (run.date && !DATE.test(run.date)) errors.push(`${at} date "${run.date}" is not YYYY-MM-DD.`);
-    if (run.workflow && !fs.existsSync(run.workflow)) errors.push(`${at} workflow ${run.workflow} does not exist.`);
+    const badDate = run.date && dateProblem(run.date, today);
+    if (badDate) errors.push(`${at} date "${run.date}" ${badDate}.`);
+    if (run.workflow && !WORKFLOW.test(run.workflow)) {
+      errors.push(`${at} workflow ${run.workflow} is not a file under .github/workflows/.`);
+    } else if (run.workflow && !fs.existsSync(run.workflow)) {
+      errors.push(`${at} workflow ${run.workflow} does not exist.`);
+    }
     if (run.run && !runUrl.test(run.run)) {
       errors.push(`${at} run "${run.run}" is not a run URL in ${repository}'s GitHub Actions.`);
     }
@@ -256,10 +335,30 @@ export function checkReadinessLine(leaf, body, validation = loadValidation()) {
     return null;
   }
   const want = readinessLine(leaf, latestRuns(validation).get(leaf.id));
-  const have = body.split('\n').find((l) => l.startsWith('**Readiness:**'));
-  if (have === want) return null;
-  return `${leaf.path}: ${have ? 'readiness line reads' : 'has no readiness line under its title'}` +
-    `${have ? ` "${have}"` : ''}; it should read:\n    ${want}`;
+
+  // Exactly one readiness line, outside code, in the header block under the
+  // H1 - a second one further down could contradict the first, and one inside
+  // a code fence is not rendered as the leaf's claim at all.
+  const lines = body.split('\n');
+  let fenced = false;
+  const found = [];
+  for (const [i, line] of lines.entries()) {
+    if (/^\s*(`{3,}|~{3,})/.test(line)) fenced = !fenced;
+    else if (!fenced && line.startsWith('**Readiness:**')) found.push(i);
+  }
+  if (found.length > 1) {
+    return `${leaf.path}: has ${found.length} readiness lines (lines ${found.map((i) => i + 1).join(', ')}); keep only the one under its title.`;
+  }
+  const h1 = lines.findIndex((l) => l.startsWith('# '));
+  let end = h1 + 1;
+  while (end < lines.length && !lines[end].trim()) end++;
+  while (end < lines.length && lines[end].trim()) end++;
+  const at = found[0];
+  if (at === undefined || h1 < 0 || at < h1 || at >= end) {
+    return `${leaf.path}: has no readiness line in the header block under its title; add it after the **Forest:** line:\n    ${want}`;
+  }
+  if (lines[at] === want) return null;
+  return `${leaf.path}:${at + 1} readiness line reads "${lines[at]}"; it should read:\n    ${want}`;
 }
 
 /** READINESS.md, generated from the catalog and the run records. */
@@ -268,7 +367,10 @@ export function renderReadinessMd(catalog, validation = loadValidation()) {
   const count = (level) => catalog.leaves.filter((l) => l.readiness === level).length;
   const total = catalog.leaves.length;
   const escape = (s) => s.replace(/\|/g, '\\|');
-  const free = catalog.leaves.filter((l) => l.needs?.length && l.needs.every((n) => n === 'runner' || n === 'ollama')).length;
+  // Rendered even from a malformed catalog, so the errors checkReadiness
+  // reports are not lost to a crash here.
+  const needsOf = (l) => (Array.isArray(l.needs) ? l.needs : []);
+  const free = catalog.leaves.filter((l) => needsOf(l).length && needsOf(l).every((n) => n === 'runner' || n === 'ollama')).length;
 
   const out = [
     '# Readiness',
@@ -288,8 +390,10 @@ export function renderReadinessMd(catalog, validation = loadValidation()) {
     '',
     '- every command block is free of literal credentials, destructive operations,',
     '  `curl | sh` and plaintext `http://`',
-    '- every Python script compiles, declares its third-party dependencies, and when',
-    '  started bare prints a usage line or names what to set rather than crashing',
+    '- every Python script compiles and declares its third-party dependencies, and',
+    '  when started bare prints a usage line or names what to set rather than',
+    '  crashing - except a script whose dependency CI does not install, which is',
+    '  reported as skipped by name rather than counted as passing',
     '- every diagram parses, every internal link resolves, and every reference links',
     '  the source it names',
     '- every pinned model, API version and image is recorded in',
@@ -323,15 +427,17 @@ export function renderReadinessMd(catalog, validation = loadValidation()) {
     '## What a live run needs',
     '',
     'Each leaf records what running its commands end-to-end requires. The list is',
-    'editorial, with a floor the check enforces: a leaf whose commands call `az` must',
-    'list an Azure subscription, `kubectl` or `helm` a Kubernetes cluster,',
-    '`nvidia-smi` or `vllm` a GPU, a Slurm command a Slurm cluster, and `ollama` an',
-    'Ollama server.',
+    'editorial, with a floor the check enforces: a leaf whose shell commands call',
+    '`az` must list an Azure subscription, `kubectl` or `helm` a Kubernetes cluster,',
+    '`nvidia-smi` or `vllm` a GPU, a Slurm command (`sbatch`, `srun`, `squeue`,',
+    '`sinfo`, `scontrol`, `sacct`, `scancel`) a Slurm cluster, and `ollama` an Ollama',
+    'server - wherever in a line the tool appears, and in any fence other than code,',
+    'data and diagrams. Tools called from inside a Python script are not detected.',
     '',
     '| Need | What it means | Leaves |',
     '| --- | --- | ---: |',
     ...Object.entries(NEEDS).map(([id, n]) =>
-      `| ${n.label} | ${n.detail} | ${catalog.leaves.filter((l) => l.needs?.includes(id)).length} |`),
+      `| ${n.label} | ${n.detail} | ${catalog.leaves.filter((l) => needsOf(l).includes(id)).length} |`),
     '',
     `${free} of ${total} leaves need only a stock runner or Ollama, so CI can validate them`,
     'at no cost. The rest need infrastructure or credentials this repository does not hold.',
@@ -344,13 +450,14 @@ export function renderReadinessMd(catalog, validation = loadValidation()) {
       const run = latest.get(l.id);
       const evidence = run ? `[${run.result} ${run.date}](${run.run})` : 'none recorded';
       return `| [${escape(l.name)}](${l.path}) | ${l.level} | ${LEVELS[l.readiness]?.label ?? l.readiness} | ` +
-        `${(l.needs ?? []).map((n) => NEEDS[n]?.label ?? n).join(', ')} | ${evidence} |`;
+        `${needsOf(l).map((n) => NEEDS[n]?.label ?? n).join(', ')} | ${evidence} |`;
     }),
     '',
     '## How a leaf becomes validated',
     '',
     '1. A workflow under `.github/workflows/` runs the leaf\'s commands against the',
-    '   live service, from a job that holds no write token.',
+    '   live service, from a job that holds no write token. The check confirms the',
+    '   workflow file exists; that its job holds no write token is confirmed in review.',
     `2. A passing run is recorded in \`${VALIDATION_PATH}\`: the leaf, date, workflow, run URL,`,
     '   environment and the commands covered.',
     '3. The leaf\'s readiness is set to `validated` in `data/catalog.json` and its',
