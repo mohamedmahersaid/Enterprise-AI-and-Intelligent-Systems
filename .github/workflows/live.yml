@@ -85,7 +85,9 @@ jobs:
         if: always()
         run: |
           if [ -f live-run.json ]; then
-            jq 'del(.steps[].output)' live-run.json
+            # The last lines each command printed, so the evidence can be read
+            # rather than taken on trust.
+            jq '.steps[].output |= (split("\n") | map(select(length > 0)) | .[-8:])' live-run.json
           else
             echo "No report: the run stopped before writing one."
           fi

@@ -17,6 +17,7 @@
  *
  * Usage: node scripts/check-ollama-tags.mjs [--json report.json]
  */
+import crypto from 'node:crypto';
 import fs from 'node:fs';
 import { deriveAssumptions } from './lib/assumptions.mjs';
 
@@ -38,11 +39,16 @@ async function probe({ name, tag }) {
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
   try {
     const res = await fetch(`${REGISTRY}/${name}/manifests/${tag}`, {
-      method: 'HEAD',
       signal: controller.signal,
       headers: { accept: 'application/vnd.docker.distribution.manifest.v2+json' },
     });
-    return { status: res.status, digest: res.headers.get('docker-content-digest') ?? '' };
+    // The registry does not always send Docker-Content-Digest; a manifest's
+    // digest is by definition the sha256 of its bytes, so compute it.
+    const body = Buffer.from(await res.arrayBuffer());
+    const digest = res.status === 200
+      ? res.headers.get('docker-content-digest') ?? `sha256:${crypto.createHash('sha256').update(body).digest('hex')}`
+      : '';
+    return { status: res.status, digest };
   } catch (error) {
     return { status: 0, digest: '', error: error.cause?.code ?? error.name };
   } finally {
