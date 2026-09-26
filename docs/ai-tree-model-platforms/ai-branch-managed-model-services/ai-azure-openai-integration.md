@@ -89,26 +89,28 @@ az cognitiveservices account deployment create -g rg-ai -n aoai-prod --deploymen
 
 ### Command 6
 
-Get an Entra token for the v1 API; the audience is `https://ai.azure.com`, and the role assignment can take up to five minutes to apply.
+On the VNet host that runs as the managed identity from Command 4, sign in as that identity and get an Entra token for the v1 API - your own account holds no data-plane role, so its token gets 401; add `--client-id <client-id>` for a user-assigned identity, the audience is `https://ai.azure.com`, and the role assignment can take up to five minutes to apply.
 
 ```text
+az login --identity
 TOKEN=$(az account get-access-token --resource https://ai.azure.com --query accessToken -o tsv)
 ```
 
 ### Command 7
 
-Prove the keyless path end to end from inside the VNet: v1 route, deployment name in `model`, no api-version, no key.
+Prove the keyless path end to end from the same VNet host: v1 route, deployment name in `model`, no api-version, no key; anything but a completion - a 401, 403 or empty reply - prints the error and exits non-zero.
 
 ```text
-curl -s https://aoai-prod.openai.azure.com/openai/v1/chat/completions -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"model":"chat","messages":[{"role":"user","content":"Reply with the word ok."}]}' | jq -r ".choices[0].message.content"
+curl -sS https://aoai-prod.openai.azure.com/openai/v1/chat/completions -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"model":"chat","messages":[{"role":"user","content":"Reply with the word ok."}]}' | jq -er ".choices[0].message.content // error(tostring)"
 ```
 
 ### Command 8
 
-Rotate a key during migration away from key auth; audit that no caller breaks.
+Rotate key1 during migration away from key auth and audit that no caller breaks, then capture key2 - still valid - as the proof key for Command 10; run Command 10 now and expect 200, because a key that already gets 401 proves nothing.
 
 ```text
 az cognitiveservices account keys regenerate -g rg-ai -n aoai-prod --key-name key1
+OLD_KEY=$(az cognitiveservices account keys list -g rg-ai -n aoai-prod --query key2 -o tsv)
 ```
 
 ### Command 9
@@ -121,10 +123,10 @@ Set-AzCognitiveServicesAccount -ResourceGroupName rg-ai -Name aoai-prod -Disable
 
 ### Command 10
 
-Confirm keys are really off: an old key must now get HTTP 401, and until it does, treat key auth as still enabled.
+Confirm keys are really off: the key captured in Command 8, which got 200 before Command 9, must now get HTTP 401, and until it does, treat key auth as still enabled; the command refuses to run if OLD_KEY is empty.
 
 ```text
-curl -s -o /dev/null -w "%{http_code}\n" https://aoai-prod.openai.azure.com/openai/v1/chat/completions -H "api-key: $OLD_KEY" -H "Content-Type: application/json" -d '{"model":"chat","messages":[{"role":"user","content":"ping"}]}'
+curl -s -o /dev/null -w "%{http_code}\n" https://aoai-prod.openai.azure.com/openai/v1/chat/completions -H "api-key: ${OLD_KEY:?capture OLD_KEY in Command 8 first}" -H "Content-Type: application/json" -d '{"model":"chat","messages":[{"role":"user","content":"ping"}]}'
 ```
 
 ### Command 11
@@ -324,7 +326,7 @@ exit ([int]($failCount -gt 0))
 4. Create a private endpoint into the application subnet and link the privatelink.openai.azure.com private DNS zone to the VNet.
 5. Deploy a small App Service or container into the VNet with a managed identity and assign it the Cognitive Services OpenAI User role.
 6. Modify the application to acquire an Entra token via DefaultAzureCredential rather than reading an API key, and confirm a successful completion. The change is the client construction shown after these steps.
-7. Disable local authentication on the account (Command 9) and confirm key-based calls now fail with HTTP 401 (Command 10) while the managed identity path still succeeds; propagation can take several hours, so repeat the key check rather than trusting the first result.
+7. Capture key2 and confirm it still gets 200 (Commands 8 and 10), disable local authentication on the account (Command 9) and confirm that same key now fails with HTTP 401 (Command 10) while the managed identity path still succeeds; propagation can take several hours, so repeat the key check rather than trusting the first result.
 8. Enable diagnostic settings to a Log Analytics workspace and locate your own request in the RequestResponse table.
 9. Configure a content filter policy and verify a disallowed prompt is blocked with the expected error shape.
 10. Run the PowerShell posture audit and remediate any FAIL rows until it exits zero.
@@ -346,7 +348,8 @@ try:
 except ImportError:
     sys.exit("pip install azure-identity openai first")
 
-# az login on a laptop, managed identity on App Service or AKS; no key anywhere.
+# Managed identity on App Service or AKS; no key anywhere. An az login token
+# works only if that account also holds Cognitive Services OpenAI User.
 token_provider = get_bearer_token_provider(
     DefaultAzureCredential(), "https://ai.azure.com/.default"
 )

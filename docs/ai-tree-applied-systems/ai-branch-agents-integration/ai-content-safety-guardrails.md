@@ -127,18 +127,18 @@ jq -n --arg prompt "$ATTACK" '{userPrompt: $prompt, documents: []}' | curl -s "$
 
 ### Command 4
 
-Split retrieved chunks (one JSON object per line with `id` and `text`) into batches of five, the most documents Prompt Shields accepts in one call
+Batch retrieved chunks (one JSON object per line with `id` and `text`) within both Prompt Shields limits - at most five documents and 10,000 characters in total per call - splitting any chunk over 10,000 characters into numbered parts first, and failing on an empty file or a chunk with no text rather than writing a batch that skips it
 
 ```text
-split -l 5 -d chunks.jsonl batch-
+jq -s -c 'if length == 0 then error("no chunks to scan") else . end | map(if (.id == null or (.text | type) != "string" or .text == "") then error("chunk without an id or text: \(.id)") else .id as $id | .text as $t | range(0; $t | length; 10000) as $o | {id: $id, part: ($o / 10000), text: $t[$o:$o + 10000]} end) | reduce .[] as $p ([]; if length > 0 and (.[length - 1] | length) < 5 and ((.[length - 1] | map(.text | length) | add) + ($p.text | length)) <= 10000 then .[length - 1] += [$p] else . + [[$p]] end) | .[]' chunks.jsonl > batches.jsonl
 ```
 
 ### Command 5
 
-Scan one batch for embedded instructions before it reaches the prompt, and print each chunk id beside its verdict - `documentsAnalysis` comes back in input order
+Scan batch `N` (one line of `batches.jsonl`) for embedded instructions before it reaches the prompt, and print each chunk id and part beside its verdict - `documentsAnalysis` comes back in input order, and an error body, an empty response or a missing verdict exits non-zero so the batch counts as unscanned, never as clean
 
 ```text
-jq -s '{userPrompt: "", documents: map(.text)}' batch-00 | curl -s "$ENDPOINT/contentsafety/text:shieldPrompt?api-version=2024-09-01" -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" --data-binary @- | jq -r --slurpfile chunks batch-00 '.documentsAnalysis | to_entries[] | [$chunks[.key].id, (.value.attackDetected | tostring)] | @tsv'
+B=$(sed -n "${N:-1}p" batches.jsonl); jq -n --argjson b "$B" '{userPrompt: "", documents: ($b | map(.text))}' | curl -sS "$ENDPOINT/contentsafety/text:shieldPrompt?api-version=2024-09-01" -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" --data-binary @- | jq -e -r --argjson b "$B" 'if (.documentsAnalysis | type) == "array" and (.documentsAnalysis | length) == ($b | length) and all(.documentsAnalysis[]; (.attackDetected | type) == "boolean") then .documentsAnalysis | to_entries[] | [$b[.key].id, $b[.key].part, .value.attackDetected] | @tsv else error("no verdict for every document - treat batch as unscanned: \(tojson)") end'
 ```
 
 ### Command 6
@@ -209,29 +209,42 @@ def auth_headers():
     if key:
         return lambda: {"Ocp-Apim-Subscription-Key": key}
     # Imported here so the key fallback works without azure-identity installed.
-    from azure.identity import DefaultAzureCredential, get_bearer_token_provider
+    try:
+        from azure.identity import DefaultAzureCredential, get_bearer_token_provider
+    except ImportError:
+        sys.exit("azure-identity is not installed - pip install azure-identity requests, "
+                 "or set CONTENT_SAFETY_KEY as the fallback")
     token = get_bearer_token_provider(DefaultAzureCredential(), SCOPE)
+    try:
+        token()  # fetch once up front, so a missing sign-in stops here and not mid-corpus
+    except Exception as exc:
+        sys.exit(f"could not get a Content Safety token - run az login first, or set "
+                 f"CONTENT_SAFETY_KEY as the fallback ({type(exc).__name__})")
     return lambda: {"Authorization": f"Bearer {token()}"}
 
 
 def classify(text, headers):
-    response = requests.post(
-        f"{ENDPOINT}/contentsafety/text:analyze?api-version=2024-09-01",
-        headers=headers(),
-        json={"text": text},
-        timeout=30,
-    )
-    response.raise_for_status()
-    return {
-        item["category"]: item["severity"]
-        for item in response.json().get("categoriesAnalysis", [])
-    }
+    try:
+        response = requests.post(
+            f"{ENDPOINT}/contentsafety/text:analyze?api-version=2024-09-01",
+            headers=headers(),
+            json={"text": text},
+            timeout=30,
+        )
+        response.raise_for_status()
+        analysis = response.json()["categoriesAnalysis"]
+    except (requests.RequestException, ValueError, KeyError) as exc:
+        # A failed call must stop the sweep: scoring it as severity 0 would read as "clean".
+        sys.exit(f"Content Safety call failed, no thresholds reported ({type(exc).__name__}: {exc})")
+    return {item["category"]: item["severity"] for item in analysis}
 
 
 def main(corpus_path, headers):
     """corpus: JSONL of {"text": ..., "violates": "Hate"|null}"""
     with open(corpus_path) as handle:
         records = [json.loads(line) for line in handle if line.strip()]
+    if not records:
+        sys.exit(f"{corpus_path} has no records - an empty corpus measures nothing")
 
     scored = [(r, classify(r["text"], headers)) for r in records]
     categories = sorted({c for _, s in scored for c in s})
@@ -399,8 +412,8 @@ That people stop using the system, which makes the estate less safe while the da
 ## References
 
 - [Microsoft Learn: Harm categories and severity levels](https://learn.microsoft.com/azure/ai-services/content-safety/concepts/harm-categories) - Harm categories and per-category severity levels used for threshold tuning.
-- [Microsoft Learn: Prompt Shields](https://learn.microsoft.com/azure/ai-services/content-safety/concepts/jailbreak-detection) - Prompt Shields for user prompts and retrieved documents (up to five per call), and the Spotlighting preview with its base64 and token-count caveats.
-- [Microsoft Learn: What is Azure AI Content Safety?](https://learn.microsoft.com/azure/ai-services/content-safety/overview) - Microsoft Entra ID authentication and the Cognitive Services User role used by the commands and the tuner script.
+- [Microsoft Learn: Prompt Shields](https://learn.microsoft.com/azure/ai-services/content-safety/concepts/jailbreak-detection) - Prompt Shields for user prompts and retrieved documents, and the Spotlighting preview with its base64 and token-count caveats.
+- [Microsoft Learn: What is Azure AI Content Safety?](https://learn.microsoft.com/azure/ai-services/content-safety/overview) - Prompt Shields input limits (a 10K-character prompt, and up to five documents totalling 10K characters per call), Microsoft Entra ID authentication and the Cognitive Services User role used by the commands and the tuner script.
 - [Microsoft Learn: Defend against indirect prompt injection attacks](https://learn.microsoft.com/security/zero-trust/sfi/defend-indirect-prompt-injection) - Delimiting and data marking of retrieved content as containment behind detection.
 - [OWASP Gen AI Security Project: OWASP GenAI LLM Top 10 2026](https://genai.owasp.org/resource/owasp-genai-llm-top-10-2026/) - LLM01:2026 Prompt Injection, LLM10:2026 Improper Output Handling and associated mitigations.
 - [National Institute of Standards and Technology (NIST): Artificial Intelligence Risk Management Framework (AI RMF 1.0)](https://doi.org/10.6028/NIST.AI.100-1) - MEASURE and MANAGE functions for operational safeguards.

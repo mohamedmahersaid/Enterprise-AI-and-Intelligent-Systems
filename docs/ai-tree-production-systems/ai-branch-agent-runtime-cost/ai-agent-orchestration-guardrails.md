@@ -197,6 +197,9 @@ def router(state: AgentState) -> AgentState:
 def call_tool(state: AgentState) -> AgentState:
     action = state.get("pending_action") or {}
     tool = action.get("tool", "")
+    # Consume the action whatever the outcome, so a denial or an approval gate
+    # ends the run instead of re-offering the same call until the step ceiling.
+    state["pending_action"] = None
 
     if not authorise(state, tool):
         reason = "user_scope" if tool in AGENT_TOOL_CEILING else "agent_ceiling"
@@ -251,12 +254,12 @@ app = graph.compile()
 2. Give it a goal it cannot achieve and observe the retry loop. Measure tokens consumed before you stop it manually.
 3. Add a hard step ceiling and a per-run token budget on the transition edge, and confirm the same request now aborts cleanly with partial results.
 4. Give the agent a single privileged service account with broad permissions.
-5. Craft a prompt injection in a retrieved document instructing the agent to call the delete action.
+5. Craft a prompt injection in a retrieved document instructing the agent to call the restart action (`restart_service`, which is inside `AGENT_TOOL_CEILING`).
 6. Observe the agent execute it - this is the confused deputy, and the agent behaved exactly as designed.
 7. Change tool authorisation to use the invoking user scopes instead of the service account.
-8. Repeat the injection with a user lacking that scope and confirm the tool call is denied and traced.
-9. Repeat the injection as an administrator who holds `tool:delete_resource`, and confirm it is still denied with reason `agent_ceiling`, because delete_resource is outside `AGENT_TOOL_CEILING` whoever is signed in.
-10. Add human approval as a node for irreversible actions and confirm the agent halts awaiting approval.
+8. Repeat the injection with a user who lacks `tool:restart_service` and confirm the tool call is denied and traced with reason `user_scope`.
+9. Change the injected instruction to call the delete action and run it as an administrator who holds `tool:delete_resource`, and confirm it is still denied with reason `agent_ceiling`, because delete_resource is outside `AGENT_TOOL_CEILING` whoever is signed in.
+10. Add human approval as a node for irreversible actions, repeat the restart injection as a user who holds `tool:restart_service`, and confirm the agent halts awaiting approval (trace event `approval_required`) instead of restarting anything.
 11. Persist state mid-run, kill the process, and resume from the persisted state.
 12. Retrieve the full trace for a run and walk through every prompt, tool call and routing decision.
 
@@ -264,9 +267,9 @@ app = graph.compile()
 
 - Unguarded agent demonstrably loops and burns budget.
 - Guarded version aborts cleanly.
-- Prompt injection succeeds against the service-account model and is denied under user-scoped authorisation.
-- The same injection run as an administrator is denied by the agent tool ceiling, and the trace records reason `agent_ceiling`.
-- Irreversible actions halt for approval.
+- Prompt injection succeeds against the service-account model and is denied under user-scoped authorisation, and the trace records reason `user_scope`.
+- The delete injection run as an administrator is denied by the agent tool ceiling, and the trace records reason `agent_ceiling`.
+- An in-ceiling irreversible action requested by a user who holds its scope halts for approval, and the trace records `approval_required` rather than `tool_call`.
 - A killed run resumes from persisted state.
 
 ## Operational automation

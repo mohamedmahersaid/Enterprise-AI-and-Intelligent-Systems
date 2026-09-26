@@ -112,7 +112,7 @@ az monitor scheduled-query create -g rg-ai -n aoai-drift-alert --scopes $LAW_ID 
 
 ### Command 9
 
-Grant the identity that runs the drift gate - your account, or the pipeline's managed identity - the least-privilege inference role on the account. It cannot create or change deployments; that control-plane work needs a role such as Cognitive Services Contributor, held by a different identity. The assignment can take up to five minutes to apply.
+Grant the identity that runs the drift gate - your account, or the pipeline's managed identity - the least-privilege inference role on the account. It cannot create or change deployments; that control-plane work needs a role such as Cognitive Services Contributor, held by a different identity. The assignment can take up to five minutes to apply; until it does, the drift gate's requests return 403 and the gate exits 2 instead of passing.
 
 ```text
 az role assignment create --assignee <principal-object-id> --role "Cognitive Services OpenAI User" --scope $AOAI_ID
@@ -128,7 +128,9 @@ The script authenticates with Microsoft Entra ID - az login on a laptop, managed
 #!/usr/bin/env python3
 """Replay a frozen golden-question set against a candidate deployment and a
 known-good baseline, score both, and fail (exit 1) if the candidate drifted
-below an acceptable margin. Designed to run as a CI gate or a nightly job.
+below an acceptable margin. Exits 2 when the run cannot be scored - missing
+input, an empty golden set, or any failed request. Designed to run as a CI
+gate or a nightly job.
 """
 import json
 import os
@@ -155,6 +157,10 @@ def load_goldenset(path):
             line = line.strip()
             if line:
                 rows.append(json.loads(line))
+    if not rows:
+        # An empty set scores both sides zero - no drift, a false pass.
+        print("ERROR: golden set is empty: %s" % path)
+        sys.exit(2)
     return rows
 
 
@@ -207,18 +213,21 @@ def score(answer, expected_keywords):
 
 
 def run_suite(deployment, rows, system=None):
-    scores = []
+    """Return (mean score over answered questions, failed request count).
+    A failed request is not a zero score: if a 403 while a role assignment
+    propagates scored 0.0, both suites would score 0.0 and read as no drift."""
+    scores, failures = [], 0
     for row in rows:
         try:
             answer = call_deployment(deployment, row["prompt"], system)
         except Exception as exc:
             print("  %s: request failed for '%s...': %s" % (
                 deployment, row["prompt"][:40], exc))
-            scores.append(0.0)
+            failures += 1
             continue
-        scores.append(score(answer, row.get("expected_keywords", [])))
+        scores.append(score(answer or "", row.get("expected_keywords", [])))
         time.sleep(0.2)
-    return sum(scores) / len(scores) if scores else 0.0
+    return (sum(scores) / len(scores) if scores else 0.0), failures
 
 
 def main():
@@ -231,8 +240,8 @@ def main():
     if not AOAI_ENDPOINT:
         print("ERROR: AZURE_OPENAI_ENDPOINT not set")
         sys.exit(2)
-    # Fail fast: an auth failure mid-suite scores both sides zero, which
-    # would read as no drift and pass the gate.
+    # Fail fast when no token can be obtained. This proves only that a token
+    # exists, not that the role is held - a 403 is caught per request below.
     try:
         aoai_token()
     except Exception as exc:
@@ -243,9 +252,9 @@ def main():
     system = read_prompt(SYSTEM_PROMPT_FILE)
     candidate_system = read_prompt(CANDIDATE_SYSTEM_PROMPT_FILE) or system
     print("Scoring baseline deployment '%s' on %d questions..." % (baseline, len(rows)))
-    baseline_score = run_suite(baseline, rows, system)
+    baseline_score, baseline_failed = run_suite(baseline, rows, system)
     print("Scoring candidate deployment '%s' on %d questions..." % (candidate, len(rows)))
-    candidate_score = run_suite(candidate, rows, candidate_system)
+    candidate_score, candidate_failed = run_suite(candidate, rows, candidate_system)
 
     drift_pct = (baseline_score - candidate_score) * 100.0
     report = {
@@ -253,13 +262,21 @@ def main():
         "candidate_deployment": candidate,
         "baseline_score": round(baseline_score, 4),
         "candidate_score": round(candidate_score, 4),
+        "baseline_failed_requests": baseline_failed,
+        "candidate_failed_requests": candidate_failed,
         "drift_pct": round(drift_pct, 2),
         "max_drift_pct": MAX_DRIFT_PCT,
-        "pass": drift_pct <= MAX_DRIFT_PCT,
+        # Fail closed: any failed request means the scores are not comparable.
+        "pass": drift_pct <= MAX_DRIFT_PCT and not (baseline_failed or candidate_failed),
     }
     with open("drift.json", "w", encoding="utf-8") as fh:
         json.dump(report, fh, indent=2)
     print(json.dumps(report, indent=2))
+    if baseline_failed or candidate_failed:
+        print("ERROR: %d baseline and %d candidate requests failed - the gate cannot "
+              "score this run (a 403 usually means the Cognitive Services OpenAI User "
+              "role is missing or still propagating)" % (baseline_failed, candidate_failed))
+        sys.exit(2)
     sys.exit(0 if report["pass"] else 1)
 
 
@@ -285,6 +302,7 @@ if __name__ == "__main__":
 
 - drift.json contains non-zero scores for both deployments on a clean run with pass true.
 - After the deliberate system-prompt regression, drift.json shows pass false and the CI job exits 1.
+- A run in which any request fails - for example a 403 before the role assignment applies - writes pass false and exits 2, never 0.
 - The CI pipeline blocks a merge that regresses the golden-set score beyond MAX_DRIFT_PCT.
 - The nightly scheduled run produces a dated drift.json artifact usable to plot a trend over weeks.
 - The Azure Monitor alert fires within the configured evaluation window when a failing drift.json is produced.
