@@ -146,9 +146,13 @@ vllm serve <model> --gpu-memory-utilization 0.90 --max-model-len 4096
 
 The server's own metrics distinguish queue time from generation time. A rising
 queue with flat generation latency means admission is the bottleneck, not speed.
+KV cache occupancy is `vllm:kv_cache_usage_perc`, a 0-1 fraction. vLLM 0.9.2
+added it and deprecated the older `vllm:gpu_cache_usage_perc`; 0.11 hides the
+old name unless `--show-hidden-metrics-for-version=0.10` is passed, and 0.12.0
+removes it, so a dashboard built on it goes blank on upgrading to 0.11.
 
 ```text
-curl -s localhost:8000/metrics | grep -E 'num_requests|time_to_first_token|gpu_cache_usage'
+curl -s localhost:8000/metrics | grep -E 'vllm:num_requests|vllm:time_to_first_token_seconds|vllm:kv_cache_usage_perc'
 ```
 
 ### Command 4
@@ -319,7 +323,7 @@ build-versus-buy on measured utilisation rather than price per token.
 
 ### Running this as a service rather than an experiment
 
-- **Alert on queue depth and cache occupancy, not GPU utilisation.** GPU utilisation reads high during decode regardless of throughput; queue depth and `gpu_cache_usage` are the metrics that move before users notice.
+- **Alert on queue depth and cache occupancy, not GPU utilisation.** GPU utilisation reads high during decode regardless of throughput; queue depth and `vllm:kv_cache_usage_perc` are the metrics that move before users notice.
 - **Make max context a deployment parameter with a stated capacity cost.** Raising `--max-model-len` silently lowers concurrency. If the number can be changed without review, capacity changes without anyone deciding to change it.
 - **Re-run the sweep on every model, quantisation or serving-version change.** Throughput characteristics are not portable across any of the three; a figure carried over from the previous model is a guess.
 - **Load-shed at admission rather than degrading everyone.** Rejecting or queueing past the measured ceiling keeps latency predictable for admitted requests. Accepting everything makes the whole service slow at once.
@@ -337,7 +341,7 @@ build-versus-buy on measured utilisation rather than price per token.
 
 **Likely cause:** KV cache growth, not a leak. Sequences that started short have generated their way into long contexts, and the cache grew with them until admission and residency collided.
 
-**Resolution:** Check `gpu_cache_usage` over the hour rather than instantaneous free memory. Cap `--max-model-len`, cap `--max-num-seqs`, and confirm the serving stack is configured to preempt rather than crash.
+**Resolution:** Check `vllm:kv_cache_usage_perc` over the hour rather than instantaneous free memory. Cap `--max-model-len`, cap `--max-num-seqs`, and confirm the serving stack is configured to preempt rather than crash.
 
 ### Scenario 3: Quantising the model freed VRAM but concurrency barely improved.
 
@@ -388,6 +392,8 @@ Continuous batching, and the difference is large enough that static batching sho
 - [NVIDIA: KV Cache System — TensorRT LLM](https://nvidia.github.io/TensorRT-LLM/latest/features/kvcache.html) - KV cache management (paged KV cache, memory fraction for cache) in TensorRT-LLM.
 - [vLLM Project: Paged Attention - vLLM](https://docs.vllm.ai/en/latest/design/paged_attention/) - Paged attention and block-based KV cache management in vLLM.
 - [vLLM Project: Automatic Prefix Caching - vLLM](https://docs.vllm.ai/en/stable/design/prefix_caching/) - Prefix caching of shared prompt prefixes (--enable-prefix-caching).
+- [vLLM Project: Metrics - vLLM](https://docs.vllm.ai/en/latest/design/metrics/) - The `vllm:`-prefixed Prometheus metrics on `/metrics`, including `vllm:num_requests_running`, `vllm:num_requests_waiting` and `vllm:kv_cache_usage_perc`, grepped in Command 3.
+- [vLLM Project: vllm/v1/metrics/loggers.py at v0.11.0](https://github.com/vllm-project/vllm/blob/v0.11.0/vllm/v1/metrics/loggers.py) - Source for the rename: `vllm:gpu_cache_usage_perc` deprecated in 0.9.2 in favour of `vllm:kv_cache_usage_perc`, hidden in 0.11 behind `--show-hidden-metrics-for-version=0.10`, and absent from 0.12.0.
 - [Hugging Face: Text Generation Inference Architecture](https://huggingface.co/docs/text-generation-inference/en/architecture) - TGI serving architecture and request batching.
 - [arXiv (Ainslie et al.): GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints](https://arxiv.org/abs/2305.13245) - Grouped-query attention sharing K/V heads to shrink the KV cache.
 - [NVIDIA: Profiling — NVIDIA DCGM Documentation](https://docs.nvidia.com/datacenter/dcgm/latest/learn/modules/profiling.html) - Profiling metrics for memory bandwidth versus compute activity.

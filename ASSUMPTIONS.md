@@ -70,7 +70,7 @@ Base images are rebuilt and old tags eventually stop being published.
 
 | Value | Used by |
 | --- | --- |
-| `nvidia/cuda:12.2.0-base-ubuntu22.04` | `ai-distributed-training-kubeflow-ray` |
+| `nvidia/cuda:12.9.2-base-ubuntu24.04` | `ai-distributed-training-kubeflow-ray` |
 
 ## Certifications cited
 
@@ -158,7 +158,7 @@ Derived from the leading command in every `text` block. A leaf listing a tool as
 | `ai-fine-tuning-peft` | Python 3, jq, vLLM |
 | `ai-reproducible-training-runs` | Python 3, git, jq, pip |
 | `ai-vector-db-hybrid-retrieval` | curl, psql (PostgreSQL client) |
-| `ai-evaluation-harness-gates` | Python 3, git, promptfoo |
+| `ai-evaluation-harness-gates` | Python 3, git, pip, promptfoo |
 | `ai-how-retrieval-finds-things` | Azure CLI, curl, jq |
 | `ai-retrieval-test-collections` | Python 3, jq, pip |
 | `ai-agent-orchestration-guardrails` | Python 3, curl, jq, kubectl, pip |

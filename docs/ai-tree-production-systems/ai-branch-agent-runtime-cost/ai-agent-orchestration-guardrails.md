@@ -32,7 +32,10 @@ properties that matter operationally - the run can be **persisted and resumed**,
 a failed run can be **replayed**, human approval can be inserted as a **node**, and a
 hard step ceiling is trivial to enforce. **CrewAI** expresses role-based crews quickly
 and **AutoGen** suits exploratory multi-agent dialogue, but neither gives the same
-control over the transition graph.
+control over the transition graph. For new work, Microsoft names **Microsoft Agent
+Framework** as the direct successor to AutoGen and Semantic Kernel, built by the same
+teams, and publishes an AutoGen migration guide; its graph-based workflows give
+explicit control over multi-agent execution paths.
 
 ### The runaway loop
 
@@ -81,10 +84,10 @@ flowchart TD
 
 ### Command 1
 
-Install the graph orchestration layer
+Install the graph orchestration layer, plus the LangGraph CLI with its `inmem` extra, which provides the `langgraph` command that Command 3 runs; the `langgraph` package itself installs no command. The `inmem` extra needs Python 3.11 or later: on 3.10 the install succeeds without the server packages and `langgraph dev` stops with "The in-mem server requires Python 3.11 or higher"
 
 ```text
-pip install langgraph langchain-core
+pip install langgraph langchain-core "langgraph-cli[inmem]"
 ```
 
 ### Command 2
@@ -97,7 +100,7 @@ python -c "from langgraph.graph import StateGraph; print(StateGraph)"
 
 ### Command 3
 
-Run the local development server with the graph inspector for visualising state transitions
+Run the local development server with the graph inspector for visualising state transitions. Run it from the directory holding `langgraph.json`, which maps a graph name to the compiled graph - for the script below, `{"dependencies": ["."], "graphs": {"agent": "./guarded_agent.py:app"}}`; without that file it stops with "Path 'langgraph.json' does not exist". It serves on 127.0.0.1:2024 unless `--port` is given or 2024 is taken, in which case it logs the port it picked instead
 
 ```text
 langgraph dev
@@ -113,18 +116,18 @@ kubectl logs -l app=agent --tail=200 | grep -E "step_count|token_budget|abort"
 
 ### Command 5
 
-Retrieve a full run trace for debugging a wrong answer step by step
+Retrieve the trace of a thread's latest run from the Command 3 server, for debugging a wrong answer step by step. The server has no trace endpoint of its own: the trace is the `trace` list that guarded_agent.py keeps in graph state, so read it from the thread state. `POST /threads` returns the `thread_id`, and `POST /threads/$THREAD_ID/runs` with `{"assistant_id": "agent", "input": {...}}` starts a run and returns its `run_id`
 
 ```text
-curl -s localhost:8000/traces/<run_id> | jq ".steps[] | {node, tool, tokens}"
+curl -s localhost:2024/threads/$THREAD_ID/state | jq ".values.trace[] | {event, tool, reason}"
 ```
 
 ### Command 6
 
-Retrieve the full step trace for a single agent run by run id - the primary debugging interface
+Retrieve the full step trace for a single agent run by run id - the primary debugging interface. `join` waits for the run to finish and returns its final state
 
 ```text
-curl -s localhost:8000/runs/$RUN_ID/trace | jq ".steps[] | {node, tool, tokens}"
+curl -s localhost:2024/threads/$THREAD_ID/runs/$RUN_ID/join | jq ".trace[] | {event, tool, reason}"
 ```
 
 ## Automation scripts
@@ -366,6 +369,11 @@ From the trace, which has to exist before the incident. I want every prompt, eve
 
 - [LangChain (LangGraph documentation): Persistence](https://docs.langchain.com/oss/python/langgraph/persistence) - LangGraph state graphs, checkpointing and persistence for resume and replay.
 - [LangChain (LangGraph documentation): Interrupts](https://docs.langchain.com/oss/python/langgraph/interrupts) - Human-in-the-loop approval patterns in LangGraph.
+- [LangChain (LangGraph documentation): Run a local server](https://docs.langchain.com/oss/python/langgraph/local-server) - Installing `langgraph-cli[inmem]` for `langgraph dev`, the `langgraph.json` it reads and the default 127.0.0.1:2024 address used in Command 3.
+- [LangChain (GitHub): langgraph-sdk _async/threads.py](https://github.com/langchain-ai/langgraph/blob/main/libs/sdk-py/langgraph_sdk/_async/threads.py) - The `GET /threads/{thread_id}/state` endpoint that Command 5 calls on the development server.
+- [LangChain (GitHub): langgraph-sdk _async/runs.py](https://github.com/langchain-ai/langgraph/blob/main/libs/sdk-py/langgraph_sdk/_async/runs.py) - The `GET /threads/{thread_id}/runs/{run_id}/join` endpoint that Command 6 calls, which waits for the run and returns its final state.
+- [Microsoft Learn: Microsoft Agent Framework](https://learn.microsoft.com/agent-framework/overview/) - Agent Framework as the direct successor to Semantic Kernel and AutoGen, created by the same teams, with graph-based workflows for explicit multi-agent orchestration.
+- [Microsoft Learn: AutoGen to Microsoft Agent Framework Migration Guide](https://learn.microsoft.com/agent-framework/migration-guide/from-autogen/) - Mapping AutoGen agents, teams and GraphFlow onto Agent Framework agents and workflows.
 - [OWASP Gen AI Security Project: OWASP GenAI LLM Top 10 2026](https://genai.owasp.org/resource/owasp-genai-llm-top-10-2026/) - LLM01:2026 Prompt Injection and Excessive Agency risks for tool-using agents.
 - [Model Context Protocol: Authorization - Model Context Protocol](https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization) - MCP authorisation boundaries for tools exposed to agents.
 - [Microsoft Learn: How toolbox authentication works in Microsoft Foundry](https://learn.microsoft.com/azure/foundry/agents/how-to/tools/tool-authentication) - Agent tool calling with identity-scoped (per-user) access instead of a shared service account.

@@ -35,6 +35,20 @@ structure. **Ray** distributes computation *within* a step across workers with a
 shared object store, which is what avoids serialising large tensors between tasks.
 They compose: a pipeline step launches a Ray job.
 
+### Training Operator v1 and Kubeflow Trainer v2
+
+Kubeflow's training operator has two API generations. **Training Operator v1** defines
+one custom resource per framework - `PyTorchJob`, `TFJob`, `MPIJob` - and is maintained
+on the project's `release-1.9` branch. **Kubeflow Trainer v2** (v2.3.0 when this was
+checked, still labelled alpha, with APIs that may change) replaces them with a single
+`TrainJob` that references a reusable `ClusterTrainingRuntime` or `TrainingRuntime`,
+such as the `torch-distributed` runtime its manifests install; it ships only those
+three CRDs, so a v2-only cluster has no `pytorchjobs` resource type to list. The
+gang-scheduling, checkpoint and early-stopping reasoning in this leaf applies to both;
+what changes is the resource you create and list. Check which generation a cluster runs
+with `kubectl get crd | grep kubeflow.org` before following a guide, and use the
+project's migration guide to move a `PyTorchJob` to a `TrainJob`.
+
 ### Checkpoint frequency is a cost decision
 
 On spot or preemptible GPUs, an eviction at hour eleven of a twelve-hour run loses
@@ -72,10 +86,10 @@ flowchart TD
 
 ### Command 1
 
-Training job custom resources across namespaces - the training-layer equivalent of listing deployments
+Training job custom resources across namespaces - the training-layer equivalent of listing deployments. This lists Kubeflow Trainer v2 `TrainJob`s; on a cluster still running Training Operator v1, list `pytorchjobs` instead
 
 ```text
-kubectl get pytorchjobs,rayjobs -A
+kubectl get trainjobs.trainer.kubeflow.org,rayjobs -A
 ```
 
 ### Command 2
@@ -175,7 +189,12 @@ echo
 # Allocated but idle - the expensive silent failure.
 echo "GPU utilisation on allocated nodes:"
 for node in $(kubectl get nodes -l nvidia.com/gpu.present=true -o name 2>/dev/null | cut -d/ -f2); do
-  UTIL=$(kubectl debug node/"${node}" -it --image=nvidia/cuda:12.2.0-base-ubuntu22.04 -- \
+  # The NVIDIA runtime checks the image's NVIDIA_REQUIRE_CUDA against the node
+  # driver: this tag passes on CUDA 12.9 or newer, or on a driver from one of the
+  # branches it lists (535, 550, 560, 565, 570, 580). Check the node driver meets
+  # it; nvidia-smi comes from the host driver, so NVIDIA_DISABLE_REQUIRE=true is
+  # safe to set for this probe only.
+  UTIL=$(kubectl debug node/"${node}" -it --image=nvidia/cuda:12.9.2-base-ubuntu24.04 -- \
     nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader 2>/dev/null | head -1 || echo "n/a")
   printf "  %-30s %s\n" "${node}" "${UTIL}"
 done
@@ -286,15 +305,19 @@ First whether the job is data-loading bound rather than compute bound, because t
 ## Certification alignment
 
 - **Certified Kubernetes Administrator (CKA)** - Workloads & Scheduling: gang scheduling with Kueue, Volcano or the coscheduling plugin so distributed jobs are admitted as units, with per-team GPU quotas instead of first-come allocation.
-- **Certified Kubernetes Application Developer (CKAD)** - Application Design and Build: defining distributed training as PyTorchJob and RayJob custom resources with GPU resource requests, and Kubeflow Pipelines compiled from code and version-controlled.
+- **Certified Kubernetes Application Developer (CKAD)** - Application Design and Build: defining distributed training as TrainJob (Kubeflow Trainer v2, with a ClusterTrainingRuntime; PyTorchJob on Training Operator v1) and RayJob custom resources with GPU resource requests, and Kubeflow Pipelines compiled from code and version-controlled.
 - **NVIDIA-Certified Associate: AI Infrastructure and Operations** - GPU cluster operations and monitoring.
 - **Vendor-neutral** - distributed systems fundamentals: gang scheduling, checkpoint-restart and collective communication.
 
 ## References
 
 - [Kubeflow: Overview | Kubeflow (Kubeflow Pipelines)](https://www.kubeflow.org/docs/components/pipelines/overview/) - Kubeflow Pipelines DAG orchestration of containerised training workflow steps.
-- [Kubeflow: PyTorch Training (PyTorchJob) | Kubeflow](https://www.kubeflow.org/docs/components/trainer/legacy-v1/user-guides/pytorch/) - Training operator PyTorchJob custom resource for distributed training on Kubernetes.
+- [Kubeflow: PyTorch Training (PyTorchJob) | Kubeflow](https://www.kubeflow.org/docs/components/trainer/legacy-v1/user-guides/pytorch/) - Legacy Training Operator v1 PyTorchJob custom resource, for clusters not yet on Trainer v2.
 - [Kubeflow Trainer](https://trainer.kubeflow.org/en/latest/) - Current Kubeflow training operator (Trainer v2) for distributed training.
+- [Kubeflow Trainer: Migrating to Kubeflow Trainer v2](https://trainer.kubeflow.org/en/latest/operator-guides/migration.html) - TrainJob, TrainingRuntime and ClusterTrainingRuntime replacing PyTorchJob, TFJob and MPIJob, with a PyTorchJob-to-TrainJob example using the torch-distributed runtime.
+- [Kubeflow (GitHub): Kubeflow Trainer README at v2.3.0](https://github.com/kubeflow/trainer/blob/v2.3.0/README.md) - Alpha status, and Training Operator v1 maintained on the release-1.9 branch.
+- [NVIDIA (Docker Hub): nvidia/cuda](https://hub.docker.com/r/nvidia/cuda) - The CUDA base image tags used by the node GPU utilisation check, including 12.9.2-base-ubuntu24.04.
+- [NVIDIA (GitHub): nvidia-container-toolkit internal/config/image/cuda_image.go](https://github.com/NVIDIA/nvidia-container-toolkit/blob/main/internal/config/image/cuda_image.go) - How the runtime reads an image's NVIDIA_REQUIRE_CUDA requirements and skips them when NVIDIA_DISABLE_REQUIRE is true; in libnvidia-container's `src/cli/dsl.c` a space separates OR clauses and a comma AND terms.
 - [Kubeflow: An overview for Katib](https://www.kubeflow.org/docs/components/katib/overview/) - Katib hyperparameter tuning with early stopping.
 - [Ray (Anyscale / Ray project): Ray Train Overview](https://docs.ray.io/en/latest/train/overview.html) - Ray Train distributed training concepts (training function, ScalingConfig, Trainer).
 - [Ray (Anyscale / Ray project): Saving and Loading Checkpoints](https://docs.ray.io/en/latest/train/user-guides/checkpoints.html) - Ray Train checkpointing to shared storage and resuming after worker loss.
