@@ -11,8 +11,6 @@ on:
     paths:
       - data/live/**
       - scripts/live-run.mjs
-      - scripts/check-ollama-tags.mjs
-      - scripts/lib/assumptions.mjs
       - docs/ai-tree-model-platforms/ai-branch-local-inference/ai-ollama-local-inference.md
       - .github/workflows/live.yml
   schedule:
@@ -24,34 +22,19 @@ on:
         required: false
         default: ''
 
-# Read-only, and no job here holds a secret: both jobs run repository code,
-# and live-run.mjs executes the leaves' commands.
+# Read-only, and no job here holds a secret: live-run.mjs executes the
+# leaves' commands. The registry check for pinned model tags is in
+# model-tags.yml, which runs on every leaf change because it takes seconds.
 permissions:
   contents: read
 
+# A newer push to a pull request supersedes its run; a scheduled or manual run
+# on main is evidence and is never cancelled by the other.
 concurrency:
-  group: live-${{ github.ref }}
-  cancel-in-progress: true
+  group: live-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  ollama-tags:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      # Actions are pinned to a commit SHA rather than a tag: a tag can be moved
-      # to point at different code, a SHA cannot.
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: '22'
-
-      # Every Ollama tag a leaf pins, looked up in the registry. Fails when one
-      # is no longer published; the job summary records each tag's digest today.
-      - name: Check pinned Ollama tags against the registry
-        run: node scripts/check-ollama-tags.mjs --json ollama-tags.json
-
   ollama-leaf:
     runs-on: ubuntu-latest
     timeout-minutes: 60

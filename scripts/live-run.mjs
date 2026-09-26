@@ -77,46 +77,111 @@ for (const [name, content] of Object.entries(spec.files ?? {})) {
 }
 
 const background = [];
+const foreground = new Set();
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+// -e and pipefail, so a failing line in a multi-line block or a failing
+// command early in a pipe fails the step instead of vanishing behind the
+// status of the last one.
+const SHELL = ['-eo', 'pipefail', '-c'];
 
-async function waitReady(check, seconds) {
+// Servers the steps start run in their own process group; however the run
+// ends - normally, on an error, or interrupted - they are stopped and the
+// working directory removed, so no orphan keeps the port for the next run.
+let cleaned = false;
+function cleanup() {
+  if (cleaned) return;
+  cleaned = true;
+  for (const child of [...background.map((bg) => bg.child), ...foreground]) {
+    try { process.kill(-child.pid, 'SIGTERM'); } catch { /* already gone */ }
+  }
+  fs.rmSync(work, { recursive: true, force: true });
+}
+process.on('exit', cleanup);
+for (const signal of ['SIGINT', 'SIGTERM']) {
+  process.on(signal, () => {
+    cleanup();
+    process.exit(signal === 'SIGINT' ? 130 : 143);
+  });
+}
+
+const probe = (check) => spawnSync('bash', ['-c', check], { cwd: work }).status === 0;
+
+async function waitReady(bg, check, seconds) {
   const until = Date.now() + seconds * 1000;
   while (Date.now() < until) {
-    if (spawnSync('bash', ['-c', check], { cwd: work }).status === 0) return true;
+    if (bg.exited !== undefined) return false;
+    if (probe(check)) return true;
     await sleep(1000);
   }
   return false;
+}
+
+/**
+ * Runs a command to completion without blocking the event loop - spawnSync
+ * would, and a SIGINT or SIGTERM sent to this process during a long step would
+ * then wait for the step to finish instead of stopping the run. The command
+ * gets its own process group so a timeout or a signal stops all of it.
+ */
+function runForeground(text, stdin, timeoutMs) {
+  return new Promise((resolve) => {
+    const child = spawn('bash', [...SHELL, text], { cwd: work, stdio: ['pipe', 'pipe', 'pipe'], detached: true });
+    foreground.add(child);
+    let output = '';
+    let timedOut = false;
+    child.stdout.on('data', (d) => (output += d));
+    child.stderr.on('data', (d) => (output += d));
+    child.stdin.on('error', () => { /* the command closed stdin early */ });
+    child.stdin.end(stdin);
+    const timer = setTimeout(() => {
+      timedOut = true;
+      try { process.kill(-child.pid, 'SIGKILL'); } catch { /* already gone */ }
+    }, timeoutMs);
+    child.on('close', (status, signal) => {
+      clearTimeout(timer);
+      foreground.delete(child);
+      resolve({ status, signal, output, error: timedOut ? { code: 'ETIMEDOUT' } : null });
+    });
+  });
+}
+
+/** A background server that has exited, or undefined if all are still up. */
+const deadServer = () => background.find((bg) => bg.exited !== undefined);
+
+async function runStep(step, text) {
+  if (step.background) {
+    // The probe must fail before the server starts: if something already
+    // answers it, it would pass for a server that never started.
+    if (probe(step.ready)) {
+      return { ok: false, output: '', why: `something already answers \`${step.ready}\` - stop it first` };
+    }
+    const child = spawn('bash', [...SHELL, text], { cwd: work, stdio: ['ignore', 'pipe', 'pipe'], detached: true });
+    const bg = { child, command: step.command, log: '', exited: undefined };
+    child.stdout.on('data', (d) => (bg.log += d));
+    child.stderr.on('data', (d) => (bg.log += d));
+    child.on('exit', (code, signal) => (bg.exited = code ?? signal));
+    background.push(bg);
+    const ready = await waitReady(bg, step.ready, step.timeout ?? 60);
+    await sleep(1000); // a server that binds and then dies should die here, not later
+    if (bg.exited !== undefined) return { ok: false, output: bg.log, why: `exited ${bg.exited} before or just after becoming ready` };
+    return { ok: ready, output: bg.log, why: ready ? '' : `not ready: ${step.ready}`, bg };
+  }
+  const r = await runForeground(text, step.stdin ?? '', (step.timeout ?? 120) * 1000);
+  const output = r.output;
+  const matched = step.expect ? new RegExp(step.expect, 'm').test(output) : true;
+  const dead = deadServer();
+  const why = r.error?.code === 'ETIMEDOUT' ? `timed out after ${step.timeout ?? 120}s`
+    : r.status !== 0 ? `exited ${r.status ?? r.signal}`
+      : !matched ? `output did not match /${step.expect}/`
+        : dead ? `the server from Command ${dead.command} exited (${dead.exited}) during this step`
+          : '';
+  return { ok: !why && !r.error, output, why };
 }
 
 const results = [];
 for (const step of spec.steps) {
   const text = leafCommands.get(step.command);
   const started = Date.now();
-  let result;
-  if (step.background) {
-    const child = spawn('bash', ['-c', text], { cwd: work, stdio: ['ignore', 'pipe', 'pipe'], detached: true });
-    let log = '';
-    child.stdout.on('data', (d) => (log += d));
-    child.stderr.on('data', (d) => (log += d));
-    background.push(child);
-    const ready = await waitReady(step.ready, step.timeout ?? 60);
-    result = { exit: ready ? 0 : 1, output: log, ok: ready, why: ready ? '' : `not ready: ${step.ready}` };
-  } else {
-    const r = spawnSync('bash', ['-c', text], {
-      cwd: work,
-      input: step.stdin ?? '',
-      encoding: 'utf8',
-      timeout: (step.timeout ?? 120) * 1000,
-      maxBuffer: 64 * 1024 * 1024,
-    });
-    const output = `${r.stdout ?? ''}${r.stderr ?? ''}`;
-    const matched = step.expect ? new RegExp(step.expect, 'm').test(output) : true;
-    const ok = r.status === 0 && matched && !r.error;
-    const why = r.error?.code === 'ETIMEDOUT' ? `timed out after ${step.timeout ?? 120}s`
-      : r.status !== 0 ? `exited ${r.status ?? r.signal}`
-        : matched ? '' : `output did not match /${step.expect}/`;
-    result = { exit: r.status, output, ok, why };
-  }
+  const result = await runStep(step, text);
   const entry = {
     command: step.command,
     text,
@@ -125,6 +190,7 @@ for (const step of spec.steps) {
     why: result.why,
     output: result.output.slice(-2000),
   };
+  if (result.bg) result.bg.entry = entry;
   results.push(entry);
   console.log(`${entry.ok ? 'pass' : 'FAIL'}  Command ${step.command}  (${entry.seconds}s)  ${text.split('\n')[0]}${entry.why ? `\n      ${entry.why}` : ''}`);
   if (!entry.ok) {
@@ -135,18 +201,26 @@ for (const step of spec.steps) {
 
 // Read while any server the steps started is still up: some clients report
 // only a connection warning, not their version, when nothing is listening.
-const version = (cmd) => spawnSync('bash', ['-c', cmd], { encoding: 'utf8' }).stdout?.trim() ?? '';
+// One line, and never a warning when a real version line is present.
+function version(cmd) {
+  const lines = (spawnSync('bash', ['-c', cmd], { encoding: 'utf8' }).stdout ?? '')
+    .split('\n').map((l) => l.trim()).filter(Boolean);
+  return lines.find((l) => !/^warning/i.test(l)) ?? lines.join('; ');
+}
 const serviceVersion = spec.version ? version(spec.version) : '';
 
-for (const child of background) {
-  try { process.kill(-child.pid, 'SIGTERM'); } catch { /* already gone */ }
-}
+// A server's output keeps arriving after its step passes; record all of it.
+for (const bg of background) if (bg.entry) bg.entry.output = bg.log.slice(-2000);
 
 const passed = results.length === spec.steps.length && results.every((r) => r.ok);
+const ran = results.filter((r) => r.ok).map((r) => r.command);
 const report = {
   leaf: id,
   result: passed ? 'pass' : 'fail',
-  covered: `Commands ${spec.steps.map((s) => s.command).join(', ')}`,
+  // Only the commands that ran and passed: a run that stopped early must not
+  // be recorded as having covered the ones it never reached.
+  covered: ran.length ? `Commands ${ran.join(', ')}` : 'no command passed',
+  planned: `Commands ${spec.steps.map((s) => s.command).join(', ')}`,
   skipped: spec.skip ?? {},
   environment: [
     process.env.ImageOS && `${process.env.ImageOS} ${process.env.ImageVersion ?? ''}`.trim(),
@@ -158,7 +232,7 @@ const report = {
 const md = [
   `## Live run: ${id}`,
   '',
-  `Result: **${report.result}** - ${report.covered}; environment: ${report.environment}.`,
+  `Result: **${report.result}** - ${report.covered} of ${report.planned}; environment: ${report.environment}.`,
   '',
   '| Command | Result | Seconds | Note |',
   '| --- | --- | ---: | --- |',
@@ -170,5 +244,5 @@ if (process.env.GITHUB_STEP_SUMMARY) fs.appendFileSync(process.env.GITHUB_STEP_S
 const jsonAt = process.argv.indexOf('--json');
 if (jsonAt > -1) fs.writeFileSync(process.argv[jsonAt + 1], JSON.stringify(report, null, 2));
 
-fs.rmSync(work, { recursive: true, force: true });
+cleanup();
 process.exit(passed ? 0 : 1);

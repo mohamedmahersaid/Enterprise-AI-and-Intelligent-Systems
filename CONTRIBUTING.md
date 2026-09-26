@@ -188,19 +188,22 @@ rejects correct content; it checks safety and convention invariants instead.
 
 ## Live validation
 
-`.github/workflows/live.yml` runs what no offline check can, on the pull
-requests that change what it tests, every Tuesday, and on demand:
+Two workflows run what no offline check can, on the pull requests that change
+what they test, every Tuesday, and on demand:
 
-- **Ollama tags.** `node scripts/check-ollama-tags.mjs` asks the Ollama registry
+- **Ollama tags** (`model-tags.yml`, on any leaf change). `node scripts/check-ollama-tags.mjs` asks the Ollama registry
   for every tag the leaves pin - read from the same derivation as
   `ASSUMPTIONS.md` - fails when one is no longer published, and records the
   digest each resolves to.
-- **Leaf commands.** `node scripts/live-run.mjs <leaf-id>` runs a leaf's own
+- **Leaf commands** (`live.yml`). `node scripts/live-run.mjs <leaf-id>` runs a leaf's own
   command blocks, taken from the leaf text, against the live service, as
   `data/live/<leaf-id>.json` describes: fixtures, the order, which commands start
   a server, what each output must show, and why any command is skipped. Every
   command in the leaf must be run or skipped with a reason, so a new command
-  cannot go untested unnoticed. Today it runs the Ollama leaf on the runner's CPU.
+  cannot go untested unnoticed. Each command runs under `bash -eo pipefail`; a
+  server step fails if anything already answers its readiness probe or if the
+  server exits during the run; and the report's `covered` lists only the
+  commands that passed. Today it runs the Ollama leaf on the runner's CPU.
 
 Both run repository code, so the workflow is read-only and holds no secret. A
 passing run is evidence, not a promotion: to mark a leaf validated, record the
