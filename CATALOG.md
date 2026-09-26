@@ -79,6 +79,7 @@ Running AI systems in production: vector store selection and retrieval quality, 
 - **Advanced:** [Vector Database Selection and Hybrid Retrieval: pgvector, Qdrant, Milvus and Reranking](docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/ai-vector-db-hybrid-retrieval.md)
 - **Advanced:** [LLM Evaluation Harnesses and Regression Gates for Production AI](docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/ai-evaluation-harness-gates.md)
 - **Beginner:** [How Retrieval Finds Things: Keywords, Meaning and Why Each One Misses](docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/ai-how-retrieval-finds-things.md)
+- **Intermediate:** [Retrieval Test Collections: Graded Judgements, Pooling and Telling a Real Improvement from Noise](docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/ai-retrieval-test-collections.md)
 
 ### Agent Runtime and Cost Control
 

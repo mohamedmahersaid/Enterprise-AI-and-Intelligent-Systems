@@ -219,6 +219,8 @@ if __name__ == "__main__":
 7. Compare local Ollama+JSON index results against Azure AI Search semantic re-ranked results for the same query set.
 8. Document the chosen chunk size, overlap and whether hybrid search was required, with the recall numbers that justified the choice.
 
+Before acting on a chunk-size comparison, replace the single `expected_source` labels with a graded, pooled collection built the way [Retrieval Test Collections](../../ai-tree-production-systems/ai-branch-retrieval-evaluation/ai-retrieval-test-collections.md) builds its fixtures: on 15 queries, one query flipping moves recall@5 by about 0.07.
+
 ### Validation
 
 - The evaluation script reports a recall@5 percentage for at least three chunk-size configurations.

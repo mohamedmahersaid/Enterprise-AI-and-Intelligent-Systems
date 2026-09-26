@@ -5,13 +5,13 @@
   "repository": "Enterprise-AI-and-Intelligent-Systems",
   "treeCount": 5,
   "branchCount": 10,
-  "expectedLeafCount": 34,
+  "expectedLeafCount": 35,
   "levelCounts": {
     "Advanced": 14,
     "Beginner": 10,
     "Enterprise": 2,
     "Expert": 2,
-    "Intermediate": 6
+    "Intermediate": 7
   },
   "pathCount": 6,
   "leaves": [
@@ -405,6 +405,18 @@
       "path": "docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/ai-how-retrieval-finds-things.md"
     },
     {
+      "id": "ai-retrieval-test-collections",
+      "name": "Retrieval Test Collections: Graded Judgements, Pooling and Telling a Real Improvement from Noise",
+      "level": "Intermediate",
+      "readiness": "lab",
+      "needs": [
+        "runner"
+      ],
+      "tree": "Production AI Systems",
+      "branch": "Retrieval and Evaluation",
+      "path": "docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/ai-retrieval-test-collections.md"
+    },
+    {
       "id": "ai-agent-orchestration-guardrails",
       "name": "Agent Orchestration with LangGraph: State, Guardrails and Tool Authorisation",
       "level": "Advanced",
@@ -506,6 +518,10 @@
         {
           "leaf": "ai-how-retrieval-finds-things",
           "why": "Understand what similarity search is actually comparing before tuning anything, or you will tune blind."
+        },
+        {
+          "leaf": "ai-retrieval-test-collections",
+          "why": "Build the graded, pooled collection the next step's recall@5 comparison needs, and check it is large enough to detect the difference before trusting a winner."
         },
         {
           "leaf": "ai-rag-architecture",

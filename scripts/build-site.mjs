@@ -179,6 +179,20 @@ function markdownFiles(dir, found = []) {
   return found;
 }
 
+// A leaf's lab data lives in a fixtures/ directory next to it. The markdown in
+// there becomes pages like any other; everything else is published as-is, so
+// a reader following the lab from the site can download the files the fixtures
+// README links to.
+function fixtureDataFiles(dir, found = [], inFixtures = false) {
+  for (const entry of readdirSync(dir)) {
+    if (SKIP_DIRS.has(entry)) continue;
+    const full = join(dir, entry);
+    if (statSync(full).isDirectory()) fixtureDataFiles(full, found, inFixtures || entry === 'fixtures');
+    else if (inFixtures && !entry.endsWith('.md')) found.push(full);
+  }
+  return found;
+}
+
 function outputPathFor(source) {
   const rel = relative('.', source).split(sep).join('/');
   const html = rel.replace(/\.md$/, '.html');
@@ -361,6 +375,14 @@ function main() {
   mkdirSync(join(OUT, 'data'), { recursive: true });
   copyFileSync(VALIDATION_PATH, join(OUT, VALIDATION_PATH));
 
+  let copied = 0;
+  for (const source of fixtureDataFiles('docs')) {
+    const target = join(OUT, relative('.', source));
+    mkdirSync(dirname(target), { recursive: true });
+    copyFileSync(source, target);
+    copied += 1;
+  }
+
   // validate-content resolves relative links in the markdown, but a page can
   // still link to a file the site never publishes. Fail the build rather
   // than ship a dead link.
@@ -370,7 +392,7 @@ function main() {
     return 1;
   }
 
-  console.log(`Built ${written} pages into ${OUT}/ (${index.length} leaves indexed for search).`);
+  console.log(`Built ${written} pages and ${copied} fixture files into ${OUT}/ (${index.length} leaves indexed for search).`);
   return 0;
 }
 

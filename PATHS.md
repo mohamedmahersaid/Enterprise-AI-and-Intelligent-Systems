@@ -11,7 +11,7 @@ a step you already know is a step you skip.
 | Path | Steps | For |
 | --- | ---: | --- |
 | [Ship your first AI feature](#ship-your-first-ai-feature) | 10 | An engineer with a working prototype who has been asked when it can go live. |
-| [Build retrieval that actually answers](#build-retrieval-that-actually-answers) | 7 | An engineer whose search or RAG system returns plausible things that are not the right things. |
+| [Build retrieval that actually answers](#build-retrieval-that-actually-answers) | 8 | An engineer whose search or RAG system returns plausible things that are not the right things. |
 | [Govern AI across an organisation](#govern-ai-across-an-organisation) | 6 | Whoever has been handed responsibility for AI risk, policy or approval. |
 | [Run the model platform](#run-the-model-platform) | 7 | A platform or infrastructure engineer who now owns GPUs, training jobs and model artefacts. |
 | [Decide what to run, and what it costs](#decide-what-to-run-and-what-it-costs) | 6 | An architect or lead answering 'which model, hosted where, and what will this cost at scale'. |
@@ -54,15 +54,17 @@ Retrieval fails quietly: the answer is fluent and wrong because the right passag
    The cheapest retrieval system is the one you did not build. Rule that out first.
 2. **[How Retrieval Finds Things: Keywords, Meaning and Why Each One Misses](docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/ai-how-retrieval-finds-things.md)** &middot; Beginner
    Understand what similarity search is actually comparing before tuning anything, or you will tune blind.
-3. **[RAG Architecture: Embeddings, Chunking and Vector Search](docs/ai-tree-applied-systems/ai-branch-rag-knowledge/ai-rag-architecture.md)** &middot; Advanced
+3. **[Retrieval Test Collections: Graded Judgements, Pooling and Telling a Real Improvement from Noise](docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/ai-retrieval-test-collections.md)** &middot; Intermediate
+   Build the graded, pooled collection the next step's recall@5 comparison needs, and check it is large enough to detect the difference before trusting a winner.
+4. **[RAG Architecture: Embeddings, Chunking and Vector Search](docs/ai-tree-applied-systems/ai-branch-rag-knowledge/ai-rag-architecture.md)** &middot; Advanced
    Chunking and embedding decisions made here determine your ceiling. Most recall problems are chunking problems.
-4. **[Vector Database Selection and Hybrid Retrieval: pgvector, Qdrant, Milvus and Reranking](docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/ai-vector-db-hybrid-retrieval.md)** &middot; Advanced
+5. **[Vector Database Selection and Hybrid Retrieval: pgvector, Qdrant, Milvus and Reranking](docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/ai-vector-db-hybrid-retrieval.md)** &middot; Advanced
    Dense vectors miss exact terms - product codes, error numbers, names. Hybrid retrieval is the usual fix.
-5. **[LLM Evaluation Harnesses and Regression Gates for Production AI](docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/ai-evaluation-harness-gates.md)** &middot; Advanced
+6. **[LLM Evaluation Harnesses and Regression Gates for Production AI](docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/ai-evaluation-harness-gates.md)** &middot; Advanced
    Recall is measurable. Until you measure it, every tuning change is superstition.
-6. **[Content Safety and Guardrails: Input Filtering, Output Classification and Refusal Design](docs/ai-tree-applied-systems/ai-branch-agents-integration/ai-content-safety-guardrails.md)** &middot; Intermediate
+7. **[Content Safety and Guardrails: Input Filtering, Output Classification and Refusal Design](docs/ai-tree-applied-systems/ai-branch-agents-integration/ai-content-safety-guardrails.md)** &middot; Intermediate
    Retrieved content is untrusted input. A document in your own corpus can carry an injection.
-7. **[Grounding Enterprise Data Privately: Offline RAG and Access Control](docs/ai-tree-applied-systems/ai-branch-rag-knowledge/ai-private-enterprise-rag.md)** &middot; Enterprise
+8. **[Grounding Enterprise Data Privately: Offline RAG and Access Control](docs/ai-tree-applied-systems/ai-branch-rag-knowledge/ai-private-enterprise-rag.md)** &middot; Enterprise
    The hard part of enterprise RAG is not retrieval quality, it is making sure the answer only contains what this user is allowed to see.
 
 ## Govern AI across an organisation
