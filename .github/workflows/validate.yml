@@ -27,6 +27,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Unit tests for the validators themselves, on small fixtures: a rule that
+      # silently stops firing passes against the corpus, so only a test sees it.
+      - name: Test the validators
+        run: npm test
+
       # Fails on a high or critical advisory in the toolchain. Two high-severity
       # advisories once sat in these logs unnoticed because nothing failed on them.
       - name: Audit dependencies

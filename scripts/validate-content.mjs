@@ -3,6 +3,7 @@ import { deriveAssumptions, renderAssumptionsMd } from './lib/assumptions.mjs';
 import { checkCertifications } from './lib/certifications.mjs';
 import { checkReferences } from './lib/references.mjs';
 import { checkReadiness, checkReadinessLine, loadValidation, renderReadinessMd } from './lib/readiness.mjs';
+import { parityGates, runsGate } from './lib/parity.mjs';
 import path from 'node:path';
 
 import { readinessSummary, slug } from './lib/derive.mjs';
@@ -409,8 +410,8 @@ if (!fs.existsSync('READINESS.md')) {
 // --- runner parity -----------------------------------------------------------
 
 /**
- * Every `validate:*` npm script must be invoked by BOTH runners: the CI
- * workflow and run.bat.
+ * Every `validate:*` npm script, and `npm test`, must be invoked by BOTH
+ * runners: the CI workflow and run.bat.
  *
  * This check exists because adding validate:commands did not add it to CI. The
  * workflow enumerates each step individually rather than calling `npm run
@@ -425,21 +426,23 @@ if (!fs.existsSync('READINESS.md')) {
  */
 function checkRunnerParity() {
   const scripts = JSON.parse(fs.readFileSync('package.json', 'utf8')).scripts;
-  const gates = Object.keys(scripts).filter((n) => n.startsWith('validate:'));
+  // A gate counts only where it is invoked, never where a comment names it;
+  // see lib/parity.mjs.
+  const gates = parityGates(scripts);
 
   const runners = [
-    { file: '.github/workflows/validate.yml', label: 'the CI workflow' },
-    { file: 'run.bat', label: 'run.bat' },
+    { file: '.github/workflows/validate.yml', label: 'the CI workflow', kind: 'workflow' },
+    { file: 'run.bat', label: 'run.bat', kind: 'batch' },
   ];
 
-  for (const { file, label } of runners) {
+  for (const { file, label, kind } of runners) {
     if (!fs.existsSync(file)) {
       errors.push(`${file} is missing, so runner parity cannot be checked.`);
       continue;
     }
     const text = fs.readFileSync(file, 'utf8');
     for (const gate of gates) {
-      if (!text.includes(gate)) {
+      if (!runsGate(text, gate, kind)) {
         errors.push(
           `${file}: ${label} never runs \`${gate}\`. A gate absent from a runner ` +
             'reports success without checking anything - add the step or remove the script.'

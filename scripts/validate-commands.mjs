@@ -19,84 +19,33 @@
  *
  * Every rule below was measured against the corpus before being added. A rule
  * that fires on existing correct content is a bug in the rule, not a finding.
+ *
+ * On top of those, data/command-deny.json, when present, lists commands known
+ * to be stale - a command group that does not exist, a flag that was removed -
+ * each with the reason, its replacement and the URL checked. They are banned
+ * inside command blocks only, so prose can still say what replaced what. The
+ * rules and the extraction live in scripts/lib/commands.mjs, where the tests in
+ * test/ exercise them.
  */
 import fs from 'node:fs';
+import { RULES, checkBlocks, commandBlocks, loadDenyRules } from './lib/commands.mjs';
 
 const { leaves } = JSON.parse(fs.readFileSync('data/catalog.json', 'utf8'));
 
-/**
- * Each rule states what it protects, because a future contributor hitting one
- * needs to know whether to fix the command or fix the rule.
- *
- * Deliberately absent: a `--force` rule. Force flags are legitimate in
- * documented git and kubectl workflows, so it would eventually fire on correct
- * content - exactly the failure mode this file exists to avoid.
- */
-const RULES = [
-  {
-    id: 'literal-credential',
-    // Requires a credential-shaped word, then a value of 12+ literal characters.
-    // `$VAR`, `${VAR}` and `<placeholder>` do not match: none of `$`, `{` or `<`
-    // is in the value class, so env-var and placeholder forms stay legal.
-    pattern: /(?:password|secret|api[-_]?key|token|bearer)\s*[=:]\s*["']?[A-Za-z0-9._-]{12,}/i,
-    why: 'looks like a real credential. Use an environment variable or a <placeholder>.',
-  },
-  {
-    id: 'destructive-rm',
-    pattern: /\brm\s+-[a-zA-Z]*[rR][a-zA-Z]*f?\s+\//,
-    why: 'recursively removes an absolute path. A reader pasting this can lose data.',
-  },
-  {
-    id: 'disk-destructive',
-    pattern: /\b(?:mkfs\b|dd\s+if=)/,
-    why: 'writes to a device. Not something to ship without an explicit warning.',
-  },
-  {
-    id: 'sql-drop',
-    pattern: /\bdrop\s+(?:database|table)\b/i,
-    why: 'drops a database object. Teaching material should not hand this to a copy-paste.',
-  },
-  {
-    id: 'curl-pipe-shell',
-    pattern: /\b(?:curl|wget)\b[^|\n]*\|\s*(?:sudo\s+)?(?:ba|z|k)?sh\b/,
-    why: 'pipes a download straight into a shell, which executes whatever the host returns.',
-  },
-  {
-    id: 'plaintext-http',
-    // Loopback is exempt: local inference endpoints are legitimately plain http.
-    pattern: /http:\/\/(?!localhost|127\.0\.0\.1|0\.0\.0\.0)/,
-    why: 'sends traffic unencrypted to a non-loopback host. Use https.',
-  },
-  {
-    id: 'placeholder-drift',
-    // The corpus uses <angle-bracket> placeholders throughout. These other
-    // spellings are the ones that leak in and read as unfinished work.
-    pattern: /\b(?:YOUR[_-][A-Z_]+|CHANGEME|REPLACE[_-]ME|TODO|FIXME|x{5,})\b/i,
-    why: 'is not the repository\'s placeholder convention. Use <angle-brackets>.',
-  },
-];
+const deny = loadDenyRules();
+if (deny.errors.length) {
+  console.error(deny.errors.join('\n'));
+  console.error(`\n${deny.errors.length} deny-list error(s).`);
+  process.exit(1);
+}
 
-// Collect blocks with the markdown line they start on, so a failure points at
-// the line a contributor edits rather than an offset inside a fragment.
 const blocks = [];
 for (const leaf of leaves) {
   if (!fs.existsSync(leaf.path)) continue;
-  const lines = fs.readFileSync(leaf.path, 'utf8').split('\n');
-  let start = -1;
-  for (const [index, line] of lines.entries()) {
-    if (start === -1 && line.trimEnd() === '```text') {
-      start = index;
-    } else if (start !== -1 && line.trimEnd() === '```') {
-      blocks.push({
-        file: leaf.path,
-        offset: start + 1,
-        lines: lines.slice(start + 1, index),
-      });
-      start = -1;
-    }
-  }
-  if (start !== -1) {
-    console.error(`${leaf.path}: unterminated \`\`\`text fence at line ${start + 1}`);
+  try {
+    blocks.push(...commandBlocks(leaf.path, fs.readFileSync(leaf.path, 'utf8')));
+  } catch (error) {
+    console.error(error.message);
     process.exit(1);
   }
 }
@@ -112,22 +61,7 @@ if (!blocks.length) {
   process.exit(1);
 }
 
-const failures = [];
-for (const block of blocks) {
-  for (const [index, line] of block.lines.entries()) {
-    for (const rule of RULES) {
-      if (rule.pattern.test(line)) {
-        failures.push({
-          file: block.file,
-          line: block.offset + index + 1,
-          id: rule.id,
-          why: rule.why,
-          text: line.trim(),
-        });
-      }
-    }
-  }
-}
+const failures = checkBlocks(blocks, [...RULES, ...deny.rules]);
 
 for (const failure of failures) {
   console.error(`${failure.file}:${failure.line} [${failure.id}] ${failure.why}`);
@@ -142,5 +76,6 @@ if (failures.length) {
 console.log(
   `Checked ${blocks.length} command blocks across ` +
   `${new Set(blocks.map((b) => b.file)).size} leaves ` +
-  `against ${RULES.length} safety and convention rules.`
+  `against ${RULES.length} safety and convention rules` +
+  (deny.rules.length ? ` and ${deny.rules.length} deny-list entries.` : '.')
 );
