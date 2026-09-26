@@ -17,6 +17,9 @@ const TYPES = {
   '.json': 'application/json; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',
+  // Browsers refuse a module script served with a non-JavaScript type, and the
+  // self-hosted mermaid is a set of .mjs modules.
+  '.mjs': 'text/javascript; charset=utf-8',
   '.svg': 'image/svg+xml',
   '.png': 'image/png',
   '.ico': 'image/x-icon',
