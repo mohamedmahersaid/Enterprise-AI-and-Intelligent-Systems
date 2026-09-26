@@ -9,13 +9,13 @@
 // Output goes to site/ and is not committed - CI builds it and GitHub Pages
 // serves it.
 
-import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
-import { dirname, join, relative, sep } from 'node:path';
+import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { dirname, join, normalize, relative, sep } from 'node:path';
 import { marked } from 'marked';
 
 import { readCatalog, group, slug } from './lib/derive.mjs';
 import { STYLE, SCRIPT } from './lib/site-assets.mjs';
-import { LEVELS, needsSentence } from './lib/readiness.mjs';
+import { LEVELS, VALIDATION_PATH, needsSentence } from './lib/readiness.mjs';
 
 const OUT = 'site';
 const SKIP_DIRS = new Set(['node_modules', '.git', '.github', '.venv', OUT]);
@@ -275,6 +275,26 @@ against the live service or only checked offline, and what a live run would need
 }
 
 // ---------------------------------------------------------------------------
+// output check
+
+function deadLinks(dir, found = []) {
+  for (const entry of readdirSync(dir)) {
+    const full = join(dir, entry);
+    if (statSync(full).isDirectory()) {
+      deadLinks(full, found);
+      continue;
+    }
+    if (!entry.endsWith('.html')) continue;
+    for (const m of readFileSync(full, 'utf8').matchAll(/\bhref="([^"#?]*)/g)) {
+      const target = m[1];
+      if (!target || /^[a-z][a-z0-9+.-]*:/i.test(target) || target.startsWith('//')) continue;
+      if (!existsSync(normalize(join(dirname(full), target)))) found.push(`  ${full} -> ${target}`);
+    }
+  }
+  return found;
+}
+
+// ---------------------------------------------------------------------------
 
 function main() {
   const catalog = readCatalog();
@@ -334,6 +354,21 @@ function main() {
   // Pages would otherwise run the output through Jekyll and drop nothing here,
   // but underscore-prefixed paths are a silent trap; disable it explicitly.
   writeFileSync(join(OUT, '.nojekyll'), '');
+
+  // READINESS.md sends readers to the run records as the evidence behind each
+  // level, so the site publishes them; otherwise the link works on GitHub and
+  // is a 404 here.
+  mkdirSync(join(OUT, 'data'), { recursive: true });
+  copyFileSync(VALIDATION_PATH, join(OUT, VALIDATION_PATH));
+
+  // validate-content resolves relative links in the markdown, but a page can
+  // still link to a file the site never publishes. Fail the build rather
+  // than ship a dead link.
+  const dead = deadLinks(OUT);
+  if (dead.length) {
+    console.error(`${dead.length} relative link(s) in the built site do not resolve:\n${dead.join('\n')}`);
+    return 1;
+  }
 
   console.log(`Built ${written} pages into ${OUT}/ (${index.length} leaves indexed for search).`);
   return 0;

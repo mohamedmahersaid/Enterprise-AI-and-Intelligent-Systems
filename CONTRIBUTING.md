@@ -207,10 +207,12 @@ npm run serve:site   # serve it at http://localhost:4173
 
 On Windows, `run.bat site` does both and opens your browser.
 
-Navigation, breadcrumbs, level badges and the search index are all derived from the
-catalog, so the site cannot disagree with it — there is no second copy of the taxonomy
-to keep in step. Page bodies are the leaf markdown rendered to HTML, with links to
-`.md` files rewritten to their generated pages.
+Navigation, breadcrumbs, level and readiness badges and the search index are all
+derived from the catalog, so the site cannot disagree with it — there is no second copy
+of the taxonomy to keep in step. Page bodies are the leaf markdown rendered to HTML,
+with links to `.md` files rewritten to their generated pages. `data/validation.json`
+is published alongside, because `READINESS.md` links it as the evidence behind each
+level, and the build fails if any relative link in the output does not resolve.
 
 `site/` is not committed. CI builds it on every pull request, so a structural break
 fails the build, and publishes it to GitHub Pages on merge to `main`.
