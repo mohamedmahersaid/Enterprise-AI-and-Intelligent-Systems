@@ -98,15 +98,15 @@ TOKEN=$(az account get-access-token --resource https://ai.azure.com --query acce
 
 ### Command 7
 
-Prove the keyless path end to end from the same VNet host: v1 route, deployment name in `model`, no api-version, no key; anything but a completion - a 401, 403 or empty reply - prints the error and exits non-zero.
+Prove the keyless path end to end from the same VNet host: v1 route, deployment name in `model`, no api-version, no key; anything but a completion - an unreachable endpoint, a 401 or 403, or an empty reply - exits non-zero, printing the error body when there is one (the reply is captured and checked non-empty first, because jq 1.6 treats empty input as success).
 
 ```text
-curl -sS https://aoai-prod.openai.azure.com/openai/v1/chat/completions -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"model":"chat","messages":[{"role":"user","content":"Reply with the word ok."}]}' | jq -er ".choices[0].message.content // error(tostring)"
+R=$(curl -sS https://aoai-prod.openai.azure.com/openai/v1/chat/completions -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"model":"chat","messages":[{"role":"user","content":"Reply with the word ok."}]}') && [ -n "$R" ] && printf '%s' "$R" | jq -er ".choices[0].message.content // error(tostring)"
 ```
 
 ### Command 8
 
-Rotate key1 during migration away from key auth and audit that no caller breaks, then capture key2 - still valid - as the proof key for Command 10; run Command 10 now and expect 200, because a key that already gets 401 proves nothing.
+Rotate key1 during migration away from key auth and audit that no caller breaks, then capture key2 - still valid - as the proof key for Command 10. Run this in an admin session signed in as your own account with Cognitive Services Contributor, not on the VNet host after Command 6: the managed identity holds only Cognitive Services OpenAI User, which cannot list or regenerate keys. Copy `OLD_KEY` to the VNet host and run Command 10 there now, expecting 200, because a key that already gets 401 proves nothing.
 
 ```text
 az cognitiveservices account keys regenerate -g rg-ai -n aoai-prod --key-name key1
@@ -123,7 +123,7 @@ Set-AzCognitiveServicesAccount -ResourceGroupName rg-ai -Name aoai-prod -Disable
 
 ### Command 10
 
-Confirm keys are really off: the key captured in Command 8, which got 200 before Command 9, must now get HTTP 401, and until it does, treat key auth as still enabled; the command refuses to run if OLD_KEY is empty.
+Confirm keys are really off, from the VNet host - public network access is off since Command 2, so a call from outside gets 403 whatever the key: the key captured in Command 8, which got 200 before Command 9, must now get HTTP 401, and until it does, treat key auth as still enabled; the command refuses to run if OLD_KEY is not set in this shell.
 
 ```text
 curl -s -o /dev/null -w "%{http_code}\n" https://aoai-prod.openai.azure.com/openai/v1/chat/completions -H "api-key: ${OLD_KEY:?capture OLD_KEY in Command 8 first}" -H "Content-Type: application/json" -d '{"model":"chat","messages":[{"role":"user","content":"ping"}]}'

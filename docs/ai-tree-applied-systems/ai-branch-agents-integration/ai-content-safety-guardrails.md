@@ -135,10 +135,10 @@ jq -s -c 'if length == 0 then error("no chunks to scan") else . end | map(if (.i
 
 ### Command 5
 
-Scan batch `N` (one line of `batches.jsonl`) for embedded instructions before it reaches the prompt, and print each chunk id and part beside its verdict - `documentsAnalysis` comes back in input order, and an error body, an empty response or a missing verdict exits non-zero so the batch counts as unscanned, never as clean
+Scan batch `N` (one line of `batches.jsonl`) for embedded instructions before it reaches the prompt, and print each chunk id and part beside its verdict - `documentsAnalysis` comes back in input order, and an unreachable service, an error body, an empty response or a missing verdict exits non-zero so the batch counts as unscanned, never as clean (the reply is captured and checked non-empty first, because jq 1.6 treats empty input as success)
 
 ```text
-B=$(sed -n "${N:-1}p" batches.jsonl); jq -n --argjson b "$B" '{userPrompt: "", documents: ($b | map(.text))}' | curl -sS "$ENDPOINT/contentsafety/text:shieldPrompt?api-version=2024-09-01" -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" --data-binary @- | jq -e -r --argjson b "$B" 'if (.documentsAnalysis | type) == "array" and (.documentsAnalysis | length) == ($b | length) and all(.documentsAnalysis[]; (.attackDetected | type) == "boolean") then .documentsAnalysis | to_entries[] | [$b[.key].id, $b[.key].part, .value.attackDetected] | @tsv else error("no verdict for every document - treat batch as unscanned: \(tojson)") end'
+B=$(sed -n "${N:-1}p" batches.jsonl); R=$(jq -n --argjson b "$B" '{userPrompt: "", documents: ($b | map(.text))}' | curl -sS "$ENDPOINT/contentsafety/text:shieldPrompt?api-version=2024-09-01" -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" --data-binary @-) && [ -n "$R" ] && printf '%s' "$R" | jq -e -r --argjson b "$B" 'if (.documentsAnalysis | type) == "array" and (.documentsAnalysis | length) == ($b | length) and all(.documentsAnalysis[]; (.attackDetected | type) == "boolean") then .documentsAnalysis | to_entries[] | [$b[.key].id, $b[.key].part, .value.attackDetected] | @tsv else error("no verdict for every document - treat batch as unscanned: \(tojson)") end'
 ```
 
 ### Command 6

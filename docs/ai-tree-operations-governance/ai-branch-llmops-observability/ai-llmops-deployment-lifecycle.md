@@ -203,7 +203,14 @@ def call_deployment(deployment, prompt, system=None):
                                           "Authorization": "Bearer " + aoai_token()})
     with urllib.request.urlopen(req, timeout=120) as resp:
         out = json.loads(resp.read().decode())
-    return out["choices"][0]["message"]["content"]
+    choice = out["choices"][0]
+    content = choice["message"].get("content") or ""
+    # An empty answer (the cap spent on reasoning), a filtered one or a
+    # truncated one is not an answer to score: counted as 0.0 on both sides it
+    # would read as no drift, so it is raised and counted as a failed request.
+    if choice.get("finish_reason") != "stop" or not content.strip():
+        raise RuntimeError("no usable answer (finish_reason=%s)" % choice.get("finish_reason"))
+    return content
 
 
 def score(answer, expected_keywords):
@@ -225,7 +232,7 @@ def run_suite(deployment, rows, system=None):
                 deployment, row["prompt"][:40], exc))
             failures += 1
             continue
-        scores.append(score(answer or "", row.get("expected_keywords", [])))
+        scores.append(score(answer, row.get("expected_keywords", [])))
         time.sleep(0.2)
     return (sum(scores) / len(scores) if scores else 0.0), failures
 
