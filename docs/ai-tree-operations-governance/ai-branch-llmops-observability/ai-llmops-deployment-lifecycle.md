@@ -110,15 +110,27 @@ Create a scheduled query alert that fires when a drift signal appears in logs.
 az monitor scheduled-query create -g rg-ai -n aoai-drift-alert --scopes $LAW_ID --condition "count 'AppTraces | where Message contains \"drift_score_low\"' > 0" --evaluation-frequency 1h --window-size 1h
 ```
 
+### Command 9
+
+Grant the identity that runs the drift gate - your account, or the pipeline's managed identity - the least-privilege inference role on the account. It cannot create or change deployments; that control-plane work needs a role such as Cognitive Services Contributor, held by a different identity. The assignment can take up to five minutes to apply; until it does, the drift gate's requests return 403 and the gate exits 2 instead of passing.
+
+```text
+az role assignment create --assignee <principal-object-id> --role "Cognitive Services OpenAI User" --scope $AOAI_ID
+```
+
 ## Automation scripts
 
 ### Golden-set drift detector and canary gate
+
+The script authenticates with Microsoft Entra ID - az login on a laptop, managed identity on an Azure-hosted runner - and requires `pip install azure-identity`. If a key is unavoidable, keep it in Key Vault and read it at runtime, never in pipeline variables or the repository.
 
 ```python
 #!/usr/bin/env python3
 """Replay a frozen golden-question set against a candidate deployment and a
 known-good baseline, score both, and fail (exit 1) if the candidate drifted
-below an acceptable margin. Designed to run as a CI gate or a nightly job.
+below an acceptable margin. Exits 2 when the run cannot be scored - missing
+input, an empty golden set, or any failed request. Designed to run as a CI
+gate or a nightly job.
 """
 import json
 import os
@@ -127,7 +139,7 @@ import time
 import urllib.request
 
 AOAI_ENDPOINT = os.environ.get("AZURE_OPENAI_ENDPOINT", "")
-AOAI_KEY = os.environ.get("AZURE_OPENAI_API_KEY", "")
+_TOKEN_PROVIDER = None
 MAX_DRIFT_PCT = float(os.environ.get("MAX_DRIFT_PCT", "5.0"))
 # The system prompt both deployments run under, and an optional override for
 # the candidate alone - how a prompt regression is tested before it ships.
@@ -145,6 +157,10 @@ def load_goldenset(path):
             line = line.strip()
             if line:
                 rows.append(json.loads(line))
+    if not rows:
+        # An empty set scores both sides zero - no drift, a false pass.
+        print("ERROR: golden set is empty: %s" % path)
+        sys.exit(2)
     return rows
 
 
@@ -158,6 +174,21 @@ def read_prompt(path):
         return fh.read()
 
 
+def aoai_token():
+    """Short-lived Entra ID token for Azure OpenAI - no API key. The import is
+    lazy so a bare run can print its usage without azure-identity installed."""
+    global _TOKEN_PROVIDER
+    if _TOKEN_PROVIDER is None:
+        try:
+            from azure.identity import DefaultAzureCredential, get_bearer_token_provider
+        except ImportError:
+            raise RuntimeError("azure-identity is not installed: "
+                               "pip install azure-identity") from None
+        _TOKEN_PROVIDER = get_bearer_token_provider(
+            DefaultAzureCredential(), "https://ai.azure.com/.default")
+    return _TOKEN_PROVIDER()
+
+
 def call_deployment(deployment, prompt, system=None):
     url = "%s/openai/v1/chat/completions" % AOAI_ENDPOINT.rstrip("/")
     messages = [{"role": "system", "content": system}] if system else []
@@ -169,10 +200,17 @@ def call_deployment(deployment, prompt, system=None):
             "max_completion_tokens": 400}
     req = urllib.request.Request(url, data=json.dumps(body).encode(),
                                  headers={"Content-Type": "application/json",
-                                          "api-key": AOAI_KEY})
+                                          "Authorization": "Bearer " + aoai_token()})
     with urllib.request.urlopen(req, timeout=120) as resp:
         out = json.loads(resp.read().decode())
-    return out["choices"][0]["message"]["content"]
+    choice = out["choices"][0]
+    content = choice["message"].get("content") or ""
+    # An empty answer (the cap spent on reasoning), a filtered one or a
+    # truncated one is not an answer to score: counted as 0.0 on both sides it
+    # would read as no drift, so it is raised and counted as a failed request.
+    if choice.get("finish_reason") != "stop" or not content.strip():
+        raise RuntimeError("no usable answer (finish_reason=%s)" % choice.get("finish_reason"))
+    return content
 
 
 def score(answer, expected_keywords):
@@ -182,18 +220,21 @@ def score(answer, expected_keywords):
 
 
 def run_suite(deployment, rows, system=None):
-    scores = []
+    """Return (mean score over answered questions, failed request count).
+    A failed request is not a zero score: if a 403 while a role assignment
+    propagates scored 0.0, both suites would score 0.0 and read as no drift."""
+    scores, failures = [], 0
     for row in rows:
         try:
             answer = call_deployment(deployment, row["prompt"], system)
         except Exception as exc:
             print("  %s: request failed for '%s...': %s" % (
                 deployment, row["prompt"][:40], exc))
-            scores.append(0.0)
+            failures += 1
             continue
         scores.append(score(answer, row.get("expected_keywords", [])))
         time.sleep(0.2)
-    return sum(scores) / len(scores) if scores else 0.0
+    return (sum(scores) / len(scores) if scores else 0.0), failures
 
 
 def main():
@@ -203,17 +244,24 @@ def main():
     path, candidate = sys.argv[1], sys.argv[2]
     baseline = sys.argv[3] if len(sys.argv) > 3 else "chat-prod"
 
-    if not AOAI_ENDPOINT or not AOAI_KEY:
-        print("ERROR: AZURE_OPENAI_ENDPOINT / AZURE_OPENAI_API_KEY not set")
+    if not AOAI_ENDPOINT:
+        print("ERROR: AZURE_OPENAI_ENDPOINT not set")
+        sys.exit(2)
+    # Fail fast when no token can be obtained. This proves only that a token
+    # exists, not that the role is held - a 403 is caught per request below.
+    try:
+        aoai_token()
+    except Exception as exc:
+        print("ERROR: no Entra ID token for Azure OpenAI (run az login): %s" % exc)
         sys.exit(2)
 
     rows = load_goldenset(path)
     system = read_prompt(SYSTEM_PROMPT_FILE)
     candidate_system = read_prompt(CANDIDATE_SYSTEM_PROMPT_FILE) or system
     print("Scoring baseline deployment '%s' on %d questions..." % (baseline, len(rows)))
-    baseline_score = run_suite(baseline, rows, system)
+    baseline_score, baseline_failed = run_suite(baseline, rows, system)
     print("Scoring candidate deployment '%s' on %d questions..." % (candidate, len(rows)))
-    candidate_score = run_suite(candidate, rows, candidate_system)
+    candidate_score, candidate_failed = run_suite(candidate, rows, candidate_system)
 
     drift_pct = (baseline_score - candidate_score) * 100.0
     report = {
@@ -221,13 +269,21 @@ def main():
         "candidate_deployment": candidate,
         "baseline_score": round(baseline_score, 4),
         "candidate_score": round(candidate_score, 4),
+        "baseline_failed_requests": baseline_failed,
+        "candidate_failed_requests": candidate_failed,
         "drift_pct": round(drift_pct, 2),
         "max_drift_pct": MAX_DRIFT_PCT,
-        "pass": drift_pct <= MAX_DRIFT_PCT,
+        # Fail closed: any failed request means the scores are not comparable.
+        "pass": drift_pct <= MAX_DRIFT_PCT and not (baseline_failed or candidate_failed),
     }
     with open("drift.json", "w", encoding="utf-8") as fh:
         json.dump(report, fh, indent=2)
     print(json.dumps(report, indent=2))
+    if baseline_failed or candidate_failed:
+        print("ERROR: %d baseline and %d candidate requests failed - the gate cannot "
+              "score this run (a 403 usually means the Cognitive Services OpenAI User "
+              "role is missing or still propagating)" % (baseline_failed, candidate_failed))
+        sys.exit(2)
     sys.exit(0 if report["pass"] else 1)
 
 
@@ -241,9 +297,9 @@ if __name__ == "__main__":
 
 ### Steps
 
-1. Create two Azure OpenAI deployments, each pinned to an explicit model version and with an explicit sku-capacity: chat-prod on the model in service today, and chat-canary on the model that will replace it when that one retires.
+1. Create two Azure OpenAI deployments, each pinned to an explicit model version and with an explicit sku-capacity: chat-prod on the model in service today, and chat-canary on the model that will replace it when that one retires. Creating deployments is a control-plane action that needs a role such as Cognitive Services Contributor.
 2. Write 20-30 golden questions with expected keyword lists into golden_questions.jsonl, covering the core intents your application actually serves.
-3. Put your application's system prompt in system_prompt.txt, set SYSTEM_PROMPT_FILE to it along with AZURE_OPENAI_ENDPOINT and AZURE_OPENAI_API_KEY, then run the drift detector script comparing chat-canary against chat-prod.
+3. Put your application's system prompt in system_prompt.txt and set SYSTEM_PROMPT_FILE to it along with AZURE_OPENAI_ENDPOINT - no API key. Grant your identity Cognitive Services OpenAI User on the account (Command 9), run az login, then run the drift detector script comparing chat-canary against chat-prod.
 4. Copy system_prompt.txt, remove a key instruction from the copy, point CANDIDATE_SYSTEM_PROMPT_FILE at it so only the canary runs the regressed prompt, re-run the script, and confirm drift_pct rises and the script exits non-zero.
 5. Wire the script into a CI pipeline stage that runs on every pull request touching prompts/ or the deployment configuration, failing the build on non-zero exit.
 6. Add a scheduled nightly run of the same script against production only, comparing today's score to a stored baseline from last week to catch provider-side model drift.
@@ -253,6 +309,7 @@ if __name__ == "__main__":
 
 - drift.json contains non-zero scores for both deployments on a clean run with pass true.
 - After the deliberate system-prompt regression, drift.json shows pass false and the CI job exits 1.
+- A run in which any request fails - for example a 403 before the role assignment applies - writes pass false and exits 2, never 0.
 - The CI pipeline blocks a merge that regresses the golden-set score beyond MAX_DRIFT_PCT.
 - The nightly scheduled run produces a dated drift.json artifact usable to plot a trend over weeks.
 - The Azure Monitor alert fires within the configured evaluation window when a failing drift.json is produced.
@@ -331,6 +388,7 @@ A system prompt directly determines model behaviour with the same blast radius a
 ## References
 
 - [Microsoft Learn: Working with models](https://learn.microsoft.com/azure/foundry/openai/how-to/working-with-models) - Azure OpenAI deployment management: version pinning, upgrade policies and controlled migration between model versions.
+- [Microsoft Learn: How to configure Azure OpenAI in Microsoft Foundry Models with Microsoft Entra ID authentication (classic)](https://learn.microsoft.com/azure/foundry-classic/openai/how-to/managed-identity) - Keyless drift-gate calls with DefaultAzureCredential, the Cognitive Services OpenAI User role, and the separate control-plane role for deployments.
 - [Microsoft Learn: Microsoft Foundry Models lifecycle and support policy](https://learn.microsoft.com/azure/foundry/openai/concepts/model-retirements) - Azure OpenAI model version lifecycle: deprecation, retirement and notification timelines.
 - [Argo Project: Canary Deployment Strategy - Argo Rollouts](https://argo-rollouts.readthedocs.io/en/stable/features/canary/) - Canary rollout strategies with weighted traffic steps.
 - [Argo Project: Analysis & Progressive Delivery - Argo Rollouts](https://argo-rollouts.readthedocs.io/en/stable/features/analysis/) - Automated analysis gating promotion or rollback of a canary.

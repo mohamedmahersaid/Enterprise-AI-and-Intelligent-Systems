@@ -70,6 +70,14 @@ reaches the model having never passed the input filter, because it was not typed
 user. **Filter retrieved context on the same path as user input**, and treat any
 document source that outsiders can write to as hostile by default.
 
+Detection needs containment behind it, because the detector will miss some attacks.
+Wrap each retrieved chunk in explicit delimiters and state in the system prompt that
+delimited text is data, never instruction. Prompt Shields also offers **Spotlighting**,
+which base64-encodes documents so the model treats them as lower trust than the user and
+system prompts. It is a preview feature, off by default and available only for models
+called through the Chat Completions API; it adds tokens, which can push a long document
+past the input limit, and the model may mention the encoding in its answer.
+
 ## Architecture and flow
 
 ```mermaid
@@ -95,29 +103,45 @@ flowchart TD
 
 ### Command 1
 
-Classify a single text against the standard harm categories and read back per-category severity
+Get a Microsoft Entra token for Content Safety - the signed-in identity needs the Cognitive Services User role on the resource, and a resource key is only the fallback where Entra ID cannot be used
 
 ```text
-curl -s "$ENDPOINT/contentsafety/text:analyze?api-version=2024-09-01" -H "Ocp-Apim-Subscription-Key: $KEY" -H "Content-Type: application/json" -d "{\"text\":\"$SAMPLE\"}" | jq ".categoriesAnalysis"
+TOKEN=$(az account get-access-token --resource https://cognitiveservices.azure.com --query accessToken -o tsv)
 ```
 
 ### Command 2
 
-Test a jailbreak attempt against the dedicated prompt-shield endpoint rather than the category classifier
+Classify a single text against the standard harm categories and read back per-category severity, with the body built by jq so quotes in the sample cannot break the JSON
 
 ```text
-curl -s "$ENDPOINT/contentsafety/text:shieldPrompt?api-version=2024-09-01" -H "Ocp-Apim-Subscription-Key: $KEY" -d "{\"userPrompt\":\"$ATTACK\",\"documents\":[]}" | jq
+jq -n --arg text "$SAMPLE" '{text: $text}' | curl -s "$ENDPOINT/contentsafety/text:analyze?api-version=2024-09-01" -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" --data-binary @- | jq ".categoriesAnalysis"
 ```
 
 ### Command 3
 
-Scan a retrieved document for embedded instructions before it reaches the prompt - the path user input never takes
+Test a jailbreak attempt against the dedicated prompt-shield endpoint rather than the category classifier
 
 ```text
-curl -s "$ENDPOINT/contentsafety/text:shieldPrompt?api-version=2024-09-01" -H "Ocp-Apim-Subscription-Key: $KEY" -d "{\"userPrompt\":\"\",\"documents\":[\"$(cat retrieved.txt)\"]}" | jq ".documentsAnalysis"
+jq -n --arg prompt "$ATTACK" '{userPrompt: $prompt, documents: []}' | curl -s "$ENDPOINT/contentsafety/text:shieldPrompt?api-version=2024-09-01" -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" --data-binary @- | jq
 ```
 
 ### Command 4
+
+Batch retrieved chunks (one JSON object per line with `id` and `text`) within both Prompt Shields limits - at most five documents and 10,000 characters in total per call - splitting any chunk over 10,000 characters into numbered parts first, and failing on an empty file or a chunk with no text rather than writing a batch that skips it
+
+```text
+jq -s -c 'if length == 0 then error("no chunks to scan") else . end | map(if (.id == null or (.text | type) != "string" or .text == "") then error("chunk without an id or text: \(.id)") else .id as $id | .text as $t | range(0; $t | length; 10000) as $o | {id: $id, part: ($o / 10000), text: $t[$o:$o + 10000]} end) | reduce .[] as $p ([]; if length > 0 and (.[length - 1] | length) < 5 and ((.[length - 1] | map(.text | length) | add) + ($p.text | length)) <= 10000 then .[length - 1] += [$p] else . + [[$p]] end) | .[]' chunks.jsonl > batches.jsonl
+```
+
+### Command 5
+
+Scan batch `N` (one line of `batches.jsonl`) for embedded instructions before it reaches the prompt, and print each chunk id and part beside its verdict - `documentsAnalysis` comes back in input order, and an unreachable service, an error body, an empty response or a missing verdict exits non-zero so the batch counts as unscanned, never as clean (the reply is captured and checked non-empty first, because jq 1.6 treats empty input as success)
+
+```text
+B=$(sed -n "${N:-1}p" batches.jsonl); R=$(jq -n --argjson b "$B" '{userPrompt: "", documents: ($b | map(.text))}' | curl -sS "$ENDPOINT/contentsafety/text:shieldPrompt?api-version=2024-09-01" -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" --data-binary @-) && [ -n "$R" ] && printf '%s' "$R" | jq -e -r --argjson b "$B" 'if (.documentsAnalysis | type) == "array" and (.documentsAnalysis | length) == ($b | length) and all(.documentsAnalysis[]; (.attackDetected | type) == "boolean") then .documentsAnalysis | to_entries[] | [$b[.key].id, $b[.key].part, .value.attackDetected] | @tsv else error("no verdict for every document - treat batch as unscanned: \(tojson)") end'
+```
+
+### Command 6
 
 Report the block rate by category from the gateway log - the false-negative half of the picture
 
@@ -125,7 +149,7 @@ Report the block rate by category from the gateway log - the false-negative half
 jq -r "select(.blocked) | .category" gateway.log | sort | uniq -c | sort -rn
 ```
 
-### Command 5
+### Command 7
 
 Report refusals against total requests per application tier - the false-positive signal that precedes users routing around you
 
@@ -133,7 +157,7 @@ Report refusals against total requests per application tier - the false-positive
 jq -r "[.tier, (.blocked|tostring)] | @tsv" gateway.log | sort | uniq -c
 ```
 
-### Command 6
+### Command 8
 
 Confirm the refusal path does not echo blocked content back to the caller
 
@@ -150,9 +174,12 @@ filter nobody can defend in either direction. This runs a labelled set through t
 filter at every threshold and reports what each setting actually costs, so the choice is
 made from a table rather than a feeling.
 
-Requires `pip install requests`. The endpoint and key are read from
-`CONTENT_SAFETY_ENDPOINT` and `CONTENT_SAFETY_KEY` rather than the command line, where a
-key would be kept in shell history and shown to anyone who can list processes.
+Requires `pip install requests azure-identity`. The endpoint is read from
+`CONTENT_SAFETY_ENDPOINT`, and calls authenticate with a Microsoft Entra token
+(`az login` on a laptop, managed identity on an Azure host) for an identity holding the
+Cognitive Services User role on the resource. `CONTENT_SAFETY_KEY` is the fallback where
+Entra ID cannot be used; it is read from the environment rather than the command line,
+where a key would be kept in shell history and shown to anyone who can list processes.
 
 ```python
 #!/usr/bin/env python3
@@ -172,29 +199,54 @@ import sys
 import requests
 
 ENDPOINT = os.environ.get("CONTENT_SAFETY_ENDPOINT", "").rstrip("/")
+SCOPE = "https://cognitiveservices.azure.com/.default"
 SEVERITIES = [0, 2, 4, 6]  # provider severity levels, ascending
 
 
-def classify(text, key):
-    response = requests.post(
-        f"{ENDPOINT}/contentsafety/text:analyze?api-version=2024-09-01",
-        headers={"Ocp-Apim-Subscription-Key": key},
-        json={"text": text},
-        timeout=30,
-    )
-    response.raise_for_status()
-    return {
-        item["category"]: item["severity"]
-        for item in response.json().get("categoriesAnalysis", [])
-    }
+def auth_headers():
+    """Return a callable producing auth headers: Entra ID by default, key as fallback."""
+    key = os.environ.get("CONTENT_SAFETY_KEY")
+    if key:
+        return lambda: {"Ocp-Apim-Subscription-Key": key}
+    # Imported here so the key fallback works without azure-identity installed.
+    try:
+        from azure.identity import DefaultAzureCredential, get_bearer_token_provider
+    except ImportError:
+        sys.exit("azure-identity is not installed - pip install azure-identity requests, "
+                 "or set CONTENT_SAFETY_KEY as the fallback")
+    token = get_bearer_token_provider(DefaultAzureCredential(), SCOPE)
+    try:
+        token()  # fetch once up front, so a missing sign-in stops here and not mid-corpus
+    except Exception as exc:
+        sys.exit(f"could not get a Content Safety token - run az login first, or set "
+                 f"CONTENT_SAFETY_KEY as the fallback ({type(exc).__name__})")
+    return lambda: {"Authorization": f"Bearer {token()}"}
 
 
-def main(corpus_path, key):
+def classify(text, headers):
+    try:
+        response = requests.post(
+            f"{ENDPOINT}/contentsafety/text:analyze?api-version=2024-09-01",
+            headers=headers(),
+            json={"text": text},
+            timeout=30,
+        )
+        response.raise_for_status()
+        analysis = response.json()["categoriesAnalysis"]
+    except (requests.RequestException, ValueError, KeyError) as exc:
+        # A failed call must stop the sweep: scoring it as severity 0 would read as "clean".
+        sys.exit(f"Content Safety call failed, no thresholds reported ({type(exc).__name__}: {exc})")
+    return {item["category"]: item["severity"] for item in analysis}
+
+
+def main(corpus_path, headers):
     """corpus: JSONL of {"text": ..., "violates": "Hate"|null}"""
     with open(corpus_path) as handle:
         records = [json.loads(line) for line in handle if line.strip()]
+    if not records:
+        sys.exit(f"{corpus_path} has no records - an empty corpus measures nothing")
 
-    scored = [(r, classify(r["text"], key)) for r in records]
+    scored = [(r, classify(r["text"], headers)) for r in records]
     categories = sorted({c for _, s in scored for c in s})
 
     print(f"{'category':<12}{'thresh':>7}{'caught':>9}{'missed':>8}{'blocked_ok':>12}{'note':>26}")
@@ -227,10 +279,10 @@ def main(corpus_path, key):
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         sys.exit("usage: guardrail_threshold_tuner.py <corpus.jsonl>")
-    key = os.environ.get("CONTENT_SAFETY_KEY")
-    if not ENDPOINT or not key:
-        sys.exit("set CONTENT_SAFETY_ENDPOINT and CONTENT_SAFETY_KEY first")
-    sys.exit(main(sys.argv[1], key))
+    if not ENDPOINT:
+        sys.exit("set CONTENT_SAFETY_ENDPOINT first (and sign in with az login, "
+                 "or set CONTENT_SAFETY_KEY as the fallback)")
+    sys.exit(main(sys.argv[1], auth_headers()))
 ```
 
 ## Lab
@@ -326,6 +378,12 @@ if __name__ == "__main__":
 
 **Resolution:** Construct refusals from the category and request id alone, and add a test asserting a known blocked phrase never appears in a refusal body. Then check the logs on the same assumption, since the same reflex usually writes the content there too - the more serious finding, because it relocates the most sensitive material in the system into a store with weaker access controls and longer retention.
 
+### Scenario 6: After Spotlighting was enabled, answers mention that the source documents are base64 encoded, and long documents start failing.
+
+**Likely cause:** Spotlighting (preview) base64-encodes documents before the model sees them. The model may remark on the encoding even though neither the user nor the system prompt asked about it, and the encoding adds tokens, which pushes long documents past the input limit.
+
+**Resolution:** Confirm the diagnosis by toggling Spotlighting off in the document attack control for the deployment and replaying the same request: the remark and the size failures disappear. Add a system-prompt line telling the model not to describe how documents are encoded, chunk long documents smaller before they are attached, and re-check token budgets and cost with Spotlighting on. Keep plain delimiting in place either way, since Spotlighting is a preview feature and works only through the Chat Completions API.
+
 ## Interview questions
 
 ### 1. The model provider already filters content. Why would you build another layer?
@@ -338,7 +396,7 @@ Not by intuition, because a number picked that way cannot be defended in either 
 
 ### 3. A RAG assistant summarises documents that partners upload. Where is the injection risk?
 
-In the corpus, and teams miss it because the mental model is that filtering happens at the user's keyboard. A partner-uploaded document can carry instructions addressed to the model - reveal the system prompt, ignore prior constraints, call a tool with different arguments - and that text reaches the model having never crossed the input filter, because no user typed it. The fix is to put retrieved context on the same filtering path as user input, in the retrieval pipeline rather than the prompt template, so a future feature that assembles prompts differently cannot bypass it. Beyond filtering, I treat any source outsiders can write to as hostile by default: a separate index with tighter thresholds, no path by which its content influences tool selection, and output filtering on the way back out, since exfiltration is the usual goal.
+In the corpus, and teams miss it because the mental model is that filtering happens at the user's keyboard. A partner-uploaded document can carry instructions addressed to the model - reveal the system prompt, ignore prior constraints, call a tool with different arguments - and that text reaches the model having never crossed the input filter, because no user typed it. The fix is to put retrieved context on the same filtering path as user input, in the retrieval pipeline rather than the prompt template, so a future feature that assembles prompts differently cannot bypass it. Prompt Shields is a probabilistic detector, so a clean scan lowers the risk rather than proving the document safe, which is why the containment below still matters. Beyond filtering, I treat any source outsiders can write to as hostile by default: a separate index with tighter thresholds, no path by which its content influences tool selection, and output filtering on the way back out, since exfiltration is the usual goal.
 
 ### 4. Your filter blocks unsafe content effectively and complaints are rising. What is the actual risk?
 
@@ -354,7 +412,9 @@ That people stop using the system, which makes the estate less safe while the da
 ## References
 
 - [Microsoft Learn: Harm categories and severity levels](https://learn.microsoft.com/azure/ai-services/content-safety/concepts/harm-categories) - Harm categories and per-category severity levels used for threshold tuning.
-- [Microsoft Learn: Prompt Shields](https://learn.microsoft.com/azure/ai-services/content-safety/concepts/jailbreak-detection) - Prompt Shields for user prompts and retrieved documents.
+- [Microsoft Learn: Prompt Shields](https://learn.microsoft.com/azure/ai-services/content-safety/concepts/jailbreak-detection) - Prompt Shields for user prompts and retrieved documents, and the Spotlighting preview with its base64 and token-count caveats.
+- [Microsoft Learn: What is Azure AI Content Safety?](https://learn.microsoft.com/azure/ai-services/content-safety/overview) - Prompt Shields input limits (a 10K-character prompt, and up to five documents totalling 10K characters per call), Microsoft Entra ID authentication and the Cognitive Services User role used by the commands and the tuner script.
+- [Microsoft Learn: Defend against indirect prompt injection attacks](https://learn.microsoft.com/security/zero-trust/sfi/defend-indirect-prompt-injection) - Delimiting and data marking of retrieved content as containment behind detection.
 - [OWASP Gen AI Security Project: OWASP GenAI LLM Top 10 2026](https://genai.owasp.org/resource/owasp-genai-llm-top-10-2026/) - LLM01:2026 Prompt Injection, LLM10:2026 Improper Output Handling and associated mitigations.
 - [National Institute of Standards and Technology (NIST): Artificial Intelligence Risk Management Framework (AI RMF 1.0)](https://doi.org/10.6028/NIST.AI.100-1) - MEASURE and MANAGE functions for operational safeguards.
 - [International Organization for Standardization (ISO): ISO/IEC 42001:2023 - AI management systems](https://www.iso.org/standard/42001) - AI management system requirements covering operational controls and incident handling.

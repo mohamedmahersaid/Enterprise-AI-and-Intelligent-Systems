@@ -73,6 +73,14 @@ budget on a task that was impossible from the start. Loop caps, token budgets
 and wall-clock timeouts are not optional extras; they are the difference
 between a feature and an incident.
 
+**Observations can be hostile.** Everything a tool returns — a web page, an
+email, a retrieved document — goes back into the context, and the model cannot
+reliably tell text it should read from text it should obey. In a loop, an
+instruction planted in one observation can choose the next tool and its
+arguments. In a workflow it cannot: the next step is the one you wrote, so
+injected text can spoil an answer but not redirect the run. This is LLM01:2026
+Prompt Injection, and a loop widens it from a bad reply to an action.
+
 ### The question that decides it
 
 Ask this: **can you write the steps down in advance?**
@@ -302,6 +310,7 @@ each costs, so the choice between them is evidence rather than vocabulary.
 - **Track the step-count distribution weekly.** When it tightens around one shape, the loop has finished discovering your workflow and should be replaced by it.
 - **Make every tool idempotent or explicitly confirmed.** A loop will retry, and a non-idempotent action retried three times is three refunds issued.
 - **Give each run a budget in money, not just tokens, and refuse to start without one.** Token caps are abstract to the people approving the feature; a per-run ceiling in currency is not.
+- **Treat every tool result as untrusted input.** Mark it as data rather than instructions when it goes back into the context, give the loop only the tools and permissions the task needs, and confirm any write action whose arguments came from an observation - an injected instruction can only reach what the loop can reach (LLM01:2026 Prompt Injection).
 
 ## Troubleshooting
 
@@ -339,7 +348,7 @@ each costs, so the choice between them is evidence rather than vocabulary.
 
 ### 1. A stakeholder asks for an agent. What do you establish first?
 
-Which of three architectures they mean, because the word covers all of them and they have very different costs. A single call with tools, where the model picks a function and my code runs it. A fixed workflow, where I wrote the sequence and the model supplies judgement at each step. Or a genuine loop, where the model decides its own next action repeatedly until it stops. The deciding question is whether the steps can be written down in advance. If they can, I write them down, because a workflow is cheaper, testable step by step, and produces locatable failures. A loop is warranted only when step four is genuinely unknowable until step three has run. I would ask for the last twenty real requests and write each as a step sequence; if most share a shape, I build that shape and route the exceptions to a human. That usually converts a hard, unpredictable problem into an easy one with an escape hatch, which is a better system and a much smaller bill.
+Which of three architectures they mean, because the word covers all of them and they have very different costs. A single call with tools, where the model picks a function and my code runs it. A fixed workflow, where I wrote the sequence and the model supplies judgement at each step. Or a genuine loop, where the model decides its own next action repeatedly until it stops. The deciding question is whether the steps can be written down in advance. If they can, I write them down, because a workflow is cheaper, testable step by step, and produces locatable failures. A loop is warranted only when step four is genuinely unknowable until step three has run. It also lets text inside a fetched page or document choose the next tool, which a workflow never does, so a loop takes on LLM01:2026 Prompt Injection as an action risk rather than just a bad-answer risk. I would ask for the last twenty real requests and write each as a step sequence; if most share a shape, I build that shape and route the exceptions to a human. That usually converts a hard, unpredictable problem into an easy one with an escape hatch, which is a better system and a much smaller bill.
 
 ### 2. Why does agent cost grow faster than the number of steps?
 
@@ -368,6 +377,7 @@ When the traces show it has stopped being an agent in practice. If I look at a m
 - [Model Context Protocol: Specification (2026-07-28)](https://modelcontextprotocol.io/specification/2026-07-28) - Current MCP specification, which defines the server features tools, resources and prompts.
 - [Model Context Protocol: Tools](https://modelcontextprotocol.io/specification/2025-06-18/server/tools) - MCP definition of model-controlled tools that servers expose for models to invoke.
 - [arXiv (Yao et al., ICLR 2023): ReAct: Synergizing Reasoning and Acting in Language Models](https://arxiv.org/abs/2210.03629) - Reason-act-observe loop pattern that underlies agent loops.
+- [OWASP Gen AI Security Project: OWASP GenAI LLM Top 10 2026](https://genai.owasp.org/resource/owasp-genai-llm-top-10-2026/) - LLM01:2026 Prompt Injection, the risk a loop turns from a bad reply into an action when observations carry instructions.
 - [OpenTelemetry (open-telemetry/semantic-conventions-genai on GitHub): Semantic Conventions for GenAI agent and framework spans](https://github.com/open-telemetry/semantic-conventions-genai/blob/main/docs/gen-ai/gen-ai-agent-spans.md) - Standard span conventions for tracing agent runs and tool calls, used to log full traces.
 
 ## Suggested video search

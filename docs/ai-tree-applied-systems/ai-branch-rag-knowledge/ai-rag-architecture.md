@@ -28,6 +28,8 @@ Retrieval-augmented generation solves the problem a model cannot solve on its ow
 
 **Retrieval quality** is measured, not assumed: recall@k (is the right chunk in the top k?), and increasingly a re-ranking pass (a cross-encoder scoring query-chunk pairs directly) that reorders an over-fetched candidate set before the final top-k reaches the prompt. Hybrid search - combining vector similarity with BM25 keyword search - consistently beats either alone, because vector search misses exact identifiers (part numbers, error codes) that keyword search catches trivially.
 
+**Retrieved chunks are untrusted input.** Once a chunk is in the prompt, the model has no reliable way to tell its text apart from your instructions, so anyone who can write to a source document can write to the prompt. Microsoft calls this a document attack: hidden instructions in third-party content, such as documents, emails and web pages. Scan chunks with Prompt Shields before they reach the prompt, delimit them so retrieved text is marked as data rather than instruction, and require human approval before retrieved content can drive a consequential action. The detector is probabilistic, so the delimiting and the approval step stay in place even when every scan comes back clean.
+
 ## Architecture and flow
 
 ```mermaid
@@ -40,7 +42,8 @@ flowchart TD
     D --> G
     G --> H[Re-ranker\ncross-encoder]
     H --> I[Top-N chunks + citations]
-    I --> J[LLM prompt: context + query]
+    I --> S[Prompt Shields document scan\nflagged chunks dropped]
+    S --> J[LLM prompt: delimited context + query]
     J --> K[Grounded answer]
 ```
 
@@ -238,6 +241,8 @@ if __name__ == "__main__":
 
 **Automated chunk quality checks.** Flag chunks that are pathologically short (likely a parsing artifact from a table or image) or that exceed the embedding model's context limit and were silently truncated - both are common, invisible sources of degraded retrieval.
 
+**Scan new chunks for document attacks at ingestion.** Send each new or changed chunk through Prompt Shields before it is embedded, in batches that respect both per-call limits on `documents` - at most five, and at most 10K characters in total - splitting any chunk longer than 10K characters into parts first, and map each `documentsAnalysis` entry back to its chunk id by position. A call that returns an error, or fewer verdicts than documents sent, leaves its chunks unscanned: hold them out of the index exactly as if they had been flagged, never index them as clean. Quarantine flagged chunks instead of indexing them, and emit the quarantine count per source as a metric: a sudden rise from one source means either a compromised document store or a detector change, and both need a person to look. Ingestion scanning complements the query-time scan rather than replacing it, because chunks indexed before the check existed were never scanned.
+
 ## Troubleshooting
 
 ### Scenario 1: The model answers confidently but cites the wrong document or a document that does not exist.
@@ -301,6 +306,9 @@ Vector search with a bi-encoder embeds the query and every chunk independently, 
 - [Microsoft Learn: Vector search in Azure AI Search](https://learn.microsoft.com/azure/search/vector-search-overview) - Vector search concepts and indexing/query workflow in Azure AI Search.
 - [Microsoft Learn: Hybrid search using vectors and full-text search in Azure AI Search](https://learn.microsoft.com/azure/search/hybrid-search-overview) - Hybrid (keyword + vector) retrieval and RRF result merging.
 - [Microsoft Learn: Chunk large documents for RAG and vector search in Azure AI Search](https://learn.microsoft.com/azure/search/vector-search-how-to-chunk-documents) - Chunking strategies, chunk size/overlap and vectorization for RAG.
+- [Microsoft Learn: Prompt Shields](https://learn.microsoft.com/azure/ai-services/content-safety/concepts/jailbreak-detection) - Document-attack detection used to scan retrieved and newly ingested chunks.
+- [Microsoft Learn: What is Azure AI Content Safety?](https://learn.microsoft.com/azure/ai-services/content-safety/overview) - Prompt Shields input limits: up to five documents totalling 10K characters per call, which set the ingestion batch size.
+- [Microsoft Learn: Defend against indirect prompt injection attacks](https://learn.microsoft.com/security/zero-trust/sfi/defend-indirect-prompt-injection) - Delimiting and data marking of retrieved content, least privilege and human approval for consequential actions.
 - [Ollama: Generate embeddings](https://docs.ollama.com/api/embed) - Ollama embeddings API (/api/embed) reference.
 - [Sentence Transformers (SBERT) documentation: Retrieve & Re-Rank](https://sbert.net/examples/sentence_transformer/applications/retrieve_rerank/README.html) - Bi-encoder retrieval followed by cross-encoder re-ranking pipeline.
 - [Sentence Transformers (SBERT) documentation: Usage (Cross Encoder)](https://sbert.net/docs/cross_encoder/usage/usage.html) - Using cross-encoder reranker models.

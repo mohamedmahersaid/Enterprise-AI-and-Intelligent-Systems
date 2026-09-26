@@ -89,13 +89,47 @@ az cognitiveservices account deployment create -g rg-ai -n aoai-prod --deploymen
 
 ### Command 6
 
-Rotate a key during migration away from key auth; audit that no caller breaks.
+On the VNet host that runs as the managed identity from Command 4, sign in as that identity and get an Entra token for the v1 API - your own account holds no data-plane role, so its token gets 401; add `--client-id <client-id>` for a user-assigned identity, the audience is `https://ai.azure.com`, and the role assignment can take up to five minutes to apply.
 
 ```text
-az cognitiveservices account keys regenerate -g rg-ai -n aoai-prod --key-name key1
+az login --identity
+TOKEN=$(az account get-access-token --resource https://ai.azure.com --query accessToken -o tsv)
 ```
 
 ### Command 7
+
+Prove the keyless path end to end from the same VNet host: v1 route, deployment name in `model`, no api-version, no key; anything but a completion - an unreachable endpoint, a 401 or 403, or an empty reply - exits non-zero, printing the error body when there is one (the reply is captured and checked non-empty first, because jq 1.6 treats empty input as success).
+
+```text
+R=$(curl -sS https://aoai-prod.openai.azure.com/openai/v1/chat/completions -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"model":"chat","messages":[{"role":"user","content":"Reply with the word ok."}]}') && [ -n "$R" ] && printf '%s' "$R" | jq -er ".choices[0].message.content // error(tostring)"
+```
+
+### Command 8
+
+Rotate key1 during migration away from key auth and audit that no caller breaks, then capture key2 - still valid - as the proof key for Command 10. Run this in an admin session signed in as your own account with Cognitive Services Contributor, not on the VNet host after Command 6: the managed identity holds only Cognitive Services OpenAI User, which cannot list or regenerate keys. Copy `OLD_KEY` to the VNet host and run Command 10 there now, expecting 200, because a key that already gets 401 proves nothing.
+
+```text
+az cognitiveservices account keys regenerate -g rg-ai -n aoai-prod --key-name key1
+OLD_KEY=$(az cognitiveservices account keys list -g rg-ai -n aoai-prod --query key2 -o tsv)
+```
+
+### Command 9
+
+Turn key authentication off once every caller is on Entra ID; propagation can take several hours.
+
+```text
+Set-AzCognitiveServicesAccount -ResourceGroupName rg-ai -Name aoai-prod -DisableLocalAuth $true
+```
+
+### Command 10
+
+Confirm keys are really off, from the VNet host - public network access is off since Command 2, so a call from outside gets 403 whatever the key: the key captured in Command 8, which got 200 before Command 9, must now get HTTP 401, and until it does, treat key auth as still enabled; the command refuses to run if OLD_KEY is not set in this shell.
+
+```text
+curl -s -o /dev/null -w "%{http_code}\n" https://aoai-prod.openai.azure.com/openai/v1/chat/completions -H "api-key: ${OLD_KEY:?capture OLD_KEY in Command 8 first}" -H "Content-Type: application/json" -d '{"model":"chat","messages":[{"role":"user","content":"ping"}]}'
+```
+
+### Command 11
 
 Stream request and audit logs for security monitoring and chargeback.
 
@@ -103,7 +137,7 @@ Stream request and audit logs for security monitoring and chargeback.
 az monitor diagnostic-settings create --name aoai-diag --resource $AOAI_ID --workspace $LAW_ID --logs "[{category:RequestResponse,enabled:true},{category:Audit,enabled:true}]"
 ```
 
-### Command 8
+### Command 12
 
 Verify the effective network ACLs during a compliance review.
 
@@ -111,12 +145,20 @@ Verify the effective network ACLs during a compliance review.
 az cognitiveservices account show -g rg-ai -n aoai-prod --query "properties.networkAcls"
 ```
 
-### Command 9
+### Command 13
 
 Enforce that no Azure OpenAI account can be created with public access enabled.
 
 ```text
 az policy assignment create --name deny-public-aoai --policy $POLICY_ID --scope /subscriptions/$SUB
+```
+
+### Command 14
+
+Assign the built-in policy "Azure AI Services resources should have key access disabled (disable local authentication)" so an account that turns keys back on is caught.
+
+```text
+az policy assignment create --name deny-aoai-keys --policy $KEY_POLICY_ID --scope /subscriptions/$SUB
 ```
 
 ## Automation scripts
@@ -283,18 +325,48 @@ exit ([int]($failCount -gt 0))
 3. Confirm the endpoint works from the internet with a key, then disable public network access and confirm the same call now fails.
 4. Create a private endpoint into the application subnet and link the privatelink.openai.azure.com private DNS zone to the VNet.
 5. Deploy a small App Service or container into the VNet with a managed identity and assign it the Cognitive Services OpenAI User role.
-6. Modify the application to acquire an Entra token via DefaultAzureCredential rather than reading an API key, and confirm a successful completion.
-7. Disable local authentication on the account and confirm key-based calls now fail while the managed identity path still succeeds.
+6. Modify the application to acquire an Entra token via DefaultAzureCredential rather than reading an API key, and confirm a successful completion. The change is the client construction shown after these steps.
+7. Capture key2 and confirm it still gets 200 (Commands 8 and 10), disable local authentication on the account (Command 9) and confirm that same key now fails with HTTP 401 (Command 10) while the managed identity path still succeeds; propagation can take several hours, so repeat the key check rather than trusting the first result.
 8. Enable diagnostic settings to a Log Analytics workspace and locate your own request in the RequestResponse table.
 9. Configure a content filter policy and verify a disallowed prompt is blocked with the expected error shape.
 10. Run the PowerShell posture audit and remediate any FAIL rows until it exits zero.
+
+The client for step 6 requires `pip install azure-identity openai`. The token scope is `https://ai.azure.com/.default`, the base URL is the v1 route with no api-version, and the deployment name goes in `model`.
+
+```python
+"""Lab step 6: call the deployment with an Entra token instead of an API key."""
+import os
+import sys
+
+endpoint = os.environ.get("AZURE_OPENAI_ENDPOINT")  # https://aoai-prod.openai.azure.com
+if not endpoint:
+    sys.exit("set AZURE_OPENAI_ENDPOINT (and AZURE_OPENAI_DEPLOYMENT, default chat) first")
+
+try:
+    from azure.identity import DefaultAzureCredential, get_bearer_token_provider
+    from openai import OpenAI
+except ImportError:
+    sys.exit("pip install azure-identity openai first")
+
+# Managed identity on App Service or AKS; no key anywhere. An az login token
+# works only if that account also holds Cognitive Services OpenAI User.
+token_provider = get_bearer_token_provider(
+    DefaultAzureCredential(), "https://ai.azure.com/.default"
+)
+client = OpenAI(base_url=f"{endpoint.rstrip('/')}/openai/v1/", api_key=token_provider)
+response = client.chat.completions.create(
+    model=os.environ.get("AZURE_OPENAI_DEPLOYMENT", "chat"),  # deployment, not model
+    messages=[{"role": "user", "content": "Reply with the word ok."}],
+)
+print(response.choices[0].message.content)
+```
 
 ### Validation
 
 - A call from the public internet to the account endpoint fails with a network or forbidden error.
 - A call from inside the VNet using managed identity succeeds and returns a completion.
 - nslookup of the account hostname from inside the VNet resolves to a private IP in the private endpoint subnet.
-- An API-key call fails after local authentication is disabled.
+- An API-key call fails with HTTP 401 after local authentication is disabled and has propagated.
 - The RequestResponse table in Log Analytics contains the test request with the calling identity recorded.
 - The posture audit script exits with code 0 and every control reports PASS in aoai-posture.csv.
 
@@ -310,7 +382,7 @@ exit ([int]($failCount -gt 0))
 
 **Continuous posture verification.** Run the audit script on a schedule in Azure Automation or a pipeline, publishing results to a workbook. It exits non-zero on any failure so it can gate a release. This closes the gap between the compliance statement and the running configuration, which is where audit findings actually come from.
 
-**Key elimination as a project.** Enumerate every caller from the diagnostic logs, migrate each to managed identity, then set disableLocalAuth. Regenerating keys first is a useful forcing function - anything that breaks was still using key auth.
+**Key elimination as a project.** Enumerate every caller from the diagnostic logs, migrate each to managed identity, then set disableLocalAuth and keep testing an old key until it gets 401, because the change can take hours to reach every node. Assign the built-in policy "Azure AI Services resources should have key access disabled (disable local authentication)" so an account that drifts back to keys is reported rather than discovered. Regenerating keys first is a useful forcing function - anything that breaks was still using key auth.
 
 ## Troubleshooting
 
@@ -324,7 +396,7 @@ exit ([int]($failCount -gt 0))
 
 **Likely cause:** The wrong scope or role was assigned, the token was requested for the wrong audience, or role assignment propagation has not completed.
 
-**Resolution:** Confirm the role is Cognitive Services OpenAI User assigned at the account scope - Contributor grants control-plane rights but not data-plane inference. Ensure the token audience is `https://cognitiveservices.azure.com`. Allow several minutes for propagation and restart the application so it does not serve a cached negative token.
+**Resolution:** Confirm the role is Cognitive Services OpenAI User assigned at the account scope - Contributor grants control-plane rights but not data-plane inference. Ensure the token is requested for `https://ai.azure.com/.default` (`--resource https://ai.azure.com` from the CLI), which the v1 API expects. Allow up to five minutes for propagation and restart the application so it does not serve a cached negative token.
 
 ### Scenario 3: Requests intermittently return 429 despite provisioned capacity that looks sufficient.
 

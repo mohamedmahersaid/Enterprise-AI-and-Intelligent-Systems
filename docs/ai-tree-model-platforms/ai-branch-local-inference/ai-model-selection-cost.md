@@ -112,9 +112,19 @@ Send request-level logs to Log Analytics so spend can be attributed per applicat
 az monitor diagnostic-settings create --name aoai-logs --resource $AOAI_ID --workspace $LAW_ID --logs "[{category:RequestResponse,enabled:true}]"
 ```
 
+### Command 9
+
+Grant the identity that runs the harness the least-privilege inference role on the account, so it calls with a Microsoft Entra ID token instead of an API key. It does not cover deployment create or list, which are control-plane calls needing a role such as Cognitive Services Contributor; the assignment can take up to five minutes to apply.
+
+```text
+az role assignment create --assignee <principal-object-id> --role "Cognitive Services OpenAI User" --scope $AOAI_ID
+```
+
 ## Automation scripts
 
 ### Model routing cost and quality comparison harness
+
+The Azure candidates authenticate with Microsoft Entra ID - az login on a laptop, managed identity on an Azure host - and require `pip install azure-identity`; the Ollama candidate needs only the standard library. If a key is unavoidable, keep it in Key Vault and read it at runtime, never in an environment file or the repository.
 
 ```python
 #!/usr/bin/env python3
@@ -143,7 +153,7 @@ CANDIDATES = {
 
 OLLAMA = os.environ.get("OLLAMA_HOST", "http://127.0.0.1:11434")
 AOAI = os.environ.get("AZURE_OPENAI_ENDPOINT", "")
-AOAI_KEY = os.environ.get("AZURE_OPENAI_API_KEY", "")
+_TOKEN_PROVIDER = None
 
 
 def load_evalset(path):
@@ -175,9 +185,24 @@ def call_ollama(model, prompt):
             out.get("eval_count", 0))
 
 
+def aoai_token():
+    """Short-lived Entra ID token for Azure OpenAI - no API key. Imported
+    lazily so an Ollama-only run needs no azure-identity install."""
+    global _TOKEN_PROVIDER
+    if _TOKEN_PROVIDER is None:
+        try:
+            from azure.identity import DefaultAzureCredential, get_bearer_token_provider
+        except ImportError:
+            raise RuntimeError("Azure candidates need azure-identity: "
+                               "pip install azure-identity") from None
+        _TOKEN_PROVIDER = get_bearer_token_provider(
+            DefaultAzureCredential(), "https://ai.azure.com/.default")
+    return _TOKEN_PROVIDER()
+
+
 def call_azure(model, prompt):
-    if not AOAI or not AOAI_KEY:
-        raise RuntimeError("AZURE_OPENAI_ENDPOINT / _API_KEY not set")
+    if not AOAI:
+        raise RuntimeError("AZURE_OPENAI_ENDPOINT not set")
     url = "%s/openai/v1/chat/completions" % AOAI.rstrip("/")
     body = {"model": model, "messages": [{"role": "user", "content": prompt}],
             # Reasoning models - the GPT-5 family - reject temperature and max_tokens;
@@ -185,7 +210,7 @@ def call_azure(model, prompt):
             # so an empty answer means the cap is too low for the effort used.
             "max_completion_tokens": 512}
     out = post(url, body, {"Content-Type": "application/json",
-                           "api-key": AOAI_KEY})
+                           "Authorization": "Bearer " + aoai_token()})
     usage = out.get("usage", {})
     text = out["choices"][0]["message"]["content"]
     return (text, usage.get("prompt_tokens", 0),
@@ -268,8 +293,8 @@ if __name__ == "__main__":
 ### Steps
 
 1. Collect 50-100 real prompts from one production workload, for example incident summarisation, and write a reference answer for each into evalset.csv with columns prompt and expected.
-2. Deploy a small hosted model as chat-small (Command 2) and a larger one as chat-large - gpt-5.1 2025-11-13 in regional Standard, for example - in Azure OpenAI with explicit TPM capacity, and pull an 8B model locally with Ollama. If you choose other names, rename the CANDIDATES keys to match.
-3. Copy the current per-million-token input and output prices for your region and deployment type from the Azure OpenAI pricing page into CANDIDATES, set AZURE_OPENAI_ENDPOINT and AZURE_OPENAI_API_KEY, then run the comparison harness against the evaluation set.
+2. Deploy a small hosted model as chat-small (Command 2) and a larger one as chat-large - gpt-5.1 2025-11-13 in regional Standard, for example - in Azure OpenAI with explicit TPM capacity, and pull an 8B model locally with Ollama. Creating deployments is a control-plane action that needs a role such as Cognitive Services Contributor. If you choose other names, rename the CANDIDATES keys to match.
+3. Copy the current per-million-token input and output prices for your region and deployment type from the Azure OpenAI pricing page into CANDIDATES, grant your identity Cognitive Services OpenAI User on the account (Command 9), run az login and set AZURE_OPENAI_ENDPOINT - no API key - then run the comparison harness against the evaluation set.
 4. Record quality, p50 and p95 latency and USD per 1000 requests for each candidate from model-comparison.json.
 5. Compute the crossover point: at what monthly request volume does the amortised GPU cost of the local model beat the hosted per-token cost?
 6. Restructure one prompt so the long static system instructions come first, re-run it, and confirm cached input tokens appear in the usage payload.
@@ -359,6 +384,7 @@ Memory first, then throughput. Memory is weights plus KV cache plus overhead. We
 ## References
 
 - [Microsoft Learn: Azure OpenAI in Microsoft Foundry Models quotas and limits](https://learn.microsoft.com/azure/foundry/openai/quotas-limits) - TPM quotas and rate limits per deployment, used to cap spend and to explain 429 throttling.
+- [Microsoft Learn: How to configure Azure OpenAI in Microsoft Foundry Models with Microsoft Entra ID authentication (classic)](https://learn.microsoft.com/azure/foundry-classic/openai/how-to/managed-identity) - Keyless harness calls with DefaultAzureCredential, the Cognitive Services OpenAI User role, and the separate control-plane role for deployments.
 - [Microsoft Learn: What is provisioned throughput for Foundry Models?](https://learn.microsoft.com/azure/foundry/openai/concepts/provisioned-throughput) - Provisioned throughput units and fixed-capacity versus per-token billing economics.
 - [Microsoft Learn: Getting started with Azure OpenAI batch deployments](https://learn.microsoft.com/azure/foundry/openai/how-to/batch) - Batch processing discount for work that can wait for a delayed completion window.
 - [Microsoft Learn: Prompt caching](https://learn.microsoft.com/azure/foundry/openai/how-to/prompt-caching) - Prompt caching of repeated prefixes, what breaks it, and checking cached tokens in the usage payload.
