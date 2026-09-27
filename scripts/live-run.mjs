@@ -114,9 +114,16 @@ if (Object.keys(spec.scripts ?? {}).length) {
   }
 }
 
-// Values every setup line and step sees. Captured variables join as they are
-// produced.
-const runEnv = { ...process.env, ...(spec.env ?? {}) };
+// Values every setup line and step sees. A value may reference the process
+// environment as $NAME, and $WORK is the working directory itself -
+// "$WORK/bin:$PATH" puts a spec's shims first as absolute paths, which
+// matters: a relative PATH entry makes `python -m venv` symlink the new
+// venv to the relative argv0, and the venv dangles. An unset name expands
+// to nothing. Captured variables join as they are produced.
+const expandEnv = (value) => value.replace(/\$([A-Za-z_][A-Za-z0-9_]*)/g,
+  (_, name) => (name === 'WORK' ? work : process.env[name] ?? ''));
+const runEnv = { ...process.env };
+for (const [name, value] of Object.entries(spec.env ?? {})) runEnv[name] = expandEnv(value);
 const captured = {};
 
 /** The spec's substitutions plus captured variables, applied to step text. */
@@ -304,7 +311,8 @@ for (const step of setupFailed ? [] : spec.steps) {
 // only a connection warning, not their version, when nothing is listening.
 // One line, and never a warning when a real version line is present.
 function version(cmd) {
-  const lines = (spawnSync('bash', ['-c', cmd], { encoding: 'utf8' }).stdout ?? '')
+  const lines = (spawnSync('bash', ['-c', cmd], { cwd: work, env: runEnv, encoding: 'utf8' }).stdout ?? '')
+    .replace(/\x1b\[[0-9;]*m/g, '') // tools decorate their version lines
     .split('\n').map((l) => l.trim()).filter(Boolean);
   return lines.find((l) => !/^warning/i.test(l)) ?? lines.join('; ');
 }

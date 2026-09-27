@@ -270,7 +270,7 @@ what they test, every Tuesday, and on demand:
   a non-zero status, `until` streams until the expect matches, `capture`
   hands a matched group to later steps, `substitute` fills `<placeholders>`
   with the report recording the leaf's text and what ran side by side, and
-  `versions` records tool versions into the run's environment line. The
+  `versions` records tool versions into the run's environment line; an `env` value may reference the process environment as `$NAME`, and `$WORK` is the working directory itself. The
   workflow runs one matrix leg per spec (`scripts/live-matrix.mjs`), installs
   only what each leaf's needs declare, and uploads each leg's `live-run.json`
   as an artifact; a spec'd leaf must also appear in `live.yml`'s
