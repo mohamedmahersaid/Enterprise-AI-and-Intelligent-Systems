@@ -12,10 +12,25 @@
  *
  *   files     fixtures the commands expect in their working directory - the
  *             Modelfile the lab has the reader write, for example
+ *   copy      {dest: source} - repository fixtures copied in, confined to the
+ *             leaf's own directory
+ *   scripts   {dest: heading} - python blocks extracted from the leaf's
+ *             "## Automation scripts" section, so the script that runs is the
+ *             leaf's own text, never a copy; the report records each sha256
+ *   setup     [{run, expect?, timeout?}] - commands run before the steps and
+ *             reported separately: setup is scaffolding, never coverage
+ *   env       non-secret environment values for setup and steps
+ *   substitute{"<placeholder>": value} - applied to step text; the report
+ *             records the leaf's text and what actually ran, side by side
+ *   versions  commands whose one-line output records tool versions
  *   steps     one per command, in order: `command` is the leaf's Command
  *             number; `background` starts a server and waits for `ready` to
  *             succeed; `stdin` feeds an interactive command; `expect` is a
- *             regular expression the output must match; `timeout` in seconds
+ *             regular expression the output must match (required, or
+ *             `"expect": null` with an `expect_reason`); `exit` the expected
+ *             status; `until` streams until expect matches; `capture` makes
+ *             group 1 of a match available to later steps; `timeout` in
+ *             seconds
  *   skip      every Command the steps do not run, each with the reason
  *
  * Every Command in the leaf must be either run or skipped with a reason, so a
@@ -27,11 +42,13 @@
  *
  * Usage: node scripts/live-run.mjs <leaf-id> [--json report.json]
  */
+import crypto from 'node:crypto';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
-import { checkSpec, parseCommands } from './lib/live-spec.mjs';
+import { checkSpec, parseCommands, scriptHeadings } from './lib/live-spec.mjs';
+import { pythonBlocks } from './lib/python-blocks.mjs';
 
 const id = process.argv[2];
 if (!id || id.startsWith('--')) {
@@ -51,8 +68,12 @@ const spec = JSON.parse(fs.readFileSync(specPath, 'utf8'));
 // heading-first, and checked against the spec, by scripts/lib/live-spec.mjs.
 // validate:content runs the same checks on every PR; this repeats them so a
 // stale checkout still fails loudly instead of running the wrong text.
-const parsed = parseCommands(fs.readFileSync(leaf.path, 'utf8'), leaf.path);
-const problems = [...parsed.errors, ...checkSpec(spec, parsed.commands, specPath)];
+const leafBody = fs.readFileSync(leaf.path, 'utf8');
+const parsed = parseCommands(leafBody, leaf.path);
+const problems = [...parsed.errors, ...checkSpec(spec, parsed.commands, specPath, {
+  leafDir: path.dirname(leaf.path),
+  scriptNames: scriptHeadings(leafBody),
+})];
 if (problems.length) {
   console.error(`${specPath} does not match ${leaf.path}:\n  ${problems.join('\n  ')}`);
   process.exit(1);
@@ -62,6 +83,48 @@ const leafCommands = parsed.commands;
 const work = fs.mkdtempSync(path.join(os.tmpdir(), `live-${id}-`));
 for (const [name, content] of Object.entries(spec.files ?? {})) {
   fs.writeFileSync(path.join(work, name), content);
+}
+
+// Repository fixtures, checked again here (checkSpec confines them offline):
+// only paths under the leaf's own directory reach the working directory.
+const leafDir = `${path.dirname(leaf.path)}/`;
+for (const [dest, source] of Object.entries(spec.copy ?? {})) {
+  if (!source.startsWith(leafDir) || source.includes('..')) {
+    console.error(`${specPath}: copy source "${source}" escapes ${leafDir}`);
+    process.exit(1);
+  }
+  const target = path.join(work, dest);
+  fs.mkdirSync(path.dirname(target), { recursive: true });
+  fs.cpSync(source, target, { recursive: true });
+}
+
+// The leaf's own scripts, extracted from its Automation scripts section, so
+// what runs is the text a reader sees. The report records each file's sha256.
+const scriptHashes = {};
+if (Object.keys(spec.scripts ?? {}).length) {
+  const blocks = pythonBlocks([leaf]);
+  for (const [dest, heading] of Object.entries(spec.scripts)) {
+    const block = blocks.find((b) => b.name === heading);
+    if (!block) {
+      console.error(`${specPath}: no python block under "### ${heading}" in ${leaf.path}`);
+      process.exit(1);
+    }
+    fs.writeFileSync(path.join(work, dest), block.code);
+    scriptHashes[dest] = crypto.createHash('sha256').update(block.code).digest('hex');
+  }
+}
+
+// Values every setup line and step sees. Captured variables join as they are
+// produced.
+const runEnv = { ...process.env, ...(spec.env ?? {}) };
+const captured = {};
+
+/** The spec's substitutions plus captured variables, applied to step text. */
+function substitute(text) {
+  let out = text;
+  for (const [token, value] of Object.entries(spec.substitute ?? {})) out = out.replaceAll(token, value);
+  for (const [name, value] of Object.entries(captured)) out = out.replaceAll(`<${name}>`, value);
+  return out;
 }
 
 const background = [];
@@ -92,7 +155,7 @@ for (const signal of ['SIGINT', 'SIGTERM']) {
   });
 }
 
-const probe = (check) => spawnSync('bash', ['-c', check], { cwd: work }).status === 0;
+const probe = (check) => spawnSync('bash', ['-c', check], { cwd: work, env: runEnv }).status === 0;
 
 async function waitReady(bg, check, seconds) {
   const until = Date.now() + seconds * 1000;
@@ -110,14 +173,24 @@ async function waitReady(bg, check, seconds) {
  * then wait for the step to finish instead of stopping the run. The command
  * gets its own process group so a timeout or a signal stops all of it.
  */
-function runForeground(text, stdin, timeoutMs) {
+function runForeground(text, stdin, timeoutMs, until = null) {
   return new Promise((resolve) => {
-    const child = spawn('bash', [...SHELL, text], { cwd: work, stdio: ['pipe', 'pipe', 'pipe'], detached: true });
+    const child = spawn('bash', [...SHELL, text], { cwd: work, env: runEnv, stdio: ['pipe', 'pipe', 'pipe'], detached: true });
     foreground.add(child);
     let output = '';
     let timedOut = false;
-    child.stdout.on('data', (d) => (output += d));
-    child.stderr.on('data', (d) => (output += d));
+    let streamed = false;
+    const watch = (d) => {
+      output += d;
+      // A streaming step passes the moment its expect appears; the process
+      // (a server, a follow, a watch) is then stopped - it never exits alone.
+      if (until && !streamed && until.expect.test(output)) {
+        streamed = true;
+        try { process.kill(-child.pid, 'SIGKILL'); } catch { /* already gone */ }
+      }
+    };
+    child.stdout.on('data', watch);
+    child.stderr.on('data', watch);
     child.stdin.on('error', () => { /* the command closed stdin early */ });
     child.stdin.end(stdin);
     const timer = setTimeout(() => {
@@ -127,7 +200,7 @@ function runForeground(text, stdin, timeoutMs) {
     child.on('close', (status, signal) => {
       clearTimeout(timer);
       foreground.delete(child);
-      resolve({ status, signal, output, error: timedOut ? { code: 'ETIMEDOUT' } : null });
+      resolve({ status, signal, output, streamed, error: timedOut && !streamed ? { code: 'ETIMEDOUT' } : null });
     });
   });
 }
@@ -142,7 +215,7 @@ async function runStep(step, text) {
     if (probe(step.ready)) {
       return { ok: false, output: '', why: `something already answers \`${step.ready}\` - stop it first` };
     }
-    const child = spawn('bash', [...SHELL, text], { cwd: work, stdio: ['ignore', 'pipe', 'pipe'], detached: true });
+    const child = spawn('bash', [...SHELL, text], { cwd: work, env: runEnv, stdio: ['ignore', 'pipe', 'pipe'], detached: true });
     const bg = { child, command: step.command, log: '', exited: undefined };
     child.stdout.on('data', (d) => (bg.log += d));
     child.stderr.on('data', (d) => (bg.log += d));
@@ -153,26 +226,66 @@ async function runStep(step, text) {
     if (bg.exited !== undefined) return { ok: false, output: bg.log, why: `exited ${bg.exited} before or just after becoming ready` };
     return { ok: ready, output: bg.log, why: ready ? '' : `not ready: ${step.ready}`, bg };
   }
-  const r = await runForeground(text, step.stdin ?? '', (step.timeout ?? 120) * 1000);
+  const until = step.until ? { expect: new RegExp(step.expect, 'm') } : null;
+  const timeout = step.until ?? step.timeout ?? 120;
+  const r = await runForeground(text, step.stdin ?? '', timeout * 1000, until);
   const output = r.output;
   const matched = step.expect ? new RegExp(step.expect, 'm').test(output) : true;
+  const exits = step.exit === undefined ? [0] : Array.isArray(step.exit) ? step.exit : [step.exit];
   const dead = deadServer();
-  const why = r.error?.code === 'ETIMEDOUT' ? `timed out after ${step.timeout ?? 120}s`
-    : r.status !== 0 ? `exited ${r.status ?? r.signal}`
-      : !matched ? `output did not match /${step.expect}/`
-        : dead ? `the server from Command ${dead.command} exited (${dead.exited}) during this step`
+  const why = until
+    ? (r.streamed ? '' : `the stream never matched /${step.expect}/ within ${timeout}s`)
+    : r.error?.code === 'ETIMEDOUT' ? `timed out after ${timeout}s`
+      : !exits.includes(r.status) ? `exited ${r.status ?? r.signal}, not ${exits.join(' or ')}`
+        : !matched ? `output did not match /${step.expect}/`
           : '';
-  return { ok: !why && !r.error, output, why };
+  const late = !why && dead ? `the server from Command ${dead.command} exited (${dead.exited}) during this step` : '';
+  const result = { ok: !why && !late && (until ? true : !r.error), output, why: why || late };
+  if (result.ok && step.capture) {
+    const m = output.match(new RegExp(step.capture.regex, 'm'));
+    if (m?.[1] === undefined) {
+      return { ok: false, output, why: `capture /${step.capture.regex}/ matched nothing to assign to <${step.capture.name}>` };
+    }
+    captured[step.capture.name] = m[1];
+  }
+  return result;
+}
+
+// Setup builds what the commands need - runs the leaf's script over the
+// fixtures, seeds a git history - and is reported separately: scaffolding is
+// never coverage, and a setup failure fails the run before any Command runs.
+const setupResults = [];
+let setupFailed = false;
+for (const [i, s] of (spec.setup ?? []).entries()) {
+  const started = Date.now();
+  const r = await runForeground(s.run, '', (s.timeout ?? 300) * 1000);
+  const matched = s.expect ? new RegExp(s.expect, 'm').test(r.output) : true;
+  const why = r.error?.code === 'ETIMEDOUT' ? `timed out after ${s.timeout ?? 300}s`
+    : r.status !== 0 ? `exited ${r.status ?? r.signal}`
+      : !matched ? `output did not match /${s.expect}/`
+        : '';
+  const entry = { run: s.run, seconds: Math.round((Date.now() - started) / 1000), ok: !why, why, output: r.output.slice(-2000) };
+  setupResults.push(entry);
+  console.log(`${entry.ok ? 'pass' : 'FAIL'}  setup ${i + 1}  (${entry.seconds}s)  ${s.run.split('\n')[0]}${why ? `\n      ${why}` : ''}`);
+  if (!entry.ok) {
+    console.log(entry.output.split('\n').slice(-15).map((l) => `      | ${l}`).join('\n'));
+    setupFailed = true;
+    break;
+  }
 }
 
 const results = [];
-for (const step of spec.steps) {
+for (const step of setupFailed ? [] : spec.steps) {
   const text = leafCommands.get(step.command);
+  const ran = substitute(text);
   const started = Date.now();
-  const result = await runStep(step, text);
+  const result = await runStep(step, ran);
   const entry = {
     command: step.command,
     text,
+    // What actually ran, only when substitution changed the leaf's text, so a
+    // reviewer sees both sides of every replacement.
+    ...(ran !== text ? { ran } : {}),
     seconds: Math.round((Date.now() - started) / 1000),
     ok: result.ok,
     why: result.why,
@@ -180,7 +293,7 @@ for (const step of spec.steps) {
   };
   if (result.bg) result.bg.entry = entry;
   results.push(entry);
-  console.log(`${entry.ok ? 'pass' : 'FAIL'}  Command ${step.command}  (${entry.seconds}s)  ${text.split('\n')[0]}${entry.why ? `\n      ${entry.why}` : ''}`);
+  console.log(`${entry.ok ? 'pass' : 'FAIL'}  Command ${step.command}  (${entry.seconds}s)  ${ran.split('\n')[0]}${entry.why ? `\n      ${entry.why}` : ''}`);
   if (!entry.ok) {
     console.log(entry.output.split('\n').slice(-15).map((l) => `      | ${l}`).join('\n'));
     break; // later commands depend on earlier ones; stop at the first failure
@@ -195,12 +308,12 @@ function version(cmd) {
     .split('\n').map((l) => l.trim()).filter(Boolean);
   return lines.find((l) => !/^warning/i.test(l)) ?? lines.join('; ');
 }
-const serviceVersion = spec.version ? version(spec.version) : '';
+const serviceVersion = [spec.version, ...(spec.versions ?? [])].filter(Boolean).map(version).filter(Boolean).join('; ');
 
 // A server's output keeps arriving after its step passes; record all of it.
 for (const bg of background) if (bg.entry) bg.entry.output = bg.log.slice(-2000);
 
-const passed = results.length === spec.steps.length && results.every((r) => r.ok);
+const passed = !setupFailed && results.length === spec.steps.length && results.every((r) => r.ok);
 const ran = results.filter((r) => r.ok).map((r) => r.command);
 const report = {
   leaf: id,
@@ -219,6 +332,10 @@ const report = {
     process.env.ImageOS && `${process.env.ImageOS} ${process.env.ImageVersion ?? ''}`.trim(),
     serviceVersion,
   ].filter(Boolean).join(', ') || os.platform(),
+  // Scaffolding the spec ran before the Commands - never counted as coverage.
+  ...(setupResults.length ? { setup: setupResults } : {}),
+  // Each extracted leaf script, hashed, so the report pins what ran.
+  ...(Object.keys(scriptHashes).length ? { scripts_sha256: scriptHashes } : {}),
   steps: results,
 };
 
@@ -229,6 +346,7 @@ const md = [
   '',
   '| Command | Result | Seconds | Note |',
   '| --- | --- | ---: | --- |',
+  ...setupResults.map((r, i) => `| setup ${i + 1} | ${r.ok ? 'pass' : 'fail'} | ${r.seconds} | ${(r.why || r.run.split('\n')[0]).replace(/\|/g, '\\|')} |`),
   ...results.map((r) => `| ${r.command} | ${r.ok ? 'pass' : 'fail'} | ${r.seconds} | ${r.why.replace(/\|/g, '\\|')} |`),
   ...Object.entries(report.skipped).map(([n, why]) => `| ${n} | skipped | | ${why.replace(/\|/g, '\\|')} |`),
   '',

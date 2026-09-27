@@ -114,7 +114,7 @@ export function checkValidationShape(validation, file = 'data/validation.json') 
 // hour finding out.
 const STEP_TYPES = {
   command: 'number', background: 'boolean', ready: 'string',
-  timeout: 'number', stdin: 'string', expect: 'string',
+  timeout: 'number', stdin: 'string', expect_reason: 'string',
 };
 
 export function checkLiveSpec(spec, file) {
@@ -134,6 +134,11 @@ export function checkLiveSpec(spec, file) {
       }
       for (const [key, type] of Object.entries(STEP_TYPES)) {
         if (key in step && typeof step[key] !== type) errors.push(`${at} "${key}" is not a ${type}.`);
+      }
+      // `expect` is a regex string, or null when the step opts out with an
+      // expect_reason - live-spec.mjs enforces that pairing.
+      if ('expect' in step && step.expect !== null && typeof step.expect !== 'string') {
+        errors.push(`${at} "expect" is not a string or null.`);
       }
       if (typeof step.expect === 'string') {
         try {

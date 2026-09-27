@@ -3,7 +3,7 @@ import { deriveAssumptions, renderAssumptionsMd } from './lib/assumptions.mjs';
 import { checkCertifications } from './lib/certifications.mjs';
 import { checkReferences } from './lib/references.mjs';
 import { checkReadiness, checkReadinessLine, loadValidation, renderReadinessMd } from './lib/readiness.mjs';
-import { checkSpec, parseCommands } from './lib/live-spec.mjs';
+import { checkLivePaths, checkSpec, parseCommands, scriptHeadings } from './lib/live-spec.mjs';
 import { parityGates, runsGate } from './lib/parity.mjs';
 import { checkCatalogShape, checkLiveSpec, checkValidationShape, orphanDocs } from './lib/schema.mjs';
 import { checkSectionDepth, parseLines } from './lib/sections.mjs';
@@ -488,13 +488,32 @@ function checkLiveSpecs() {
       errors.push(`${specPath}: is not valid JSON: ${error.message}`);
       continue;
     }
-    const { commands, errors: parseErrors } = parseCommands(fs.readFileSync(leaf.path, 'utf8'), leaf.path);
+    const body = fs.readFileSync(leaf.path, 'utf8');
+    const { commands, errors: parseErrors } = parseCommands(body, leaf.path);
     // Parse errors are already reported once per leaf above; only the
     // spec-vs-leaf mismatches are new here.
-    if (!parseErrors.length) errors.push(...checkSpec(spec, commands, specPath));
+    if (!parseErrors.length) {
+      errors.push(...checkSpec(spec, commands, specPath, {
+        leafDir: path.dirname(leaf.path),
+        scriptNames: scriptHeadings(body),
+      }));
+    }
+    entries.push({
+      leafPath: leaf.path,
+      fixturesDir: (() => {
+        const dir = `${path.dirname(leaf.path)}/fixtures`;
+        return Object.values(spec.copy ?? {}).some((src) => String(src).startsWith(`${dir}/`)) ? dir : null;
+      })(),
+    });
+  }
+  // A spec'd leaf missing from live.yml's pull_request paths would join the
+  // matrix on main yet never run on the pull request that edits it.
+  if (fs.existsSync('.github/workflows/live.yml')) {
+    errors.push(...checkLivePaths(fs.readFileSync('.github/workflows/live.yml', 'utf8'), entries));
   }
 }
 
+const entries = [];
 checkLiveSpecs();
 
 // --- runner parity -----------------------------------------------------------

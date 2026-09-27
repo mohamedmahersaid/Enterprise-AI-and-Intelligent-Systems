@@ -6,11 +6,19 @@ name: Live validation
 # pull request. A passing run is evidence; recording it in
 # data/validation.json, and so promoting a leaf to validated, is a reviewed
 # pull request, never something this workflow does.
+#
+# The paths below must list every leaf that has a data/live spec, and its
+# fixtures directory when the spec copies one - validate-content fails a pull
+# request whose spec is missing from this filter, because the filter is static
+# YAML and a leaf the matrix knows but the filter does not would never run on
+# the pull request that edits it.
 on:
   pull_request:
     paths:
       - data/live/**
       - scripts/live-run.mjs
+      - scripts/live-matrix.mjs
+      - scripts/lib/live-spec.mjs
       - docs/ai-tree-model-platforms/ai-branch-local-inference/ai-ollama-local-inference.md
       - .github/workflows/live.yml
   schedule:
@@ -23,8 +31,10 @@ on:
         default: '0.34.4'
 
 # Read-only, and no job here holds a secret: live-run.mjs executes the
-# leaves' commands. The registry check for pinned model tags is in
-# model-tags.yml, which runs on every leaf change because it takes seconds.
+# leaves' commands, which is safe exactly while no job in this workflow gets
+# a token or a secret - keep it that way in review. The registry check for
+# pinned model tags is in model-tags.yml, which runs on every leaf change
+# because it takes seconds.
 permissions:
   contents: read
 
@@ -35,9 +45,34 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  ollama-leaf:
+  # One leg per data/live spec: a new spec joins the run by existing. The
+  # matrix carries each leaf's needs so the leg below installs only what the
+  # leaf declares.
+  list:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      matrix: ${{ steps.list.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22'
+      - id: list
+        run: node scripts/live-matrix.mjs --github
+
+  # ubuntu-24.04 by name, not ubuntu-latest: 'validated' evidence must not
+  # silently change operating system when the label moves.
+  leaf:
+    needs: list
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.list.outputs.matrix) }}
+    name: ${{ matrix.leaf }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -48,8 +83,8 @@ jobs:
 
       # The manual install from Ollama's Linux documentation, not install.sh:
       # the script registers a systemd service that would already hold port
-      # 11434 when the leaf's Command 1 starts its own server. The version
-      # installed is recorded in the run report either way.
+      # 11434 when a leaf's own server starts. Only for leaves that declare
+      # the ollama need.
       #
       # The version defaults to the one the recorded evidence in
       # data/validation.json used, so pull-request and scheduled runs test the
@@ -60,6 +95,7 @@ jobs:
       # it before anything is unpacked into /usr. The current release is
       # exercised by the ollama-latest-drift job below.
       - name: Install Ollama
+        if: contains(matrix.needs, 'ollama')
         env:
           OLLAMA_VERSION: ${{ inputs.ollama_version || '0.34.4' }}
         run: |
@@ -71,11 +107,10 @@ jobs:
           rm ollama-linux-amd64.tar.zst
           ollama -v
 
-      # Runs the leaf's own command blocks, in order, against a local server on
-      # the runner's CPU, and fails at the first command whose exit status or
-      # output does not match data/live/ai-ollama-local-inference.json.
-      - name: Run the Ollama leaf's commands
-        run: node scripts/live-run.mjs ai-ollama-local-inference --json live-run.json
+      # Runs the leaf's own command blocks, in order, and fails at the first
+      # command whose exit status or output does not match its data/live spec.
+      - name: Run the leaf's commands
+        run: node scripts/live-run.mjs ${{ matrix.leaf }} --json live-run.json
 
       - name: Print the run report
         if: always()
@@ -95,18 +130,18 @@ jobs:
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: live-run
+          name: live-run-${{ matrix.leaf }}
           path: live-run.json
           if-no-files-found: ignore
 
-  # Experimental: the same leaf against the current Ollama release, weekly, so
-  # the pinned default above ages loudly rather than silently. Its outcome is
-  # never evidence - data/validation.json records only the pinned job - so it
-  # uploads no artifact, and continue-on-error keeps a drift failure from
+  # Experimental: the Ollama leaf against the current Ollama release, weekly,
+  # so the pinned default above ages loudly rather than silently. Its outcome
+  # is never evidence - data/validation.json records only the pinned job - so
+  # it uploads no artifact, and continue-on-error keeps a drift failure from
   # marking the scheduled run red; what it leaves is a readable log.
   ollama-latest-drift:
     if: github.event_name == 'schedule'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     continue-on-error: true
     steps:
@@ -149,7 +184,7 @@ jobs:
   # is a fixed template plus the run id from the github context - nothing the
   # leaf-running job printed or output is interpolated into it.
   report:
-    needs: ollama-leaf
+    needs: leaf
     if: failure() && github.event_name == 'schedule'
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -163,7 +198,7 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           title="Scheduled live validation failed"
-          body=$(printf 'The weekly live run of the Ollama leaf failed. Read the run log: if a command has genuinely regressed, record a fail run in data/validation.json in a pull request so the leaf is demoted; if the runner flaked, re-run the workflow and close this when it passes.\n\nFailed run: %s\n' "$RUN_URL")
+          body=$(printf 'The weekly live run failed for at least one leaf. Read the run log: if a command has genuinely regressed, record a fail run in data/validation.json in a pull request so the leaf is demoted; if the runner flaked, re-run the workflow and close this when it passes.\n\nFailed run: %s\n' "$RUN_URL")
           # Only an issue this workflow opened, with exactly this title: anyone can
           # open an issue with a similar name, and the report must not land on it.
           existing=$(gh issue list --state open --author app/github-actions --search "in:title \"$title\"" \

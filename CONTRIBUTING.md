@@ -261,7 +261,20 @@ what they test, every Tuesday, and on demand:
   exactly one ` ```text ` fence, which is the text the run executes. Each command runs under `bash -eo pipefail`; a
   server step fails if anything already answers its readiness probe or if the
   server exits during the run; and the report's `covered` lists only the
-  commands that passed. Today it runs the Ollama leaf on the runner's CPU.
+  commands that passed. A spec can also build its working directory — `copy`
+  repository fixtures (confined to the leaf's own directory), extract the
+  leaf's own `scripts` by their Automation-scripts heading (each sha256 lands
+  in the report), and run `setup` lines, which are reported separately and
+  never counted as coverage. Every foreground step must `expect` output (or
+  say why not with `"expect": null` and an `expect_reason`); `exit` declares
+  a non-zero status, `until` streams until the expect matches, `capture`
+  hands a matched group to later steps, `substitute` fills `<placeholders>`
+  with the report recording the leaf's text and what ran side by side, and
+  `versions` records tool versions into the run's environment line. The
+  workflow runs one matrix leg per spec (`scripts/live-matrix.mjs`), installs
+  only what each leaf's needs declare, and uploads each leg's `live-run.json`
+  as an artifact; a spec'd leaf must also appear in `live.yml`'s
+  `pull_request` paths, which `validate:content` checks.
 
 Both run repository code, so the workflow is read-only and holds no secret. A
 passing run is evidence, not a promotion: to mark a leaf validated, record the
