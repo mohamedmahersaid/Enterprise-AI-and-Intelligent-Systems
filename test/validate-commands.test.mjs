@@ -53,7 +53,7 @@ const leafWith = (...commands) =>
 test('without a deny list, the built-in rules alone apply', () => {
   const { status, out } = run({ leaf: leafWith('az example group list') });
   assert.equal(status, 0, out);
-  assert.match(out, /Checked 1 command blocks across 1 leaves against 7 safety and convention rules\./);
+  assert.match(out, /Checked 1 command blocks across 1 leaves against 7 safety and convention rules, and every leaf line against \d+ credential formats\./);
 });
 
 test('a deny-list hit in a command block fails, naming leaf:line, reason and source', () => {
@@ -68,7 +68,7 @@ test('a mention in prose, or in a non-command fence, does not fail', () => {
   const leaf = [leafWith('az other group list'), '```python', '# az example group list', '```', ''].join('\n');
   const { status, out } = run({ leaf, deny: [ENTRY] });
   assert.equal(status, 0, out);
-  assert.match(out, /and 1 deny-list entries\./);
+  assert.match(out, /and 1 deny-list entries, and every leaf line against \d+ credential formats\./);
 });
 
 test('a malformed deny-list entry fails before any leaf is checked', () => {
@@ -140,6 +140,6 @@ test('honest bash and powershell fences pass, and the summary counts them', () =
   ].join('\n');
   const { status, out } = run({ leaf });
   assert.equal(status, 0, out);
-  assert.match(out, /Checked 1 command blocks across 1 leaves against 7 safety and convention rules\./);
+  assert.match(out, /Checked 1 command blocks across 1 leaves against 7 safety and convention rules, and every leaf line against \d+ credential formats\./);
   assert.match(out, /Checked 2 script fence\(s\) \(bash, powershell\) against the same rules, plus a parse check\./);
 });

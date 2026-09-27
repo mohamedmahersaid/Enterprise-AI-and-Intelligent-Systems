@@ -204,6 +204,11 @@ const passed = results.length === spec.steps.length && results.every((r) => r.ok
 const ran = results.filter((r) => r.ok).map((r) => r.command);
 const report = {
   leaf: id,
+  // In CI, the run and commit this report is evidence of: committed as
+  // data/live/runs/<leaf>-<run_id>.json, readiness.mjs cross-checks them
+  // against the data/validation.json record. Absent on a local run.
+  run_id: Number(process.env.GITHUB_RUN_ID) || undefined,
+  head_sha: process.env.GITHUB_SHA || undefined,
   result: passed ? 'pass' : 'fail',
   // Only the commands that ran and passed: a run that stopped early must not
   // be recorded as having covered the ones it never reached.

@@ -32,7 +32,7 @@
  */
 import fs from 'node:fs';
 import { spawnSync } from 'node:child_process';
-import { RULES, checkBlocks, checkPowerShell, commandBlocks, loadDenyRules, scriptBlocks } from './lib/commands.mjs';
+import { RULES, SECRET_PATTERNS, checkBlocks, checkPowerShell, commandBlocks, loadDenyRules, scriptBlocks, secretFindings } from './lib/commands.mjs';
 
 const { leaves } = JSON.parse(fs.readFileSync('data/catalog.json', 'utf8'));
 
@@ -45,10 +45,14 @@ if (deny.errors.length) {
 
 const blocks = [];
 const scripts = [];
+const secrets = [];
 for (const leaf of leaves) {
   if (!fs.existsSync(leaf.path)) continue;
+  const text = fs.readFileSync(leaf.path, 'utf8');
+  // Known credential shapes, over the whole file: prose, frontmatter and
+  // every fence, where the block rules below see only ```text fences.
+  secrets.push(...secretFindings(leaf.path, text));
   try {
-    const text = fs.readFileSync(leaf.path, 'utf8');
     blocks.push(...commandBlocks(leaf.path, text));
     scripts.push(...scriptBlocks(leaf.path, text));
   } catch (error) {
@@ -74,7 +78,7 @@ if (!blocks.length) {
 // nothing; skipped with a note where bash is not installed, as on Windows) and
 // a string/comment-aware brace-and-quote balance check for powershell, because
 // pwsh is not a dependency of this repository. See scripts/lib/commands.mjs.
-const failures = checkBlocks([...blocks, ...scripts], [...RULES, ...deny.rules]);
+const failures = [...secrets, ...checkBlocks([...blocks, ...scripts], [...RULES, ...deny.rules])];
 
 let bashMissing = false;
 for (const block of scripts) {
@@ -120,7 +124,8 @@ console.log(
   `Checked ${blocks.length} command blocks across ` +
   `${new Set(blocks.map((b) => b.file)).size} leaves ` +
   `against ${RULES.length} safety and convention rules` +
-  (deny.rules.length ? ` and ${deny.rules.length} deny-list entries.` : '.')
+  (deny.rules.length ? ` and ${deny.rules.length} deny-list entries` : '') +
+  `, and every leaf line against ${SECRET_PATTERNS.length} credential formats.`
 );
 if (scripts.length) {
   console.log(

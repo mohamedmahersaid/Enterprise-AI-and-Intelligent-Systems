@@ -4,7 +4,7 @@ rem  AI & Intelligent Systems curriculum - Windows launcher
 rem
 rem  Double-click for a menu, or name a target from a shell:
 rem
-rem      run.bat validate        unit tests and all six checks, in the order CI runs them
+rem      run.bat validate        unit tests and every check, in the order CI runs them
 rem      run.bat test            unit tests for the validators themselves
 rem      run.bat content         structure, catalog and README figures
 rem      run.bat mermaid         parse every diagram
@@ -57,7 +57,7 @@ echo   AI ^& Intelligent Systems - curriculum toolchain
 echo ===========================================================================
 call :print_context
 echo.
-echo   [1] Validate everything        tests + content + mermaid + python + scripts + commands + lint
+echo   [1] Validate everything        tests + content + regen + mermaid + python + scripts + commands + lint + site
 echo   [2] Validate content only
 echo   [3] Validate mermaid diagrams
 echo   [4] Lint markdown
@@ -124,6 +124,8 @@ call :run_step "Testing the validators" test
 if errorlevel 1 exit /b 1
 call :run_step "Validating structure, catalog and README figures" validate:content
 if errorlevel 1 exit /b 1
+call :run_step "Checking derived files against regeneration" validate:regen
+if errorlevel 1 exit /b 1
 call :run_step "Parsing every mermaid diagram" validate:mermaid
 if errorlevel 1 exit /b 1
 call :run_step "Compiling every python block" validate:python
@@ -133,6 +135,8 @@ if errorlevel 1 exit /b 1
 call :run_step "Checking every command block" validate:commands
 if errorlevel 1 exit /b 1
 call :run_step "Linting markdown" lint:md
+if errorlevel 1 exit /b 1
+call :run_step "Building the website" build:site
 if errorlevel 1 exit /b 1
 echo.
 echo [OK] All checks passed. This is exactly what CI runs.
@@ -388,7 +392,7 @@ exit /b 0
 echo.
 echo   run.bat [target]
 echo.
-echo     validate    the unit tests and all six checks below, in CI order
+echo     validate    the unit tests and every check below, in CI order
 echo     test        unit tests for the validators, on small fixtures
 echo     content     heading hierarchy, required sections, frontmatter and catalog
 echo                 agreement, unresolved TODOs, links, README figures

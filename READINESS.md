@@ -33,8 +33,11 @@ capture the evidence its lab asks for before relying on it.
 
 Also run end-to-end against the live service by a CI workflow in this
 repository. Each run is recorded in [data/validation.json](data/validation.json) with its date,
-workflow, environment, the commands it covered, and the URL of the run itself,
-so the evidence can be opened rather than taken on trust. A leaf is validated
+workflow, environment, the commands it covered, the URL of the run itself and
+that run's id, commit, trigger and branch, and the run's trimmed report is
+committed under `data/live/runs/`, so the evidence outlives GitHub's log
+retention and can be opened rather than taken on trust. A separate token-less
+CI job re-checks every record against the GitHub API. A leaf is validated
 only while its latest recorded run passed: a recorded failure puts it back to
 lab until a new pass is recorded.
 
@@ -118,10 +121,16 @@ at no cost. The rest need infrastructure or credentials this repository does not
 1. A workflow under `.github/workflows/` runs the leaf's commands against the
    live service, from a job that holds no write token. The check confirms the
    workflow file exists; that its job holds no write token is confirmed in review.
-2. A passing run is recorded in `data/validation.json`: the leaf, date, workflow, run URL,
-   environment and the commands covered.
+2. A passing run is recorded in `data/validation.json`: the leaf, date, workflow, run URL
+   and its structured echo (`run_id`, `head_sha`, `event`, `head_branch`),
+   environment and the commands covered - and the run's trimmed report is
+   committed as `data/live/runs/<leaf>-<run_id>.json`. Only a `schedule`,
+   `workflow_dispatch` or `push` run on `main` counts: a `pull_request` run
+   executed the pull request's own spec, so it proves nothing.
 3. The leaf's readiness is set to `validated` in `data/catalog.json` and its
    frontmatter, its readiness line is updated, and `npm run regen` rewrites this file.
 
 Recording is a pull request, reviewed like any other change: the run proves the
-commands worked, and the review confirms the run covered what the record says.
+commands worked, the committed report must agree with the record and cover at
+least half of the leaf's Commands, and a token-less CI job asks the GitHub API
+that the run really concluded success on `main`.

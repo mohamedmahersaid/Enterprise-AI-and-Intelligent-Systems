@@ -5,6 +5,8 @@ import { checkReferences } from './lib/references.mjs';
 import { checkReadiness, checkReadinessLine, loadValidation, renderReadinessMd } from './lib/readiness.mjs';
 import { checkSpec, parseCommands } from './lib/live-spec.mjs';
 import { parityGates, runsGate } from './lib/parity.mjs';
+import { checkCatalogShape, checkLiveSpec, checkValidationShape, orphanDocs } from './lib/schema.mjs';
+import { checkSectionDepth, parseLines } from './lib/sections.mjs';
 import path from 'node:path';
 
 import { readinessSummary, slug } from './lib/derive.mjs';
@@ -34,18 +36,6 @@ const FRONTMATTER_FIELDS = [
   ['branch', (leaf) => leaf.branch],
   ['readiness', (leaf) => leaf.readiness],
 ];
-
-/** Split a markdown file into lines, flagging those inside fenced code blocks. */
-function parseLines(content) {
-  let fenced = false;
-  return content.split('\n').map((text) => {
-    if (text.startsWith('```')) {
-      fenced = !fenced;
-      return { text, fenced: true };
-    }
-    return { text, fenced };
-  });
-}
 
 function parseFrontmatter(content, file) {
   const match = content.match(/^---\n([\s\S]*?)\n---\n/);
@@ -110,6 +100,13 @@ function checkLinks(lines, file) {
 }
 
 // --- catalog-level integrity -------------------------------------------------
+
+// The shape underneath the relationship checks below: required fields, the
+// level enum, the needs vocabulary, the id/path convention, no unknown keys.
+// data/validation.json and data/live/*.json get the same treatment further
+// down; see scripts/lib/schema.mjs.
+errors.push(...checkCatalogShape(catalog));
+errors.push(...checkValidationShape(validation));
 
 if (catalog.leaves.length !== catalog.expectedLeafCount) {
   errors.push(`Expected ${catalog.expectedLeafCount} leaves but catalog contains ${catalog.leaves.length}.`);
@@ -177,6 +174,10 @@ for (const leaf of catalog.leaves) {
     if (!h2.has(section)) errors.push(`${leaf.path} is missing required section: ## ${section}`);
   }
 
+  // The depth CONTRIBUTING promises inside Troubleshooting, Interview
+  // questions and Lab, not the headings alone; see scripts/lib/sections.mjs.
+  errors.push(...checkSectionDepth(leaf.path, headings, lines));
+
   const todos = lines.filter((l) => l.text.includes('TODO:')).length;
   if (todos) {
     errors.push(`${leaf.path}: ${todos} unresolved TODO marker(s) from the scaffold - replace them before merging.`);
@@ -214,6 +215,52 @@ if (fs.existsSync('CATALOG.md')) {
   const catalogMd = fs.readFileSync('CATALOG.md', 'utf8');
   for (const leaf of catalog.leaves) {
     if (!catalogMd.includes(leaf.path)) errors.push(`CATALOG.md does not link leaf: ${leaf.path}`);
+  }
+}
+
+// --- files the catalog does not know -------------------------------------------
+
+/**
+ * Every markdown file under docs/ must be a README, lab data under fixtures/,
+ * or a catalog leaf. Anything else is leaf-shaped content no navigation, path
+ * or check will ever see - present in the repository, invisible everywhere.
+ */
+function findDocsMarkdown(dir) {
+  const found = [];
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) found.push(...findDocsMarkdown(full));
+    else if (entry.name.endsWith('.md')) found.push(full);
+  }
+  return found;
+}
+
+for (const orphan of orphanDocs(findDocsMarkdown('docs'), catalog.leaves.map((l) => l.path))) {
+  errors.push(
+    `${orphan} is not in data/catalog.json. Add the leaf to the catalog (or move ` +
+      "lab data under a fixtures/ directory) and run 'npm run regen'."
+  );
+}
+
+// --- live run specs --------------------------------------------------------------
+
+/**
+ * Each data/live/<leaf>.json must name a catalog leaf and hold the shape
+ * live-run.mjs reads, so a broken spec fails here in seconds rather than in
+ * live.yml after the model pull. See scripts/lib/schema.mjs.
+ */
+if (fs.existsSync('data/live')) {
+  const leafIds = new Set(catalog.leaves.map((l) => l.id));
+  for (const name of fs.readdirSync('data/live').filter((n) => n.endsWith('.json'))) {
+    const file = `data/live/${name}`;
+    if (!leafIds.has(name.slice(0, -'.json'.length))) {
+      errors.push(`${file} names no leaf in the catalog; a live spec is dead without one.`);
+    }
+    try {
+      errors.push(...checkLiveSpec(JSON.parse(fs.readFileSync(file, 'utf8')), file));
+    } catch (error) {
+      errors.push(`${file} is not valid JSON: ${error.message}`);
+    }
   }
 }
 
@@ -507,7 +554,9 @@ console.log(
   `Validated ${catalog.leaves.length} leaves across ${catalog.treeCount} trees and ${catalog.branchCount} branches.`
 );
 console.log(
-  'Checks: catalog counts, frontmatter/catalog agreement, heading hierarchy, required sections,\n'+
+  'Checks: catalog counts, data file shapes (catalog, validation records, live specs),\n'+
+  '        frontmatter/catalog agreement, heading hierarchy, required sections and their\n'+
+  '        promised depth, docs/ files outside the catalog,\n'+
   '        mermaid fences, unresolved scaffold TODOs, relative links, CATALOG.md coverage,\n'+
   '        learning paths (every leaf reachable, no dangling step, PATHS.md in step),\n'+
   '        README badges and curriculum map, version assumptions in step,\n'+

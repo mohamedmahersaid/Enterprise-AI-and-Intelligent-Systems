@@ -7,7 +7,7 @@
  */
 import fs from 'node:fs';
 import { deriveAssumptions, renderAssumptionsMd } from './assumptions.mjs';
-import { LEVELS, writeReadinessMd } from './readiness.mjs';
+import { LEVELS, renderReadinessMd } from './readiness.mjs';
 import path from 'node:path';
 
 export const CATALOG_PATH = 'data/catalog.json';
@@ -61,11 +61,12 @@ export function recount(catalog) {
 const dirOf = (leaves) => path.dirname(leaves[0].path);
 const treeDirOf = (leaves) => leaves[0].path.split('/').slice(0, 2).join('/');
 
-function writeBranchReadmes(trees) {
+function renderBranchReadmes(trees) {
+  const out = [];
   for (const [tree, branches] of trees) {
     for (const [branch, leaves] of branches) {
       const rows = leaves.map((l) => `| ${l.level} | [${l.name}](${l.id}.md) |`).join('\n');
-      fs.writeFileSync(`${dirOf(leaves)}/README.md`,
+      out.push([`${dirOf(leaves)}/README.md`,
 `# ${branch}
 
 **Tree:** [${tree}](../README.md)
@@ -74,12 +75,14 @@ function writeBranchReadmes(trees) {
 | Level | Leaf |
 | --- | --- |
 ${rows}
-`);
+`]);
     }
   }
+  return out;
 }
 
-function writeTreeReadmes(trees) {
+function renderTreeReadmes(trees) {
+  const out = [];
   for (const [, branches] of trees) {
     const first = [...branches.values()][0];
     const file = `${treeDirOf(first)}/README.md`;
@@ -87,11 +90,12 @@ function writeTreeReadmes(trees) {
       `- [${branch}](${path.basename(dirOf(leaves))}/README.md) — ${leaves.length} leaves`).join('\n');
     // Keep the tree's own heading and description; replace only the branch list.
     const existing = fs.readFileSync(file, 'utf8');
-    fs.writeFileSync(file, existing.replace(/(## Branches\n\n)[\s\S]*$/, `$1${list}\n`));
+    out.push([file, existing.replace(/(## Branches\n\n)[\s\S]*$/, `$1${list}\n`)]);
   }
+  return out;
 }
 
-function writeCatalogMd(catalog, trees) {
+function renderCatalogMd(catalog, trees) {
   const existing = fs.readFileSync('CATALOG.md', 'utf8');
   // Preserve each tree's prose description, which lives only in CATALOG.md.
   const descriptions = new Map();
@@ -110,7 +114,7 @@ function writeCatalogMd(catalog, trees) {
       for (const l of leaves) out.push(`- **${l.level}:** [${l.name}](${l.path})`);
     }
   }
-  fs.writeFileSync('CATALOG.md', `${out.join('\n')}\n`);
+  return ['CATALOG.md', `${out.join('\n')}\n`];
 }
 
 /**
@@ -120,7 +124,7 @@ function writeCatalogMd(catalog, trees) {
  * looked up from the leaf record, so a renamed or moved leaf cannot leave a
  * path pointing at the wrong thing.
  */
-function writePathsMd(catalog) {
+function renderPathsMd(catalog) {
   const byId = new Map(catalog.leaves.map((l) => [l.id, l]));
   const out = [
     '# Learning paths',
@@ -154,7 +158,7 @@ function writePathsMd(catalog) {
     });
   }
 
-  fs.writeFileSync('PATHS.md', `${out.join('\n')}\n`);
+  return ['PATHS.md', `${out.join('\n')}\n`];
 }
 
 /** "Lab: 34 · Validated: 0" - every level, including the empty ones. */
@@ -164,7 +168,7 @@ export function readinessSummary(catalog) {
     .join(' · ');
 }
 
-function writeReadme(catalog, trees) {
+function renderReadme(catalog, trees) {
   let readme = fs.readFileSync('README.md', 'utf8');
   const leafCount = catalog.leaves.length;
   const present = catalog.leaves.filter((l) => fs.existsSync(l.path)).length;
@@ -189,25 +193,49 @@ function writeReadme(catalog, trees) {
     .replace(/(\*\*Level distribution:\*\* ).+/, `$1${levels}`)
     .replace(/(\*\*Readiness:\*\* ).+?( \(\[what that means\])/, `$1${readiness}$2`);
 
-  fs.writeFileSync('README.md', readme);
+  return ['README.md', readme];
 }
 
 /**
+ * Every derived file as [path, content], rendered without writing anything.
  * ASSUMPTIONS.md is derived from the leaf bodies rather than from the catalog,
- * so it is written last - after any regeneration that could touch a leaf.
+ * so it comes last - after any regeneration that could touch a leaf. The
+ * README, CATALOG.md and tree READMEs read their current file to preserve the
+ * editorial prose that lives only there; only the derived regions are
+ * replaced.
  */
-export function writeAssumptionsMd(catalog) {
-  fs.writeFileSync('ASSUMPTIONS.md', renderAssumptionsMd(deriveAssumptions(catalog)));
+export function renderDerived(catalog) {
+  const trees = group(catalog);
+  return [
+    ...renderBranchReadmes(trees),
+    ...renderTreeReadmes(trees),
+    renderCatalogMd(catalog, trees),
+    renderPathsMd(catalog),
+    renderReadme(catalog, trees),
+    ['READINESS.md', renderReadinessMd(catalog)],
+    ['ASSUMPTIONS.md', renderAssumptionsMd(deriveAssumptions(catalog))],
+  ];
 }
 
 /** Rewrite every derived file from the catalog. */
 export function regenerate(catalog) {
-  const trees = group(catalog);
-  writeBranchReadmes(trees);
-  writeTreeReadmes(trees);
-  writeCatalogMd(catalog, trees);
-  writePathsMd(catalog);
-  writeReadme(catalog, trees);
-  writeReadinessMd(catalog);
-  writeAssumptionsMd(catalog);
+  for (const [file, content] of renderDerived(catalog)) fs.writeFileSync(file, content);
+}
+
+/**
+ * The derived files that disagree with what regeneration would write,
+ * including data/catalog.json's own counts. `catalog` must already be
+ * recounted; compare against the file on disk, not the object. This is what
+ * `npm run validate:regen` fails on: a hand edit to a generated file, or a
+ * catalog edit whose `npm run regen` was never run.
+ */
+export function regenDrift(catalog) {
+  const drifted = [];
+  if (fs.readFileSync(CATALOG_PATH, 'utf8') !== `${JSON.stringify(catalog, null, 2)}\n`) {
+    drifted.push(CATALOG_PATH);
+  }
+  for (const [file, content] of renderDerived(catalog)) {
+    if (!fs.existsSync(file) || fs.readFileSync(file, 'utf8') !== content) drifted.push(file);
+  }
+  return drifted;
 }
