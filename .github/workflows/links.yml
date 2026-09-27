@@ -19,9 +19,18 @@ on:
 permissions:
   contents: read
 
+# A newer push to a pull request supersedes its run; a scheduled or manual run
+# on main is never cancelled by the other.
+concurrency:
+  group: links-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   check:
     runs-on: ubuntu-latest
+    # The whole corpus of links resolves in a few minutes; do not let a hung
+    # fetch hold a runner for the six-hour default.
+    timeout-minutes: 20
     permissions:
       contents: read
     outputs:
@@ -72,6 +81,7 @@ jobs:
     # started cannot file an issue claiming links are broken.
     if: always() && github.event_name == 'schedule' && needs.check.outputs.report != ''
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
       issues: write
     steps:

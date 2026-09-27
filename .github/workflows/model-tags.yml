@@ -42,3 +42,33 @@ jobs:
       # check; the job summary records each tag's status and digest today.
       - name: Check pinned Ollama tags against the registry
         run: node scripts/check-ollama-tags.mjs --json ollama-tags.json
+
+  # Separate job so the token that can write issues never shares a job with
+  # repository code, the same split as links.yml. The issue text is a fixed
+  # template plus the run id from the github context - no output of the check
+  # job is interpolated into it.
+  report:
+    needs: ollama-tags
+    if: failure() && github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      issues: write
+    steps:
+      - name: Open or update the failed-check issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          title="Scheduled model-tag check failed"
+          body=$(printf 'The weekly registry check of pinned Ollama model tags failed - a tag a leaf pins may have been withdrawn. Read the run log for which tag; if it is gone, update the leaf and its assumptions in a pull request, and close this when the check passes.\n\nFailed run: %s\n' "$RUN_URL")
+          # Only an issue this workflow opened, with exactly this title: anyone can
+          # open an issue with a similar name, and the report must not land on it.
+          existing=$(gh issue list --state open --author app/github-actions --search "in:title \"$title\"" \
+            --json number,title --jq "map(select(.title == \"$title\")) | .[0].number // empty")
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "$body"
+          else
+            gh issue create --title "$title" --body "$body"
+          fi

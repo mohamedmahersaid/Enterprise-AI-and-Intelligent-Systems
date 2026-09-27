@@ -199,7 +199,10 @@ A second CI job installs `scripts/requirements-full.txt` - every dependency a le
 declares, including MLflow, Feast and LangGraph - and runs
 `npm run validate:scripts -- --require-all`, which fails on any skip, so every
 script is started at least once. Regenerate that lockfile with the `uv pip compile`
-line in `scripts/requirements-full.in` when a leaf declares a new dependency.
+line in `scripts/requirements-full.in` when a leaf declares a new dependency. The
+same job runs `pip-audit` over both lockfiles - the pip counterpart of `npm audit` -
+so a pin with a known vulnerability fails CI until it is bumped and the lockfile
+regenerated.
 
 `.venv/` is ignored by git, the linter and the site build. Containment is not a
 sandbox: a script can still read its parent's files and reach the network, so the
@@ -344,7 +347,11 @@ fails the build, and publishes it to GitHub Pages on merge to `main`.
 
 Publishing requires Pages to be enabled once, under Settings → Pages → Source:
 **GitHub Actions**. The workflow cannot do this for you: the token it runs with may
-deploy to an enabled Pages site but not create one.
+deploy to an enabled Pages site but not create one. After enabling it, set the
+repository variable `PAGES_ENABLED` to `true` (Settings → Secrets and variables →
+Actions → Variables): the deploy job is gated on that variable so that, until
+Pages exists, pushes to `main` build the site and stay green instead of failing
+on a deployment the repository cannot accept.
 
 Do not hand-edit anything under `site/` — the next build overwrites it. To change how
 the site looks, edit `scripts/lib/site-assets.mjs`; to change what it contains, edit
