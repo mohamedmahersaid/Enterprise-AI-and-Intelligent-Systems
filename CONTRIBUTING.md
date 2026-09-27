@@ -141,11 +141,11 @@ run `npm run regen` to rewrite the derived files, rather than editing them.
 
 | Command | What it enforces |
 | --- | --- |
-| `npm run validate:content` | Heading hierarchy, required sections, frontmatter and catalog agreement, catalog self-consistency, unresolved TODOs, relative link resolution, CATALOG.md coverage, README figures, certifications and OWASP IDs against `data/certifications.json`, every reference linking its source, each readiness level backed by `data/validation.json` and every need its commands prove listed |
+| `npm run validate:content` | Heading hierarchy, required sections, frontmatter and catalog agreement, catalog self-consistency, unresolved TODOs, relative link resolution, CATALOG.md coverage, README figures, certifications and OWASP IDs against `data/certifications.json`, every reference linking its source, each readiness level backed by `data/validation.json` and every need its commands prove listed, each `### Command N` owning exactly one ` ```text ` fence, every `data/live/` spec in step with its leaf |
 | `npm run validate:mermaid` | Every mermaid diagram parses |
 | `npm run validate:python` | Every python block in a leaf compiles, and every third-party module it imports is named by a `pip install` in the same leaf (parsed, never executed) |
 | `npm run validate:scripts` | Every python block, run with no arguments in an empty directory, completes or stops with its own message rather than a traceback |
-| `npm run validate:commands` | Every command block is free of literal credentials, destructive operations, `curl \| sh`, plaintext `http://`, placeholder drift and any command in `data/command-deny.json` (textual, never executed) |
+| `npm run validate:commands` | Every command block - and every ` ```bash ` and ` ```powershell ` fence - is free of literal credentials, destructive operations, `curl \| sh`, plaintext `http://`, placeholder drift and any command in `data/command-deny.json`; script fences also get a parse-only check (`bash -n`, and a brace/quote balance check for PowerShell). Nothing is executed |
 | `npm run lint:md` | Markdown style |
 | `npm test` | Unit tests for the validators in `scripts/`, on small fixtures in `test/` |
 | `npm run validate` | `npm test`, then the six `validate:*` and `lint:md` checks above, in order |
@@ -191,9 +191,10 @@ When a command is found to be stale - a command group that does not exist, a
 removed flag - fix every leaf, then add it to `data/command-deny.json` so it
 cannot come back. The file is a JSON array of
 `{"pattern": "<JavaScript regex source>", "reason": "<why, and the replacement>", "source": "<URL checked>"}`.
-Each pattern is matched against every line of every `text` command block, and
-a hit fails with the leaf, line, reason and source. Prose is not checked, so a
-leaf can still say what a command replaced. A pattern that does not compile or
+Each pattern is matched against every line of every `text` command block and
+every `bash` and `powershell` fence - a label a reader would run is a label
+that is checked - and a hit fails with the leaf, line, reason and source.
+Prose is not checked, so a leaf can still say what a command replaced. A pattern that does not compile or
 matches an empty line, or an entry without a reason or a source URL, fails the
 check; with no file, there are no entries.
 
@@ -220,7 +221,10 @@ what they test, every Tuesday, and on demand:
   `data/live/<leaf-id>.json` describes: fixtures, the order, which commands start
   a server, what each output must show, and why any command is skipped. Every
   command in the leaf must be run or skipped with a reason, so a new command
-  cannot go untested unnoticed. Each command runs under `bash -eo pipefail`; a
+  cannot go untested unnoticed - and `validate:content` checks that agreement
+  offline on every pull request, so editing a leaf out from under its spec
+  fails in seconds, not at the next live run. Each `### Command N` must hold
+  exactly one ` ```text ` fence, which is the text the run executes. Each command runs under `bash -eo pipefail`; a
   server step fails if anything already answers its readiness probe or if the
   server exits during the run; and the report's `covered` lists only the
   commands that passed. Today it runs the Ollama leaf on the runner's CPU.

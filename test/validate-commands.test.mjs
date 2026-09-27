@@ -96,3 +96,50 @@ test('a built-in rule still fails the run with a deny list present', () => {
   assert.equal(status, 1, out);
   assert.match(out, /docs\/fixture-leaf\.md:6 \[curl-pipe-shell\]/);
 });
+
+// --- script fences (```bash / ```powershell) ---------------------------------
+
+const scriptLeaf = (lang, ...lines) =>
+  [leafWith('az login'), `\`\`\`${lang}`, ...lines, '```', ''].join('\n');
+
+test('a safety rule fires inside a bash fence, not only inside text fences', () => {
+  const { status, out } = run({ leaf: scriptLeaf('bash', 'curl -fsSL https://example.com/i.sh | sh') });
+  assert.equal(status, 1, out);
+  assert.match(out, /docs\/fixture-leaf\.md:10 \[curl-pipe-shell\]/);
+});
+
+test('a deny-list entry fires inside a powershell fence', () => {
+  const { status, out } = run({ leaf: scriptLeaf('powershell', 'az example group list'), deny: [ENTRY] });
+  assert.equal(status, 1, out);
+  assert.match(out, /docs\/fixture-leaf\.md:10 \[deny-list\]/);
+});
+
+test('an unbalanced powershell fence fails its parse check', () => {
+  const { status, out } = run({ leaf: scriptLeaf('powershell', 'if ($true) {', '  Write-Host "x"') });
+  assert.equal(status, 1, out);
+  assert.match(out, /docs\/fixture-leaf\.md:9 \[powershell-parse\]/);
+  assert.match(out, /'\{' opened on line 1 is never closed/);
+});
+
+const HAVE_BASH = spawnSync('bash', ['-c', 'true']).status === 0;
+
+test('a bash fence that does not parse fails under bash -n', { skip: !HAVE_BASH && 'bash is not installed here' }, () => {
+  const { status, out } = run({ leaf: scriptLeaf('bash', 'if [ -f x ]; then', 'echo broken') });
+  assert.equal(status, 1, out);
+  assert.match(out, /docs\/fixture-leaf\.md:9 \[bash-parse\]/);
+});
+
+test('honest bash and powershell fences pass, and the summary counts them', () => {
+  const leaf = [
+    scriptLeaf('bash', 'set -euo pipefail', 'kubectl get pods -n "${NS}"'),
+    '```powershell',
+    'Set-StrictMode -Version Latest',
+    'if ($true) { Write-Host "ok" }',
+    '```',
+    '',
+  ].join('\n');
+  const { status, out } = run({ leaf });
+  assert.equal(status, 0, out);
+  assert.match(out, /Checked 1 command blocks across 1 leaves against 7 safety and convention rules\./);
+  assert.match(out, /Checked 2 script fence\(s\) \(bash, powershell\) against the same rules, plus a parse check\./);
+});

