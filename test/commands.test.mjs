@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { RULES, checkBlocks, commandBlocks, denyRules } from '../scripts/lib/commands.mjs';
+import { RULES, SECRET_PATTERNS, checkBlocks, commandBlocks, denyRules, secretFindings } from '../scripts/lib/commands.mjs';
 
 const fence = (...lines) => ['```text', ...lines, '```'].join('\n');
 
@@ -217,4 +217,49 @@ test('the corpus powershell and bash fences pass their parse checks', () => {
   );
   assert.equal(ps.length, 1);
   assert.equal(checkPowerShell(ps[0].lines), null);
+});
+
+test('secretFindings catches each credential format in any part of a leaf', () => {
+  const leaf = [
+    '---',
+    "id: 'ai-x'",
+    'aws: AKIAIOSFODNN7EXAMPLE',                                      // frontmatter
+    '---',
+    '# Leaf',
+    'Set the token to ghp_0123456789abcdefABCDEF0123456789abcd now.', // prose
+    '```python',
+    'client = OpenAI(api_key="sk-abcdef0123456789abcdef0123456789")', // python fence
+    '```',
+    '```text',
+    'export SLACK_TOKEN=xoxb-1234567890-abcdefghijkl',                // text fence
+    '```',
+    '-----BEGIN RSA PRIVATE KEY-----',
+  ].join('\n');
+  const failures = secretFindings('leaf.md', leaf);
+  assert.deepEqual(
+    failures.map((f) => [f.line, f.id]),
+    [
+      [3, 'aws-access-key'],
+      [6, 'github-token'],
+      [8, 'openai-style-key'],
+      [11, 'slack-token'],
+      [13, 'private-key-block'],
+    ],
+  );
+  assert.deepEqual(SECRET_PATTERNS.map((p) => p.id).sort(),
+    [...new Set(failures.map((f) => f.id))].sort());
+});
+
+test('placeholders, variables and detector regexes are not credentials', () => {
+  const honest = [
+    'export OPENAI_API_KEY=<your-key>',
+    'export OPENAI_API_KEY="$OPENAI_API_KEY"',
+    'sk-<key> is the shape; never paste a real one.',
+    'aws configure  # access key id AKIA<account-specific>',
+    // The corpus ships these as teaching material inside python fences.
+    'KEY_IN_SOURCE = re.compile(r"""(sk-[A-Za-z0-9]{16,})""", re.I)',
+    '"possible secret": re.compile(r"\\b(sk-|ghp_|AKIA)[A-Za-z0-9_-]{8,}"),',
+    'a risky task-management ghp_ mention without a value',
+  ].join('\n');
+  assert.deepEqual(secretFindings('leaf.md', honest), []);
 });

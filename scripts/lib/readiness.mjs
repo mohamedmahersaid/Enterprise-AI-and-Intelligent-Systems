@@ -593,7 +593,3 @@ export function renderReadinessMd(catalog, validation = loadValidation()) {
   ];
   return `${out.join('\n')}\n`.replace(/\n\n$/, '\n');
 }
-
-export function writeReadinessMd(catalog) {
-  fs.writeFileSync('READINESS.md', renderReadinessMd(catalog));
-}

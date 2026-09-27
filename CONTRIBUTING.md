@@ -43,7 +43,14 @@ evidence rather than activity), Operational automation, Troubleshooting (five
 scenarios, each with cause and resolution), Interview questions (four, answered
 as a practitioner would in an interview rather than as definitions),
 Certification alignment, and References. Match that depth rather than the
-headings alone.
+headings alone — `validate:content` checks it: five `### Scenario N:`
+subsections each carrying a `**Likely cause:**` and a `**Resolution:**` line,
+four interview questions as `###` headings, and a `### Validation` subsection
+in the Lab.
+
+Every markdown file under `docs/` must be a README, lab data under a
+`fixtures/` directory, or a catalog leaf. Anything else fails validation:
+content the catalog cannot see appears in no navigation, path or check.
 
 Existing leaves run 2,600-3,500 words, clustering around 2,950 — counting body
 text with frontmatter stripped and fenced code included. Read that as a symptom
@@ -145,19 +152,27 @@ between editions; a bare `LLM08` fails.
 
 If you edit `data/catalog.json` directly — renaming a branch, changing a level —
 run `npm run regen` to rewrite the derived files, rather than editing them.
+`npm run validate:regen` enforces this: it renders every derived file in memory
+and fails on any byte that differs from the tree, so a hand edit to a generated
+file, or a catalog edit that was never regenerated, cannot merge. The catalog
+itself is shape-checked too — required fields, the level and needs
+vocabularies, the `docs/<tree>/<branch>/<id>.md` path convention, no unknown
+keys — as are `data/validation.json` records and `data/live/*.json` specs
+(those two tolerate fields the checker does not know, so the formats can grow).
 
 ## Checks
 
 | Command | What it enforces |
 | --- | --- |
-| `npm run validate:content` | Heading hierarchy, required sections, frontmatter and catalog agreement, catalog self-consistency, unresolved TODOs, relative link resolution, CATALOG.md coverage, README figures, certifications and OWASP IDs against `data/certifications.json`, every reference linking its source, each readiness level backed by `data/validation.json` and its committed run report under `data/live/runs/`, every need its commands prove listed, each `### Command N` owning exactly one ` ```text ` fence, and every `data/live/` spec in step with its leaf |
+| `npm run validate:content` | Heading hierarchy, required sections and their promised depth, frontmatter and catalog agreement, catalog self-consistency and shape (with `data/validation.json` and `data/live/*.json`), `docs/` files the catalog does not know, unresolved TODOs, relative link resolution, CATALOG.md coverage, README figures, certifications and OWASP IDs against `data/certifications.json`, every reference linking its source, each readiness level backed by `data/validation.json` and its committed run report under `data/live/runs/`, every need its commands prove listed, each `### Command N` owning exactly one ` ```text ` fence, and every `data/live/` spec in step with its leaf |
+| `npm run validate:regen` | Every derived file — `CATALOG.md`, `PATHS.md`, `READINESS.md`, `ASSUMPTIONS.md`, the README figures, the tree and branch READMEs, the catalog's own counts — byte-matches what `npm run regen` would write (rendered in memory; nothing is written) |
 | `npm run validate:mermaid` | Every mermaid diagram parses |
 | `npm run validate:python` | Every python block in a leaf compiles, and every third-party module it imports is named by a `pip install` in the same leaf (parsed, never executed) |
 | `npm run validate:scripts` | Every python block, run with no arguments in an empty directory, completes or stops with its own message rather than a traceback |
-| `npm run validate:commands` | Every command block - and every ` ```bash ` and ` ```powershell ` fence - is free of literal credentials, destructive operations, `curl \| sh`, plaintext `http://`, placeholder drift and any command in `data/command-deny.json`; script fences also get a parse-only check (`bash -n`, and a brace/quote balance check for PowerShell). Nothing is executed |
+| `npm run validate:commands` | Every command block - and every ` ```bash ` and ` ```powershell ` fence - is free of literal credentials, destructive operations, `curl \| sh`, plaintext `http://`, placeholder drift and any command in `data/command-deny.json`; every leaf line — prose, frontmatter and every fence — is free of known credential formats; script fences also get a parse-only check (`bash -n`, and a brace/quote balance check for PowerShell). Nothing is executed |
 | `npm run lint:md` | Markdown style |
-| `npm test` | Unit tests for the validators in `scripts/`, on small fixtures in `test/` |
-| `npm run validate` | `npm test`, then the six `validate:*` and `lint:md` checks above, in order |
+| `npm test` | Unit tests for the validators in `scripts/`, on small fixtures in `test/`; also that the `validate` script names every gate exactly once, and that `scripts/requirements*.txt` still pin every package their `.in` sources name |
+| `npm run validate` | `npm test`, then every `validate:*` check, `lint:md` and `build:site`, in the order CI runs them |
 
 `validate:content` also re-derives `ASSUMPTIONS.md` and fails if it is out of
 step, so changing a command or a pinned version means running `npm run regen`.
@@ -195,6 +210,13 @@ kept in shell history and visible in the process list.
 `validate:commands` is deliberately not a shell linter. Commands are documented
 with `<angle-bracket>` placeholders and some blocks are SQL, so a shell parser
 rejects correct content; it checks safety and convention invariants instead.
+
+Beyond the command blocks, it scans every line of every leaf — prose,
+frontmatter, python and all other fences — for known credential formats:
+`AKIA…`, `sk-…`, `xoxb-`/`xoxp-…`, `ghp_…` and `-----BEGIN … PRIVATE KEY-----`.
+The patterns require the vendor's literal shape, so `sk-<your-key>`, `$VAR`
+and a leaf that teaches a secret-detector regex all pass; anything shaped like
+a real credential fails wherever it sits.
 
 When a command is found to be stale - a command group that does not exist, a
 removed flag - fix every leaf, then add it to `data/command-deny.json` so it

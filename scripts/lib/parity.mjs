@@ -3,10 +3,15 @@
 // the workflow, a non-comment line in run.bat - so a comment, a step name or an
 // echoed help line that mentions it does not count.
 
-// Every `validate:*` script, plus `test` when there is one.
+// Every `validate:*` script, plus `lint:md`, `build:site` and `test` when
+// they exist. These are the gates: a script both runners must invoke, and the
+// `validate` script must name (test/parity.test.mjs asserts that). `regen`,
+// `words` and the like are tools, not gates.
 export function parityGates(scripts) {
   const gates = Object.keys(scripts).filter((n) => n.startsWith('validate:'));
-  if (scripts.test) gates.push('test');
+  for (const gate of ['lint:md', 'build:site', 'test']) {
+    if (scripts[gate]) gates.push(gate);
+  }
   return gates;
 }
 

@@ -48,6 +48,11 @@ jobs:
       - name: Validate structure, catalog and README figures
         run: npm run validate:content
 
+      # Renders every derived file in memory and byte-compares it with the
+      # tree, so a hand edit to a generated file cannot merge.
+      - name: Check derived files against regeneration
+        run: npm run validate:regen
+
       - name: Parse every mermaid diagram
         run: npm run validate:mermaid
 

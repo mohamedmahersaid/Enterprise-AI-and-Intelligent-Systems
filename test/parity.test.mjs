@@ -1,21 +1,36 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 
 import { batchCommands, parityGates, runsGate, workflowCommands } from '../scripts/lib/parity.mjs';
 
 const lines = (...l) => l.join('\n');
 
-test('parityGates takes every validate:* script, and test when there is one', () => {
+test('parityGates takes every validate:* script, plus lint:md, build:site and test', () => {
   const scripts = {
     validate: 'npm test && npm run validate:content',
     'validate:content': 'node a.mjs',
     'validate:commands': 'node b.mjs',
     'lint:md': 'markdownlint-cli2',
+    'build:site': 'node c.mjs',
+    regen: 'node d.mjs',
     test: 'node --test',
   };
-  assert.deepEqual(parityGates(scripts), ['validate:content', 'validate:commands', 'test']);
-  const { test: _omit, ...noTest } = scripts;
-  assert.deepEqual(parityGates(noTest), ['validate:content', 'validate:commands']);
+  assert.deepEqual(parityGates(scripts),
+    ['validate:content', 'validate:commands', 'lint:md', 'build:site', 'test']);
+  const { test: _omit, 'build:site': _omit2, ...fewer } = scripts;
+  assert.deepEqual(parityGates(fewer), ['validate:content', 'validate:commands', 'lint:md']);
+});
+
+test('the validate script names every gate exactly once', () => {
+  const { scripts } = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+  for (const gate of parityGates(scripts)) {
+    const invocation = gate === 'test' ? /\bnpm (?:run )?test(?=\s|$|&)/g
+      : new RegExp(`\\bnpm run ${gate.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?=\\s|$|&)`, 'g');
+    const count = (scripts.validate.match(invocation) ?? []).length;
+    assert.equal(count, 1,
+      `package.json "validate" must run \`${gate}\` exactly once, found ${count}`);
+  }
 });
 
 test('a workflow runs a gate from a single-line run: value', () => {

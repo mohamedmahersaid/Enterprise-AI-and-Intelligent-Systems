@@ -20,8 +20,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { readCatalog, writeCatalog, recount, regenerate, group } from './lib/derive.mjs';
 import { NEEDS, readinessLine } from './lib/readiness.mjs';
+import { LEAF_LEVELS as LEVELS } from './lib/schema.mjs';
 
-const LEVELS = ['Beginner', 'Intermediate', 'Advanced', 'Enterprise', 'Expert'];
 const SECTIONS = [
   ['Explanation', 'TODO: explain the problem this leaf solves and the mental model a reader needs. Use ### subsections for distinct topics.'],
   ['Architecture and flow', null],

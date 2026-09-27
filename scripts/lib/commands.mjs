@@ -59,6 +59,45 @@ export const RULES = [
 ];
 
 /**
+ * Known credential formats, checked against EVERY line of a leaf - prose,
+ * frontmatter and all fences, python included - where the literal-credential
+ * rule above sees only text blocks. Deliberately conservative: each pattern
+ * requires the vendor's own literal shape, so `sk-<your-key>`, `$AWS_KEY` and
+ * a leaf's own detector regex (`sk-[A-Za-z0-9]{16,}` appears in two leaves as
+ * teaching material) do not match, and the corpus needs no exemption list.
+ */
+export const SECRET_PATTERNS = [
+  { id: 'aws-access-key', pattern: /\bAKIA[0-9A-Z]{16}\b/ },
+  { id: 'openai-style-key', pattern: /\bsk-[A-Za-z0-9]{20,}\b/ },
+  { id: 'slack-token', pattern: /\bxox[bp]-[A-Za-z0-9-]{10,}/ },
+  { id: 'github-token', pattern: /\bghp_[A-Za-z0-9]{36}\b/ },
+  { id: 'private-key-block', pattern: /-----BEGIN [A-Z ]*PRIVATE KEY-----/ },
+];
+
+/**
+ * Every line of a leaf that carries something shaped like a real credential,
+ * wherever it sits. Reported in the same {file, line, id, why, text} shape as
+ * checkBlocks, so validate-commands prints them together.
+ */
+export function secretFindings(file, text) {
+  const failures = [];
+  for (const [index, line] of text.split('\n').entries()) {
+    for (const { id, pattern } of SECRET_PATTERNS) {
+      if (pattern.test(line)) {
+        failures.push({
+          file,
+          line: index + 1,
+          id,
+          why: 'is shaped like a real credential, and this scan cannot tell a real one from a sample. Use a <placeholder>.',
+          text: line.trim(),
+        });
+      }
+    }
+  }
+  return failures;
+}
+
+/**
  * Every ```text block in one leaf, with the markdown line it starts on, so a
  * failure points at the line a contributor edits rather than an offset inside
  * a fragment. Throws on an unterminated fence.
