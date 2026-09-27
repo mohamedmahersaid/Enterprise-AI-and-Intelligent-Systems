@@ -3,6 +3,7 @@ import { deriveAssumptions, renderAssumptionsMd } from './lib/assumptions.mjs';
 import { checkCertifications } from './lib/certifications.mjs';
 import { checkReferences } from './lib/references.mjs';
 import { checkReadiness, checkReadinessLine, loadValidation, renderReadinessMd } from './lib/readiness.mjs';
+import { checkSpec, parseCommands } from './lib/live-spec.mjs';
 import { parityGates, runsGate } from './lib/parity.mjs';
 import path from 'node:path';
 
@@ -184,6 +185,11 @@ for (const leaf of catalog.leaves) {
   if (!content.includes('```mermaid')) {
     errors.push(`${leaf.path} is missing a mermaid diagram.`);
   }
+
+  // Each `### Command N` must own exactly one ```text fence, heading-first,
+  // so a command can never be paired with a neighbour's text - the pairing
+  // live-run.mjs executes. See scripts/lib/live-spec.mjs.
+  errors.push(...parseCommands(content, leaf.path).errors);
 }
 
 // --- navigation files --------------------------------------------------------
@@ -407,6 +413,43 @@ if (!fs.existsSync('READINESS.md')) {
   errors.push("READINESS.md disagrees with data/catalog.json or data/validation.json. Run 'npm run regen'.");
 }
 
+// --- live specs ----------------------------------------------------------------
+
+/**
+ * Every data/live/<leaf-id>.json is checked against its leaf on every PR: the
+ * leaf's Commands must parse heading-first, every step must name a Command the
+ * leaf has, and every leaf Command must be run or skipped with a reason. The
+ * live workflow repeats these checks, but it runs weekly and only for the
+ * leaves it is filtered to - a PR that edits a leaf out from under its spec
+ * must fail here, in seconds, not at the next live run. Unknown spec keys are
+ * tolerated so a newer spec does not fail an older checker.
+ */
+function checkLiveSpecs() {
+  if (!fs.existsSync('data/live')) return;
+  for (const name of fs.readdirSync('data/live').filter((f) => f.endsWith('.json')).sort()) {
+    const specPath = `data/live/${name}`;
+    const leaf = catalog.leaves.find((l) => l.id === name.slice(0, -'.json'.length));
+    if (!leaf) {
+      errors.push(`${specPath}: no leaf '${name.slice(0, -'.json'.length)}' in the catalog.`);
+      continue;
+    }
+    if (!fs.existsSync(leaf.path)) continue; // already reported above
+    let spec;
+    try {
+      spec = JSON.parse(fs.readFileSync(specPath, 'utf8'));
+    } catch (error) {
+      errors.push(`${specPath}: is not valid JSON: ${error.message}`);
+      continue;
+    }
+    const { commands, errors: parseErrors } = parseCommands(fs.readFileSync(leaf.path, 'utf8'), leaf.path);
+    // Parse errors are already reported once per leaf above; only the
+    // spec-vs-leaf mismatches are new here.
+    if (!parseErrors.length) errors.push(...checkSpec(spec, commands, specPath));
+  }
+}
+
+checkLiveSpecs();
+
 // --- runner parity -----------------------------------------------------------
 
 /**
@@ -470,5 +513,6 @@ console.log(
   '        README badges and curriculum map, version assumptions in step,\n'+
   '        certifications (none retired, every one registered), references (each links its source),\n'+
   '        readiness (each level backed by its evidence, every proven need listed, READINESS.md in step),\n'+
+  '        Commands sections (each Command owns exactly one text fence), live specs in step with their leaves,\n'+
   '        runner parity (every gate runs in CI and run.bat).'
 );

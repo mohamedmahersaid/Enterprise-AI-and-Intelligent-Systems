@@ -31,6 +31,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
+import { checkSpec, parseCommands } from './lib/live-spec.mjs';
 
 const id = process.argv[2];
 if (!id || id.startsWith('--')) {
@@ -46,30 +47,17 @@ if (!leaf || !fs.existsSync(specPath)) {
 }
 const spec = JSON.parse(fs.readFileSync(specPath, 'utf8'));
 
-/** The leaf's commands, by number, exactly as a reader sees them. */
-function commands(body) {
-  const out = new Map();
-  const section = body.split('\n## Commands')[1]?.split('\n## ')[0] ?? '';
-  for (const m of section.matchAll(/^### Command (\d+)\n[\s\S]*?```text\n([\s\S]*?)```/gm)) {
-    out.set(Number(m[1]), m[2].trimEnd());
-  }
-  return out;
-}
-
-const leafCommands = commands(fs.readFileSync(leaf.path, 'utf8'));
-const planned = new Set(spec.steps.map((s) => s.command));
-const skipped = new Set(Object.keys(spec.skip ?? {}).map(Number));
-const problems = [];
-for (const n of leafCommands.keys()) {
-  if (!planned.has(n) && !skipped.has(n)) problems.push(`Command ${n} is neither run nor skipped with a reason.`);
-}
-for (const n of [...planned, ...skipped]) {
-  if (!leafCommands.has(n)) problems.push(`the spec names Command ${n}, which the leaf does not have.`);
-}
+// The leaf's commands, by number, exactly as a reader sees them - parsed
+// heading-first, and checked against the spec, by scripts/lib/live-spec.mjs.
+// validate:content runs the same checks on every PR; this repeats them so a
+// stale checkout still fails loudly instead of running the wrong text.
+const parsed = parseCommands(fs.readFileSync(leaf.path, 'utf8'), leaf.path);
+const problems = [...parsed.errors, ...checkSpec(spec, parsed.commands, specPath)];
 if (problems.length) {
   console.error(`${specPath} does not match ${leaf.path}:\n  ${problems.join('\n  ')}`);
   process.exit(1);
 }
+const leafCommands = parsed.commands;
 
 const work = fs.mkdtempSync(path.join(os.tmpdir(), `live-${id}-`));
 for (const [name, content] of Object.entries(spec.files ?? {})) {

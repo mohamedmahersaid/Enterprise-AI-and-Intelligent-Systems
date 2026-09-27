@@ -15,7 +15,10 @@
  * What this IS: a set of invariants that hold across all 216 blocks today and
  * that a reader would be harmed by if they stopped holding. They are all
  * textual, so nothing is executed - the same parse-don't-run posture as
- * validate-mermaid and validate-python.
+ * validate-mermaid and validate-python. The same rules cover the leaves'
+ * ```bash and ```powershell fences, so a fence label cannot switch them off;
+ * those fences are real scripts, not placeholder commands, so they also get a
+ * parse-only check (`bash -n` parses without running anything).
  *
  * Every rule below was measured against the corpus before being added. A rule
  * that fires on existing correct content is a bug in the rule, not a finding.
@@ -28,7 +31,8 @@
  * test/ exercise them.
  */
 import fs from 'node:fs';
-import { RULES, checkBlocks, commandBlocks, loadDenyRules } from './lib/commands.mjs';
+import { spawnSync } from 'node:child_process';
+import { RULES, checkBlocks, checkPowerShell, commandBlocks, loadDenyRules, scriptBlocks } from './lib/commands.mjs';
 
 const { leaves } = JSON.parse(fs.readFileSync('data/catalog.json', 'utf8'));
 
@@ -40,10 +44,13 @@ if (deny.errors.length) {
 }
 
 const blocks = [];
+const scripts = [];
 for (const leaf of leaves) {
   if (!fs.existsSync(leaf.path)) continue;
   try {
-    blocks.push(...commandBlocks(leaf.path, fs.readFileSync(leaf.path, 'utf8')));
+    const text = fs.readFileSync(leaf.path, 'utf8');
+    blocks.push(...commandBlocks(leaf.path, text));
+    scripts.push(...scriptBlocks(leaf.path, text));
   } catch (error) {
     console.error(error.message);
     process.exit(1);
@@ -61,7 +68,43 @@ if (!blocks.length) {
   process.exit(1);
 }
 
-const failures = checkBlocks(blocks, [...RULES, ...deny.rules]);
+// The safety rules and the deny list apply to the bash and powershell fences
+// too - a fence label must not be a way to step around them. On top of that,
+// each script fence gets a parse-only check: `bash -n` for bash (parses, runs
+// nothing; skipped with a note where bash is not installed, as on Windows) and
+// a string/comment-aware brace-and-quote balance check for powershell, because
+// pwsh is not a dependency of this repository. See scripts/lib/commands.mjs.
+const failures = checkBlocks([...blocks, ...scripts], [...RULES, ...deny.rules]);
+
+let bashMissing = false;
+for (const block of scripts) {
+  if (block.lang === 'bash') {
+    const r = spawnSync('bash', ['-n'], { input: block.lines.join('\n'), encoding: 'utf8' });
+    if (r.error?.code === 'ENOENT') {
+      bashMissing = true;
+    } else if (r.status !== 0) {
+      failures.push({
+        file: block.file,
+        line: block.offset,
+        id: 'bash-parse',
+        why: 'does not parse under `bash -n`. A script a reader cannot even start is broken content.',
+        text: (r.stderr || '').split('\n').filter(Boolean).slice(0, 3).join(' | '),
+      });
+    }
+  } else if (block.lang === 'powershell') {
+    const why = checkPowerShell(block.lines);
+    if (why) {
+      failures.push({
+        file: block.file,
+        line: block.offset,
+        id: 'powershell-parse',
+        why: 'has unbalanced braces or an unterminated string - a truncated or mispasted script.',
+        text: why,
+      });
+    }
+  }
+}
+if (bashMissing) console.error('note: bash is not installed here, so bash fences were not parse-checked.');
 
 for (const failure of failures) {
   console.error(`${failure.file}:${failure.line} [${failure.id}] ${failure.why}`);
@@ -79,3 +122,9 @@ console.log(
   `against ${RULES.length} safety and convention rules` +
   (deny.rules.length ? ` and ${deny.rules.length} deny-list entries.` : '.')
 );
+if (scripts.length) {
+  console.log(
+    `Checked ${scripts.length} script fence(s) (` +
+    `${scripts.map((b) => b.lang).sort().join(', ')}) against the same rules, plus a parse check.`
+  );
+}
