@@ -84,13 +84,22 @@ list those yourself. Pass `--needs azure,kubernetes` to
 `new-leaf`, or leave it to default to `runner` and let the check raise it.
 
 To record a live run, add it to `data/validation.json` (leaf, date, workflow,
-run URL, environment, what it covered, pass or fail), set the leaf to
-`validated` in the catalog and its frontmatter, update its readiness line to
-the one the check prints, and run `npm run regen`. The check confirms the
-record is complete, dated no later than today, and names an existing workflow and
-a run in this repository; review confirms the run covered what the record says
-and that the job running the commands held no write token. Recording is a pull
-request, never a commit from the workflow itself.
+run URL and its structured echo - `run_id`, `head_sha`, `event`, `head_branch`,
+as the run's API response reports them - environment, what it covered, pass or
+fail), commit the run's trimmed `live-run.json` as
+`data/live/runs/<leaf>-<run_id>.json`, set the leaf to `validated` in the
+catalog and its frontmatter, update its readiness line to the one the check
+prints, and run `npm run regen`. The check confirms the record is complete,
+dated no later than today, and names an existing workflow and a run in this
+repository whose URL ends in `run_id`; that the event is `schedule`,
+`workflow_dispatch` or `push` on `main` - a `pull_request` run executed the
+pull request's own spec, so it is not evidence; that the committed report
+agrees with the record on leaf, run id, result and covered commands; and that
+the run covered at least half of the leaf's Commands. A separate token-less CI
+job (`verify-validation` in `validate.yml`) then asks the GitHub API,
+unauthenticated, that the run really concluded success that way. Review still
+confirms that the job running the commands held no write token. Recording is a
+pull request, never a commit from the workflow itself.
 
 ### References
 
@@ -141,7 +150,7 @@ run `npm run regen` to rewrite the derived files, rather than editing them.
 
 | Command | What it enforces |
 | --- | --- |
-| `npm run validate:content` | Heading hierarchy, required sections, frontmatter and catalog agreement, catalog self-consistency, unresolved TODOs, relative link resolution, CATALOG.md coverage, README figures, certifications and OWASP IDs against `data/certifications.json`, every reference linking its source, each readiness level backed by `data/validation.json` and every need its commands prove listed, each `### Command N` owning exactly one ` ```text ` fence, every `data/live/` spec in step with its leaf |
+| `npm run validate:content` | Heading hierarchy, required sections, frontmatter and catalog agreement, catalog self-consistency, unresolved TODOs, relative link resolution, CATALOG.md coverage, README figures, certifications and OWASP IDs against `data/certifications.json`, every reference linking its source, each readiness level backed by `data/validation.json` and its committed run report under `data/live/runs/`, every need its commands prove listed, each `### Command N` owning exactly one ` ```text ` fence, and every `data/live/` spec in step with its leaf |
 | `npm run validate:mermaid` | Every mermaid diagram parses |
 | `npm run validate:python` | Every python block in a leaf compiles, and every third-party module it imports is named by a `pip install` in the same leaf (parsed, never executed) |
 | `npm run validate:scripts` | Every python block, run with no arguments in an empty directory, completes or stops with its own message rather than a traceback |
@@ -232,7 +241,9 @@ what they test, every Tuesday, and on demand:
 Both run repository code, so the workflow is read-only and holds no secret. A
 passing run is evidence, not a promotion: to mark a leaf validated, record the
 run in `data/validation.json` in a pull request, as the readiness section above
-describes. Leaves that need Azure, a GPU or a cluster are not run here; the
+describes. `node scripts/verify-validation.mjs` (the `verify-validation` job in
+`validate.yml`, which holds no token) re-checks every recorded run against the
+GitHub API: conclusion, workflow, event, branch and commit. Leaves that need Azure, a GPU or a cluster are not run here; the
 repository holds no credentials or infrastructure for them, and
 [READINESS.md](READINESS.md) says what each would need.
 

@@ -1,0 +1,15 @@
+{
+  "$comment": "The trimmed live-run report backing the data/validation.json record for run 36244545499. Normally this file is the live-run.json the run itself wrote, with run_id and head_sha; see CONTRIBUTING.md. scripts/lib/readiness.mjs cross-checks it against the record.",
+  "reconstructed": true,
+  "reason": "The run predates this file's requirement: live.yml only printed live-run.json to the job log and uploaded no artifact, so the per-step outputs are gone with the log. Rebuilt on 2026-09-26 from the data/validation.json record and the run's API response (GET /repos/mohamedmahersaid/Enterprise-AI-and-Intelligent-Systems/actions/runs/36244545499: conclusion success, event workflow_dispatch, head_branch main, head_sha be50a1353c04d1534c8d5f323dc74540af26dcb0) plus data/live/ai-ollama-local-inference.json, which is identical at that commit.",
+  "leaf": "ai-ollama-local-inference",
+  "run_id": 36244545499,
+  "head_sha": "be50a1353c04d1534c8d5f323dc74540af26dcb0",
+  "result": "pass",
+  "covered": "Commands 1, 2, 3, 4, 5, 6, 7, 8, 10",
+  "planned": "Commands 1, 2, 3, 4, 5, 6, 7, 8, 10",
+  "skipped": {
+    "9": "Binds the API to every interface; the leaf teaches it only behind an authenticating proxy, and a second server would collide with Command 1 on port 11434."
+  },
+  "environment": "GitHub-hosted ubuntu-latest (image ubuntu24 20260920.314.1), CPU only; Ollama 0.34.4; repository at be50a13; llama3.1:8b-instruct-q4_K_M resolved to sha256:46e0c10c039e019119339687c3c1757cc81b9da49709a3b3924863ba87ca666e"
+}

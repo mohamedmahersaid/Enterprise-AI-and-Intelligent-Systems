@@ -105,3 +105,27 @@ jobs:
 
       - name: Run every python block, none skipped
         run: npm run validate:scripts -- --require-all
+
+  # Confirms every run recorded in data/validation.json against the GitHub
+  # API: conclusion, workflow path, event, branch and commit - what no offline
+  # check can prove. Its own job with `permissions: {}`, because it executes
+  # the pull request's own copy of the script: checking out PR code here is
+  # acceptable exactly because the job holds no token and no secret (empty
+  # permissions, persist-credentials: false), so that code has nothing to take
+  # or write, and the script makes only unauthenticated GETs - the repository
+  # is public. Plain node with no dependencies, so no npm ci here. On a
+  # persistent API rate limit the script warns and passes on pull requests
+  # only; the push run on main still fails, so a bad record cannot land quietly.
+  verify-validation:
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22'
+
+      - name: Verify validation records against the GitHub API
+        run: node scripts/verify-validation.mjs

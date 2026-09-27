@@ -230,6 +230,70 @@ export function readinessLine(leaf, run) {
 
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 const WORKFLOW = /^\.github\/workflows\/[^/]+\.ya?ml$/;
+const SHA = /^[0-9a-f]{40}$/;
+
+/**
+ * Events whose run executed reviewed code from main. A pull_request run
+ * executed the pull request's own live-run.mjs and spec, so its green run
+ * proves only that the pull request could print "pass" - it is not evidence.
+ * scripts/verify-validation.mjs holds the API to the same list.
+ */
+export const RUN_EVENTS = ['schedule', 'workflow_dispatch', 'push'];
+
+/**
+ * The command numbers a `covered` field claims: the leading "Commands 1, 2, 8"
+ * list, however the sentence continues after it.
+ */
+export function coveredCommands(covered) {
+  const list = String(covered ?? '').match(/^Commands? ([0-9][0-9, ]*)/)?.[1] ?? '';
+  return list.split(',').map((s) => Number(s.trim())).filter(Boolean);
+}
+
+/**
+ * How many Commands a leaf has, counted from its "### Command N" headings.
+ * Deliberately minimal: the live-spec parser (scripts/lib/live-spec.mjs, when
+ * it lands) reads the Commands section properly and can replace this count.
+ */
+export function leafCommandCount(body) {
+  return (body.match(/^### Command \d+\b/gm) ?? []).length;
+}
+
+/**
+ * The committed evidence behind a validated leaf: the trimmed live-run report
+ * at <runsDir>/<leaf>-<run_id>.json, cross-checked against the record so the
+ * record cannot claim more than the report shows - GitHub's run logs and
+ * artifacts expire, the repository does not. A report rebuilt after the fact
+ * (its run predates this rule and uploaded no artifact) says so with
+ * "reconstructed": true and a reason; only such a report may omit the steps.
+ */
+function reportProblems(run, runsDir) {
+  const file = `${runsDir}/${run.leaf}-${run.run_id}.json`;
+  if (!fs.existsSync(file)) {
+    return [`has no committed run report ${file}; commit the run's trimmed live-run.json there.`];
+  }
+  let report;
+  try {
+    report = JSON.parse(fs.readFileSync(file, 'utf8'));
+  } catch {
+    return [`committed run report ${file} is not valid JSON.`];
+  }
+  const problems = [];
+  const agree = (field, got, want) => {
+    if (got !== want) problems.push(`committed report ${file} says ${field} ${JSON.stringify(got)}, but the record says ${JSON.stringify(want)}.`);
+  };
+  agree('leaf', report.leaf, run.leaf);
+  agree('run_id', report.run_id, run.run_id);
+  agree('result', report.result, run.result);
+  agree('covered', coveredCommands(report.covered).join(', '), coveredCommands(run.covered).join(', '));
+  if (report.reconstructed) {
+    if (typeof report.reason !== 'string' || !report.reason.trim()) {
+      problems.push(`committed report ${file} is marked reconstructed without a reason.`);
+    }
+  } else if (!Array.isArray(report.steps) || !report.steps.length) {
+    problems.push(`committed report ${file} records no steps; a live-run.json report shows each command, or is marked "reconstructed": true with a reason.`);
+  }
+  return problems;
+}
 
 /**
  * A real calendar date no later than today (UTC). A typo into the future
@@ -243,7 +307,7 @@ function dateProblem(date, today) {
   if (date > today) return `is after today (${today})`;
   return null;
 }
-const RUN_FIELDS = ['leaf', 'date', 'workflow', 'run', 'environment', 'covered', 'result'];
+const RUN_FIELDS = ['leaf', 'date', 'workflow', 'run', 'run_id', 'head_sha', 'event', 'head_branch', 'environment', 'covered', 'result'];
 
 /**
  * Returns error strings. Rules:
@@ -253,15 +317,21 @@ const RUN_FIELDS = ['leaf', 'date', 'workflow', 'run', 'environment', 'covered',
  * 2. Every need a leaf's commands prove is listed.
  * 3. Every run record is complete: a known leaf, a real date no later than
  *    today, a workflow under .github/workflows/ that exists, a run URL in this
- *    repository's Actions, and a pass or fail.
+ *    repository's Actions whose id equals run_id, a 40-hex head_sha, an event
+ *    in RUN_EVENTS, head_branch main, and a pass or fail. What only the API
+ *    can prove - that the run concluded that way, at that commit - is checked
+ *    online by scripts/verify-validation.mjs.
  * 4. A leaf is validated exactly when its latest recorded run passed. A leaf
  *    whose latest run failed is back to lab until a new pass is recorded.
+ * 5. A validated leaf's run is backed by a committed report in runsDir that
+ *    agrees with the record, and covered at least half of the leaf's Commands.
  */
 export function checkReadiness(
   catalog,
   validation = loadValidation(),
   repository = 'mohamedmahersaid/Enterprise-AI-and-Intelligent-Systems',
   today = new Date().toISOString().slice(0, 10),
+  runsDir = 'data/live/runs',
 ) {
   const errors = [];
   const ids = new Set(catalog.leaves.map((l) => l.id));
@@ -282,6 +352,23 @@ export function checkReadiness(
     }
     if (run.run && !runUrl.test(run.run)) {
       errors.push(`${at} run "${run.run}" is not a run URL in ${repository}'s GitHub Actions.`);
+    }
+    if (run.run_id !== undefined && (!Number.isInteger(run.run_id) || run.run_id <= 0)) {
+      errors.push(`${at} run_id ${JSON.stringify(run.run_id)} is not a positive integer.`);
+    } else if (run.run_id && run.run && runUrl.test(run.run) && runId(run) !== run.run_id) {
+      errors.push(`${at} run URL names run ${runId(run)}, not its run_id ${run.run_id}.`);
+    }
+    if (run.head_sha && !SHA.test(String(run.head_sha))) {
+      errors.push(`${at} head_sha "${run.head_sha}" is not a 40-character lowercase commit SHA.`);
+    }
+    if (run.event && !RUN_EVENTS.includes(run.event)) {
+      errors.push(
+        `${at} event "${run.event}" cannot back a validated claim; only ${RUN_EVENTS.join(', ')} runs ` +
+          "execute reviewed code (a pull_request run executes the pull request's own spec)."
+      );
+    }
+    if (run.head_branch && run.head_branch !== 'main') {
+      errors.push(`${at} head_branch "${run.head_branch}" is not main; only runs of the reviewed main branch count.`);
     }
     if (run.result && !['pass', 'fail'].includes(run.result)) {
       errors.push(`${at} result "${run.result}" is neither pass nor fail.`);
@@ -310,8 +397,9 @@ export function checkReadiness(
       errors.push(`data/catalog.json: leaf ${leaf.id} lists runner alongside other needs; runner means nothing else is needed.`);
     }
 
-    if (fs.existsSync(leaf.path)) {
-      const missing = impliedNeeds(fs.readFileSync(leaf.path, 'utf8')).filter((n) => !leaf.needs.includes(n));
+    const body = fs.existsSync(leaf.path) ? fs.readFileSync(leaf.path, 'utf8') : null;
+    if (body !== null) {
+      const missing = impliedNeeds(body).filter((n) => !leaf.needs.includes(n));
       if (missing.length) {
         errors.push(
           `data/catalog.json: leaf ${leaf.id} commands call tools that need ${missing.join(', ')}, ` +
@@ -321,6 +409,22 @@ export function checkReadiness(
     }
 
     const run = latest.get(leaf.id);
+    if (leaf.readiness === 'validated' && run?.result === 'pass') {
+      // The claim is only as good as its committed evidence and its coverage.
+      if (run.run_id && Number.isInteger(run.run_id) && run.run_id > 0) {
+        for (const p of reportProblems(run, runsDir)) {
+          errors.push(`${VALIDATION_PATH}: run for ${leaf.id} ${p}`);
+        }
+      }
+      const total = body === null ? 0 : leafCommandCount(body);
+      const coveredCount = coveredCommands(run.covered).length;
+      if (total && coveredCount * 2 < total) {
+        errors.push(
+          `${VALIDATION_PATH}: run for ${leaf.id} covered ${coveredCount} of the leaf's ${total} Commands, ` +
+            'below the floor of half; run more of them or keep the leaf at lab.'
+        );
+      }
+    }
     if (leaf.readiness === 'validated' && run?.result !== 'pass') {
       errors.push(
         `data/catalog.json: leaf ${leaf.id} is validated, but ${VALIDATION_PATH} ` +
@@ -419,8 +523,11 @@ export function renderReadinessMd(catalog, validation = loadValidation()) {
     '',
     'Also run end-to-end against the live service by a CI workflow in this',
     `repository. Each run is recorded in [${VALIDATION_PATH}](${VALIDATION_PATH}) with its date,`,
-    'workflow, environment, the commands it covered, and the URL of the run itself,',
-    'so the evidence can be opened rather than taken on trust. A leaf is validated',
+    'workflow, environment, the commands it covered, the URL of the run itself and',
+    'that run\'s id, commit, trigger and branch, and the run\'s trimmed report is',
+    'committed under `data/live/runs/`, so the evidence outlives GitHub\'s log',
+    'retention and can be opened rather than taken on trust. A separate token-less',
+    'CI job re-checks every record against the GitHub API. A leaf is validated',
     'only while its latest recorded run passed: a recorded failure puts it back to',
     'lab until a new pass is recorded.',
     '',
@@ -469,13 +576,19 @@ export function renderReadinessMd(catalog, validation = loadValidation()) {
     '1. A workflow under `.github/workflows/` runs the leaf\'s commands against the',
     '   live service, from a job that holds no write token. The check confirms the',
     '   workflow file exists; that its job holds no write token is confirmed in review.',
-    `2. A passing run is recorded in \`${VALIDATION_PATH}\`: the leaf, date, workflow, run URL,`,
-    '   environment and the commands covered.',
+    `2. A passing run is recorded in \`${VALIDATION_PATH}\`: the leaf, date, workflow, run URL`,
+    '   and its structured echo (`run_id`, `head_sha`, `event`, `head_branch`),',
+    '   environment and the commands covered - and the run\'s trimmed report is',
+    '   committed as `data/live/runs/<leaf>-<run_id>.json`. Only a `schedule`,',
+    '   `workflow_dispatch` or `push` run on `main` counts: a `pull_request` run',
+    '   executed the pull request\'s own spec, so it proves nothing.',
     '3. The leaf\'s readiness is set to `validated` in `data/catalog.json` and its',
     '   frontmatter, its readiness line is updated, and `npm run regen` rewrites this file.',
     '',
     'Recording is a pull request, reviewed like any other change: the run proves the',
-    'commands worked, and the review confirms the run covered what the record says.',
+    'commands worked, the committed report must agree with the record and cover at',
+    'least half of the leaf\'s Commands, and a token-less CI job asks the GitHub API',
+    'that the run really concluded success on `main`.',
     '',
   ];
   return `${out.join('\n')}\n`.replace(/\n\n$/, '\n');

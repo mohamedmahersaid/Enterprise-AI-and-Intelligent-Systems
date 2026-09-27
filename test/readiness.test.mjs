@@ -1,5 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -7,8 +9,10 @@ import {
   checkReadiness,
   checkReadinessLine,
   commandTools,
+  coveredCommands,
   impliedNeeds,
   latestRuns,
+  leafCommandCount,
   needsSentence,
   readinessLine,
 } from '../scripts/lib/readiness.mjs';
@@ -21,6 +25,7 @@ const REPO = 'owner/repo';
 const TODAY = '2026-01-31';
 const RUN_URL = `https://github.com/${REPO}/actions/runs/200`;
 const LEAF_PATH = 'docs/tree/branch/no-such-leaf.md';
+const SHA = 'f'.repeat(40);
 
 const leaf = (over = {}) => ({ id: 'leaf-a', path: LEAF_PATH, readiness: 'lab', needs: ['runner'], ...over });
 const run = (over = {}) => ({
@@ -28,12 +33,32 @@ const run = (over = {}) => ({
   date: '2026-01-10',
   workflow: '.github/workflows/validate.yml',
   run: RUN_URL,
+  run_id: 200,
+  head_sha: SHA,
+  event: 'schedule',
+  head_branch: 'main',
   environment: 'ubuntu-24.04',
-  covered: ['Command 1'],
+  covered: 'Command 1',
   result: 'pass',
   ...over,
 });
-const check = (leaves, runs = []) => checkReadiness({ leaves }, { runs }, REPO, TODAY);
+// The committed run report a validated leaf's record must agree with.
+const report = (over = {}) => ({
+  leaf: 'leaf-a',
+  run_id: 200,
+  result: 'pass',
+  covered: 'Command 1',
+  steps: [{ command: 1, ok: true }],
+  ...over,
+});
+/** A temporary runs directory holding the given reports, named as committed. */
+const dirWith = (...reports) => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'readiness-runs-'));
+  for (const r of reports) fs.writeFileSync(path.join(dir, `${r.leaf}-${r.run_id}.json`), JSON.stringify(r));
+  return dir;
+};
+const GOOD_RUNS = dirWith(report());
+const check = (leaves, runs = [], runsDir = GOOD_RUNS) => checkReadiness({ leaves }, { runs }, REPO, TODAY, runsDir);
 const fence = (label, ...lines) => ['```' + label, ...lines, '```'].join('\n');
 
 test('impliedNeeds finds a tool anywhere in a command line', () => {
@@ -151,6 +176,84 @@ test('checkReadiness rejects incomplete or implausible run records', () => {
   for (const [bad, want] of cases) {
     assert.match(check([leaf({ readiness: 'validated' })], [bad]).join('\n'), want);
   }
+});
+
+test('checkReadiness rejects a record whose structured run fields do not hold together', () => {
+  const cases = [
+    // A fake run URL: the URL and run_id must name the same run.
+    [run({ run: `https://github.com/${REPO}/actions/runs/999` }), /run URL names run 999, not its run_id 200/],
+    [run({ run_id: undefined }), /has no "run_id"/],
+    [run({ run_id: '200' }), /run_id "200" is not a positive integer/],
+    [run({ head_sha: 'be50a13' }), /head_sha "be50a13" is not a 40-character lowercase commit SHA/],
+    // A pull_request run executed the pull request's own spec: not evidence.
+    [run({ event: 'pull_request' }), /event "pull_request" cannot back a validated claim/],
+    [run({ head_branch: 'feature' }), /head_branch "feature" is not main/],
+  ];
+  for (const [bad, want] of cases) {
+    assert.match(check([leaf({ readiness: 'validated' })], [bad]).join('\n'), want);
+  }
+});
+
+test('checkReadiness requires the committed run report to exist and agree', () => {
+  const validated = [leaf({ readiness: 'validated' })];
+  const disagree = (r) => check(validated, [run()], dirWith(r)).join('\n');
+
+  assert.match(check(validated, [run()], dirWith()).join('\n'), /no committed run report .*leaf-a-200\.json/);
+  assert.match(disagree(report({ result: 'fail' })), /says result "fail", but the record says "pass"/);
+  assert.match(disagree(report({ run_id: 201 })), /no committed run report/); // named for its own run, so it is missing
+  assert.match(disagree(report({ covered: 'Commands 1, 2' })), /says covered "1, 2", but the record says "1"/);
+  const wrongLeaf = dirWith();
+  fs.writeFileSync(path.join(wrongLeaf, 'leaf-a-200.json'), JSON.stringify(report({ leaf: 'leaf-b' })));
+  assert.match(check(validated, [run()], wrongLeaf).join('\n'), /says leaf "leaf-b", but the record says "leaf-a"/);
+  const notJson = dirWith();
+  fs.writeFileSync(path.join(notJson, 'leaf-a-200.json'), '{');
+  assert.match(check(validated, [run()], notJson).join('\n'), /is not valid JSON/);
+});
+
+test('checkReadiness lets only a reconstructed report, with a reason, omit its steps', () => {
+  const validated = [leaf({ readiness: 'validated' })];
+  const withReport = (r) => check(validated, [run()], dirWith(r));
+
+  assert.match(withReport(report({ steps: [] })).join('\n'), /records no steps/);
+  assert.match(
+    withReport(report({ steps: undefined, reconstructed: true })).join('\n'),
+    /marked reconstructed without a reason/,
+  );
+  assert.deepEqual(withReport(report({ steps: undefined, reconstructed: true, reason: 'artifact expired' })), []);
+});
+
+test('checkReadiness enforces the floor: a run must cover at least half the leaf Commands', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'readiness-leaf-'));
+  const leafPath = path.join(dir, 'leaf.md');
+  const commands = [1, 2, 3, 4].flatMap((n) => [`### Command ${n}`, '', '```text', 'echo hi', '```', '']);
+  fs.writeFileSync(leafPath, ['# A', '', '## Commands', '', ...commands].join('\n'));
+  const l = leaf({ readiness: 'validated', path: leafPath });
+
+  const thin = run({ covered: 'Commands 1' });
+  assert.match(
+    check([l], [thin], dirWith(report({ covered: 'Commands 1' }))).join('\n'),
+    /covered 1 of the leaf's 4 Commands, below the floor of half/,
+  );
+  const enough = run({ covered: 'Commands 1, 3' });
+  assert.deepEqual(check([l], [enough], dirWith(report({ covered: 'Commands 1, 3' }))), []);
+});
+
+test('coveredCommands reads the leading command list, however the sentence continues', () => {
+  assert.deepEqual(coveredCommands('Commands 1, 2, 10, run as the spec describes; Command 9 skipped'), [1, 2, 10]);
+  assert.deepEqual(coveredCommands('Command 1'), [1]);
+  assert.deepEqual(coveredCommands('no command passed'), []);
+  assert.deepEqual(coveredCommands(undefined), []);
+});
+
+test('leafCommandCount counts the "### Command N" headings', () => {
+  assert.equal(leafCommandCount('### Command 1\n\n### Command 2\n\ntext ### Command 3\n'), 2);
+  assert.equal(leafCommandCount('no commands here'), 0);
+});
+
+test('the real migrated record passes checkReadiness offline', () => {
+  const catalog = JSON.parse(fs.readFileSync('data/catalog.json', 'utf8'));
+  const validation = JSON.parse(fs.readFileSync('data/validation.json', 'utf8'));
+  assert.deepEqual(checkReadiness(catalog, validation), []);
 });
 
 test('checkReadinessLine accepts the exact line under the title and rejects drift', () => {
