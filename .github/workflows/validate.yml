@@ -8,9 +8,18 @@ on:
 permissions:
   contents: read
 
+# A newer push to a pull request supersedes its run; a push to main is
+# evidence of what merged and is never cancelled by a later one.
+concurrency:
+  group: validate-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   validate:
     runs-on: ubuntu-latest
+    # Recent runs finish in a few minutes; the default timeout is six hours,
+    # which would let a hung step burn a runner for the rest of the day.
+    timeout-minutes: 15
     steps:
       # Actions are pinned to a commit SHA rather than a tag: a tag can be moved
       # to point at different code, a SHA cannot. The trailing comment records
@@ -87,6 +96,7 @@ jobs:
   # dependency a leaf declares and fails on any skip, so every script is run.
   scripts-all-dependencies:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     permissions:
       contents: read
     steps:
@@ -98,9 +108,32 @@ jobs:
         with:
           node-version: '22'
           cache: npm
+      # requirements-full.txt is compiled for CPython 3.12 (see its header), so
+      # this job must not float on whatever python3 the runner image ships:
+      # when ubuntu-latest moves on, the hash-locked wheels stop matching.
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: scripts/requirements*.txt
 
       - name: Install dependencies
         run: npm ci
+
+      # The pip counterpart of the main job's `npm audit`: checks every pinned
+      # package in both lockfiles against the advisory databases. --no-deps
+      # trusts the lockfiles' complete pinning and installs nothing;
+      # --disable-pip keeps the tool out of the leaf venv below. Clean as of
+      # 2026-09-26 (pip-audit 2.10.1, both files, zero findings). If a future
+      # run flags a package, bump its pin and regenerate the lockfile with the
+      # command in its .in header; an --ignore-vuln entry is a last resort and
+      # needs a written reason in this comment.
+      - name: Audit leaf script dependencies
+        run: |
+          python3 -m venv "$RUNNER_TEMP/pip-audit"
+          "$RUNNER_TEMP/pip-audit/bin/pip" install --quiet pip-audit==2.10.1
+          "$RUNNER_TEMP/pip-audit/bin/pip-audit" --no-deps --disable-pip \
+            -r scripts/requirements.txt -r scripts/requirements-full.txt
 
       - name: Install every leaf script dependency
         run: |
