@@ -206,7 +206,7 @@ export function checkContrast(style) {
 
 // The controls whose only visible edge is their border. Checking the token's
 // contrast is not enough if a control stops using the token.
-const BORDERED_CONTROLS = ['#search', 'button.theme'];
+const BORDERED_CONTROLS = ['#search', 'button.theme', '#browse-filter', 'pre .copy'];
 
 /**
  * Each control in BORDERED_CONTROLS has a rule of its own in the stylesheet

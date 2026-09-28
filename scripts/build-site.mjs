@@ -16,8 +16,9 @@ import { marked } from 'marked';
 import { readCatalog, group, slug } from './lib/derive.mjs';
 import { STYLE, SCRIPT, THEME_BOOTSTRAP, SIDEBAR_TOGGLE, mermaidLoader } from './lib/site-assets.mjs';
 import { checkSite } from './check-site.mjs';
-import { LEVELS, VALIDATION_PATH, needsSentence } from './lib/readiness.mjs';
+import { LEVELS, NEEDS, VALIDATION_PATH, latestRuns, loadValidation, needsSentence } from './lib/readiness.mjs';
 import { searchEntry, indexSizeProblem } from './lib/search-index.mjs';
+import { levelOrdered, stripHeaderBlock, tocOf, LEVEL_ORDER } from './lib/leaf-page.mjs';
 
 const OUT = 'site';
 
@@ -150,7 +151,9 @@ function buildSidebar(grouped) {
     const top = [
       ['Learning paths', 'PATHS.html'],
       ['Full catalog', 'CATALOG.html'],
+      ['Browse by level and readiness', 'browse.html'],
       ['Readiness', 'READINESS.html'],
+      ['Validation runs', 'validation.html'],
     ].map(([label, href]) => {
       const active = current === href ? CURRENT : '';
       return `<li><a href="${base}${href}"${active}>${escapeHtml(label)}</a></li>`;
@@ -169,9 +172,14 @@ function buildSidebar(grouped) {
         for (const leaf of leaves) {
           const url = leaf.path.replace(/\.md$/, '.html');
           const cls = url === current ? CURRENT : '';
+          // The readiness marker only where it says something: 'validated'
+          // is the exception worth surfacing in a list of 35, 'lab' the rule.
+          const validated = leaf.readiness === 'validated'
+            ? ` <span class="badge rd-validated" title="Run live against the real service by a recorded CI run">Validated</span>`
+            : '';
           parts.push(
             `<li><a${cls} href="${base}${url}">${escapeHtml(leaf.name)}</a>` +
-            ` <span class="badge lv-${escapeHtml(leaf.level)}">${escapeHtml(leaf.level)}</span></li>`
+            ` <span class="badge lv-${escapeHtml(leaf.level)}">${escapeHtml(leaf.level)}</span>${validated}</li>`
           );
         }
         parts.push(`</ul>`);
@@ -226,16 +234,43 @@ function outputPathFor(source) {
 // ---------------------------------------------------------------------------
 // leaf extras: breadcrumb, badge, prev/next
 
-function leafHeader(leaf, base) {
+// The crumb, and the facts panel that replaces the run-on `**Level:** ...`
+// block the markdown carries for GitHub readers (stripHeaderBlock removes
+// it): the same facts, stated once, with the run evidence a reader would
+// otherwise dig out of data/validation.json.
+function leafHeader(leaf, base, run) {
   const treeIndex = dirname(dirname(leaf.path)).split(sep).join('/') + '/index.html';
   const branchIndex = dirname(leaf.path).split(sep).join('/') + '/index.html';
+  const facts = [
+    ['Level', `<span class="badge lv-${escapeHtml(leaf.level)}">${escapeHtml(leaf.level)}</span>`],
+    ['Readiness', readinessBadge(leaf, base) + ` <span class="s">${escapeHtml(LEVELS[leaf.readiness].summary)}</span>`],
+    ['A live run needs', escapeHtml(needsSentence(leaf.needs).replace(/^A live run needs /, '').replace(/\.$/, ''))],
+  ];
+  if (run) {
+    const report = `data/live/runs/${run.leaf}-${run.run_id}.json`;
+    const reportLink = existsSync(report) ? ` · <a href="${base}${report}">report</a>` : '';
+    facts.push(['Latest live run', `${escapeHtml(run.result)} on ${escapeHtml(run.date)} · ` +
+      `<a href="${escapeHtml(run.run)}">evidence</a>${reportLink}`]);
+  }
   return `<div class="crumb">` +
     `<a href="${base}index.html">Forest</a> / ` +
     `<a href="${base}${treeIndex}">${escapeHtml(leaf.tree)}</a> / ` +
     `<a href="${base}${branchIndex}">${escapeHtml(leaf.branch)}</a>` +
     `</div>\n` +
-    `<div class="meta"><span class="badge lv-${escapeHtml(leaf.level)}">${escapeHtml(leaf.level)}</span>` +
-    readinessBadge(leaf, base) + `</div>\n`;
+    `<dl class="facts">\n` +
+    facts.map(([term, detail]) => `<div><dt>${escapeHtml(term)}</dt><dd>${detail}</dd></div>`).join('\n') +
+    `\n</dl>\n`;
+}
+
+// "On this page", from the same headings the renderer gives ids to. Placed
+// after the H1 by the caller; leaves have eleven sections, README pages
+// mostly two or three, so short pages carry no list.
+function onThisPage(markdown) {
+  const toc = tocOf(markdown);
+  if (toc.length < 3) return '';
+  return `<nav class="toc" aria-label="On this page"><p class="toc-label">On this page</p><ul>` +
+    toc.map(({ text, id }) => `<li><a href="#${escapeHtml(id)}">${escapeHtml(text)}</a></li>`).join('') +
+    `</ul></nav>\n`;
 }
 
 // The badge links to the page that says what the level does and does not
@@ -313,6 +348,75 @@ against the live service or only checked offline, and what a live run would need
 }
 
 // ---------------------------------------------------------------------------
+// browse and validation pages
+
+// Static preset lists - by level, by readiness, by need - each a plain
+// anchor a page can link to; the filter input above them is an enhancement
+// the page works without.
+function browsePage(catalog, base) {
+  const row = (leaf) => {
+    const url = leaf.path.replace(/\.md$/, '.html');
+    const validated = leaf.readiness === 'validated' ? ` <span class="badge rd-validated">Validated</span>` : '';
+    return `<li data-browse><a href="${base}${url}">${escapeHtml(leaf.name)}</a>` +
+      ` <span class="badge lv-${escapeHtml(leaf.level)}">${escapeHtml(leaf.level)}</span>${validated}</li>`;
+  };
+  const section = (id, label, leaves) => leaves.length
+    ? `<h3 id="${escapeHtml(id)}">${escapeHtml(label)} <span class="s">(${leaves.length})</span></h3>\n<ul>\n${leaves.map(row).join('\n')}\n</ul>`
+    : '';
+  const byLevel = LEVEL_ORDER.map((level) =>
+    section(`level-${slug(level)}`, level, catalog.leaves.filter((l) => l.level === level))).filter(Boolean);
+  const byReadiness = Object.entries(LEVELS).map(([id, level]) =>
+    section(`readiness-${id}`, level.label, catalog.leaves.filter((l) => l.readiness === id))).filter(Boolean);
+  const byNeed = Object.entries(NEEDS).map(([id, need]) =>
+    section(`need-${id}`, need.label, catalog.leaves.filter((l) => Array.isArray(l.needs) && l.needs.includes(id)))).filter(Boolean);
+  return `<h1>Browse the curriculum</h1>
+<p>Every leaf, three ways: by level, by <a href="${base}READINESS.html">readiness</a>, and by
+what a live run of it needs. The filter narrows all three at once.</p>
+<p class="browse-filter"><label for="browse-filter">Filter</label>
+<input id="browse-filter" type="search" autocomplete="off" placeholder="e.g. feast, Beginner, Ollama">
+<span id="browse-count" role="status" aria-live="polite" class="s"></span></p>
+<h2>By level</h2>
+${byLevel.join('\n')}
+<h2>By readiness</h2>
+${byReadiness.join('\n')}
+<h2>By what a live run needs</h2>
+${byNeed.join('\n')}
+`;
+}
+
+// Every recorded run, newest first: the history behind the READINESS table's
+// "latest" column, with each run's committed report where one exists.
+function validationPage(catalog, validation, base) {
+  const byId = new Map(catalog.leaves.map((l) => [l.id, l]));
+  const runs = [...(validation.runs ?? [])].sort((a, b) =>
+    a.date === b.date ? (b.run_id ?? 0) - (a.run_id ?? 0) : a.date < b.date ? 1 : -1);
+  const rows = runs.map((run) => {
+    const leaf = byId.get(run.leaf);
+    const name = leaf
+      ? `<a href="${base}${leaf.path.replace(/\.md$/, '.html')}">${escapeHtml(leaf.name)}</a>`
+      : escapeHtml(run.leaf);
+    const report = `data/live/runs/${run.leaf}-${run.run_id}.json`;
+    const evidence = `<a href="${escapeHtml(run.run)}">run</a>` +
+      (existsSync(report) ? ` · <a href="${base}${report}">report</a>` : '');
+    return `<tr><td>${escapeHtml(run.date)}</td><td>${name}</td>` +
+      `<td class="run-${escapeHtml(run.result)}">${escapeHtml(run.result)}</td>` +
+      `<td>${escapeHtml(run.event)}</td><td class="s">${escapeHtml(run.covered)}</td><td>${evidence}</td></tr>`;
+  });
+  return `<h1>Validation runs</h1>
+<p>Every live run recorded in <a href="${base}${VALIDATION_PATH}"><code>${VALIDATION_PATH}</code></a>,
+newest first. A leaf is <a href="${base}READINESS.html#validated">validated</a> exactly while its
+latest run here passed; each run links the CI run itself and the trimmed report committed with it,
+so the evidence can be read rather than taken on trust.</p>
+<table class="runs">
+<thead><tr><th>Date</th><th>Leaf</th><th>Result</th><th>Trigger</th><th>Covered</th><th>Evidence</th></tr></thead>
+<tbody>
+${rows.join('\n')}
+</tbody>
+</table>
+`;
+}
+
+// ---------------------------------------------------------------------------
 // output check
 
 function deadLinks(dir, found = []) {
@@ -339,7 +443,11 @@ function main() {
   const grouped = group(catalog);
   const sidebar = buildSidebar(grouped);
   const byPath = new Map(catalog.leaves.map((l) => [l.path.split(sep).join('/'), l]));
-  const ordered = [...grouped].flatMap(([, branches]) => [...branches].flatMap(([, leaves]) => leaves));
+  const validation = loadValidation();
+  const latest = latestRuns(validation);
+  // The pager reads in level order - all of Beginner before Intermediate -
+  // rather than tree order, so "next" continues at the reader's level.
+  const ordered = levelOrdered([...grouped].flatMap(([, branches]) => [...branches].flatMap(([, leaves]) => leaves)));
 
   if (existsSync(OUT)) rmSync(OUT, { recursive: true });
   mkdirSync(OUT, { recursive: true });
@@ -357,8 +465,11 @@ function main() {
     const entry = leaf ? searchEntry(leaf, raw) : null;
     if (leaf) entries.set(leaf.id, entry);
 
-    let body = rewriteLinks(marked.parse(raw));
-    if (leaf) body = leafHeader(leaf, base) + body + pager(leaf, ordered, base);
+    let body = rewriteLinks(marked.parse(leaf ? stripHeaderBlock(raw) : raw));
+    if (leaf) {
+      body = body.replace('</h1>', '</h1>\n' + onThisPage(raw));
+      body = leafHeader(leaf, base, latest.get(leaf.id)) + body + pager(leaf, ordered, base);
+    }
 
     const firstHeading = raw.match(/^#\s+(.+)$/m);
     const title = leaf ? leaf.name : firstHeading ? firstHeading[1].trim() : out;
@@ -385,6 +496,20 @@ function main() {
     sidebar, depth: 0, current: 'index.html',
   }));
 
+  writeFileSync(join(OUT, 'browse.html'), pageShell({
+    title: `Browse - ${catalog.name}`,
+    description: 'Every leaf by level, by readiness, and by what a live run of it needs.',
+    body: browsePage(catalog, './'),
+    sidebar, depth: 0, current: 'browse.html',
+  }));
+
+  writeFileSync(join(OUT, 'validation.html'), pageShell({
+    title: `Validation runs - ${catalog.name}`,
+    description: 'Every recorded live validation run, with its CI run and committed report.',
+    body: validationPage(catalog, validation, './'),
+    sidebar, depth: 0, current: 'validation.html',
+  }));
+
   // In catalog order, from the entries collected while each leaf's page was
   // rendered; a catalog leaf whose file the walk never met would already have
   // failed validate-content.
@@ -406,6 +531,15 @@ function main() {
   // is a 404 here.
   mkdirSync(join(OUT, 'data'), { recursive: true });
   copyFileSync(VALIDATION_PATH, join(OUT, VALIDATION_PATH));
+
+  // The committed run reports the facts panels and validation.html link to.
+  const runsDir = join('data', 'live', 'runs');
+  if (existsSync(runsDir)) {
+    mkdirSync(join(OUT, runsDir), { recursive: true });
+    for (const entry of readdirSync(runsDir)) {
+      if (entry.endsWith('.json')) copyFileSync(join(runsDir, entry), join(OUT, runsDir, entry));
+    }
+  }
 
   // The mermaid entry module imports its chunks by relative path, so the
   // layout under dist/ is kept. Source maps are left out (about 13 MB); the

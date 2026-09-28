@@ -85,7 +85,13 @@ code {
   padding: .12em .35em; font-size: 85%;
   font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
 }
-pre { background: var(--code); border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px; overflow-x: auto; }
+pre { position: relative; background: var(--code); border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px; overflow-x: auto; }
+pre .copy {
+  position: absolute; top: 6px; right: 6px; opacity: .75;
+  border: 1px solid var(--control-border); background: var(--bg); color: var(--fg);
+  border-radius: 6px; padding: 2px 9px; cursor: pointer; font: inherit; font-size: 12px;
+}
+pre .copy:hover, pre .copy:focus { opacity: 1; }
 pre code { background: none; border: 0; padding: 0; font-size: 13px; }
 pre.mermaid { text-align: center; border: 1px solid var(--line); }
 blockquote { margin: 16px 0; padding: 8px 14px; border-left: 3px solid var(--accent); background: var(--card); color: var(--muted); }
@@ -107,7 +113,26 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 28px 0; }
 .rd-validated { color: var(--beginner); }
 .crumb { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
 .crumb a { color: var(--muted); }
-.meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 0 0 22px; font-size: 13px; color: var(--muted); }
+main .s { color: var(--muted); }
+dl.facts {
+  display: grid; gap: 6px; margin: 0 0 20px; padding: 12px 16px; font-size: 14px;
+  background: var(--card); border: 1px solid var(--line); border-radius: 8px;
+}
+dl.facts > div { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+dl.facts dt { min-width: 132px; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+dl.facts dd { margin: 0; }
+nav.toc { margin: 14px 0 6px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--card); font-size: 13px; }
+nav.toc .toc-label { margin: 0 0 4px; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+nav.toc ul { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 2px 14px; }
+.browse-filter { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+#browse-filter {
+  flex: 0 1 320px; padding: 7px 11px;
+  border: 1px solid var(--control-border); border-radius: 6px;
+  background: var(--bg); color: var(--fg); font: inherit; font-size: 14px;
+}
+#browse-filter:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+table.runs td.run-pass { color: var(--beginner); font-weight: 600; }
+table.runs td.run-fail { color: var(--expert); font-weight: 600; }
 .stats { display: flex; gap: 10px; flex-wrap: wrap; margin: 20px 0 8px; padding: 0; list-style: none; }
 .stats li { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 10px 16px; min-width: 92px; }
 .stats .n { display: block; font-size: 24px; font-weight: 600; line-height: 1.1; }
@@ -152,7 +177,7 @@ footer.site { border-top: 1px solid var(--line); padding: 20px 16px 40px; color:
   main { padding-top: 18px; }
   main h1 { font-size: 25px; }
 }
-@media print { header.top, nav.side, .pager, #results, .search-status { display: none; } }
+@media print { header.top, nav.side, .pager, #results, .search-status, pre .copy, .browse-filter { display: none; } }
 `;
 
 // Runs in <head>, before the stylesheet, so a reader who chose a theme gets it
@@ -221,6 +246,53 @@ export const SCRIPT = `
         else localStorage.setItem('theme', mode);
       } catch (e) { /* private mode: the choice lasts for this page only */ }
       showMode();
+    });
+  }
+
+  // A copy button on every code block. Purely an enhancement: without
+  // JavaScript, or where the clipboard is unavailable (an insecure origin, a
+  // denied permission), the text selects and copies by hand as before.
+  if (navigator.clipboard && window.isSecureContext) {
+    document.querySelectorAll('main pre > code').forEach(function (code) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'copy';
+      btn.textContent = 'Copy';
+      btn.setAttribute('aria-label', 'Copy code block');
+      btn.addEventListener('click', function () {
+        navigator.clipboard.writeText(code.textContent).then(function () {
+          btn.textContent = 'Copied';
+          setTimeout(function () { btn.textContent = 'Copy'; }, 2000);
+        }, function () {
+          // Clipboard refused: select the block so one keystroke finishes it.
+          var range = document.createRange();
+          range.selectNodeContents(code);
+          var sel = window.getSelection();
+          sel.removeAllRanges();
+          sel.addRange(range);
+          btn.textContent = 'Press Ctrl+C';
+          setTimeout(function () { btn.textContent = 'Copy'; }, 3000);
+        });
+      });
+      code.parentElement.appendChild(btn);
+    });
+  }
+
+  // The browse page's filter narrows its three preset lists at once; without
+  // JavaScript the full lists simply stay visible.
+  var filter = document.getElementById('browse-filter');
+  if (filter) {
+    var items = Array.prototype.slice.call(document.querySelectorAll('[data-browse]'));
+    var browseCount = document.getElementById('browse-count');
+    filter.addEventListener('input', function () {
+      var q = filter.value.trim().toLowerCase();
+      var shown = 0;
+      items.forEach(function (li) {
+        var hit = !q || li.textContent.toLowerCase().indexOf(q) !== -1;
+        li.hidden = !hit;
+        if (hit) shown++;
+      });
+      if (browseCount) browseCount.textContent = q ? shown + ' of ' + items.length + ' leaves shown' : '';
     });
   }
 
