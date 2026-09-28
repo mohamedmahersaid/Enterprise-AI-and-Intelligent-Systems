@@ -61,3 +61,25 @@ test('focus leaving the widget closes the panel, and Escape on the link returns 
   assert.equal(doc.activeElement.id, 'search');
   assert.equal(status.textContent, '');
 });
+
+test('a result row shows title, metadata and the description line', async () => {
+  const dom = new JSDOM(`<!doctype html><body>${HEADER}</body>`, { runScripts: 'outside-only', pretendToBeVisual: true });
+  const { window } = dom;
+  window.matchMedia = () => ({ matches: false, addEventListener() {} });
+  window.fetch = async () => ({ json: async () => [
+    { url: 'docs/a.html', title: 'Local inference', level: 'Beginner', readiness: 'Lab', branch: 'b', description: 'Runs models locally.', haystack: 'local inference' },
+    { url: 'docs/b.html', title: 'Other inference', level: 'Beginner', readiness: 'Lab', branch: 'b', haystack: 'other inference' },
+  ] });
+  window.BASE = './';
+  window.eval(SCRIPT);
+  const doc = window.document;
+  const input = doc.getElementById('search');
+  input.focus();
+  input.value = 'inference';
+  input.dispatchEvent(new window.Event('input'));
+  await new Promise((r) => setTimeout(r, 200));
+  const rows = doc.querySelectorAll('#results [role="option"]');
+  assert.equal(rows.length, 2);
+  assert.equal(rows[0].querySelector('.d').textContent, 'Runs models locally.');
+  assert.equal(rows[1].querySelector('.d'), null, 'an entry without a description gets no empty line');
+});
