@@ -20,6 +20,11 @@ on:
       - scripts/live-matrix.mjs
       - scripts/lib/live-spec.mjs
       - docs/ai-tree-model-platforms/ai-branch-local-inference/ai-ollama-local-inference.md
+      - docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/ai-retrieval-test-collections.md
+      - docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/fixtures/**
+      - docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/ai-feature-store-skew.md
+      - docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/ai-reproducible-training-runs.md
+      - docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/fixtures/**
       - .github/workflows/live.yml
   schedule:
     - cron: '41 5 * * 2'

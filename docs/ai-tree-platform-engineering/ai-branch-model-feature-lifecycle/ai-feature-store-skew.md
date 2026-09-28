@@ -233,7 +233,7 @@ if __name__ == "__main__":
 3. Record the offline evaluation score - it will look excellent.
 4. Evaluate the same model against a properly held-out future period and observe the collapse. This is label leakage.
 5. Rebuild the training set with a point-in-time correct join using get-historical-features, retrain, and compare both scores.
-6. Define features once in Feast and materialise to both offline and online stores.
+6. Define features once in Feast and materialise to both offline and online stores. A minimal repository to start from - `feature_store.yaml`, the `user_stats` view and its data generator - is in [fixtures/ai-feature-store-skew/](fixtures/ai-feature-store-skew/README.md); the live run uses the same files.
 7. Serve inference reading features from the online store and confirm parity with the training path.
 8. Introduce skew deliberately: change the transformation for the online path only.
 9. Run the skew detection script and confirm it identifies the affected feature and the percentage of rows differing.

@@ -1,0 +1,27 @@
+{
+  "$comment": "What scripts/live-run.mjs runs for this leaf. The fixtures are the leaf's own, copied from its fixtures directory; test_collection.py is extracted from the leaf's Automation scripts section. Setup builds what Lab steps 1, 2, 6 and 7 build - the venv the script needs, the runs, qrels-v2 and the leaky runs - so Commands 2-6 find the files they read; setup is scaffolding and never counted as coverage. Command 1 then runs over the existing venv, which pip reports as already satisfied.",
+  "copy": {
+    "fixtures/": "docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/fixtures/ai-retrieval-test-collections/"
+  },
+  "scripts": {
+    "test_collection.py": "test_collection.py"
+  },
+  "setup": [
+    { "run": "python3 -m venv .venv-eval && .venv-eval/bin/pip install --quiet ranx==0.3.21 ir-measures==0.4.3 rank_bm25==0.2.2", "timeout": 420 },
+    { "run": ".venv-eval/bin/python test_collection.py runs fixtures/corpus.jsonl fixtures/queries.jsonl runs --synonyms fixtures/synonyms.json", "timeout": 120 },
+    { "run": "jq -s '.[0] * .[1]' fixtures/qrels.json fixtures/qrels-repool.json > qrels-v2.json" },
+    { "run": ".venv-eval/bin/python test_collection.py runs fixtures/corpus.jsonl fixtures/queries.jsonl runs-leaky --synonyms fixtures/synonyms-leaky.json", "timeout": 120 }
+  ],
+  "versions": [
+    ".venv-eval/bin/pip freeze | grep -E '^(ranx|ir-measures|rank-bm25|numba|numpy)==' | tr '\\n' ' '"
+  ],
+  "steps": [
+    { "command": 1, "expect": "Requirement already satisfied|Successfully installed", "timeout": 420 },
+    { "command": 2, "expect": "^511$" },
+    { "command": 3, "expect": "judged@10: 319 of 322" },
+    { "command": 4, "expect": "runs-leaky/expand[\\s\\S]*0\\.893", "timeout": 300 },
+    { "command": 5, "expect": "'ndcg_burges@10': " },
+    { "command": 6, "expect": "nDCG@10\\s+0\\.7909[\\s\\S]*0\\.8119", "timeout": 120 }
+  ],
+  "skip": {}
+}

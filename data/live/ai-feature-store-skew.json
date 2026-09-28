@@ -1,0 +1,60 @@
+{
+  "$comment": "What scripts/live-run.mjs runs for this leaf. The feature repository comes from the leaf's own fixtures; setup installs Feast pinned (the leaf's prose leaves the version to the reader, so a validated run states exactly what it ran), writes the parquet rows and puts the venv's feast on PATH through the bin/ symlink. The .feastignore keeps feast apply from importing the data generator.",
+  "copy": {
+    "feature_store.yaml": "docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/fixtures/ai-feature-store-skew/feature_store.yaml",
+    "features.py": "docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/fixtures/ai-feature-store-skew/features.py",
+    "fixtures/": "docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/fixtures/ai-feature-store-skew/"
+  },
+  "files": {
+    ".feastignore": "fixtures\n"
+  },
+  "env": {
+    "PATH": "$WORK/bin:$PATH"
+  },
+  "setup": [
+    {
+      "run": "python3 -m venv .venv && .venv/bin/pip install --quiet feast==0.66.0 && mkdir -p bin && ln -s \"$PWD/.venv/bin/feast\" bin/feast && bin/feast version",
+      "expect": "0\\.66\\.0",
+      "timeout": 600
+    },
+    {
+      "run": ".venv/bin/python fixtures/make_data.py",
+      "expect": "wrote data/user_stats.parquet: 2 rows"
+    }
+  ],
+  "versions": [
+    "bin/feast version",
+    ".venv/bin/pip freeze | grep -E '^(pandas|pyarrow)==' | tr '\\n' ' '"
+  ],
+  "steps": [
+    {
+      "command": 1,
+      "expect": "user_stats",
+      "timeout": 180
+    },
+    {
+      "command": 2,
+      "expect": "user_stats",
+      "timeout": 180
+    },
+    {
+      "command": 3,
+      "expect": "\"tenure_days\":50",
+      "timeout": 180
+    },
+    {
+      "command": 4,
+      "expect": "\"tenure_days\": \\[\\s*76",
+      "timeout": 120
+    },
+    {
+      "command": 5,
+      "expect": "user_stats"
+    },
+    {
+      "command": 6,
+      "expect": "ttl: 172800s[\\s\\S]*endTime"
+    }
+  ],
+  "skip": {}
+}
