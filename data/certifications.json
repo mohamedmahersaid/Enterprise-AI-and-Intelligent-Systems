@@ -27,6 +27,22 @@
       "evidence": "read"
     },
     {
+      "id": "AI-200",
+      "vendor": "Microsoft",
+      "credential": "Microsoft Certified: Azure AI Cloud Developer Associate",
+      "label": "Microsoft Certified: Azure AI Cloud Developer Associate (AI-200)",
+      "exam": "AI-200: Developing AI Cloud Solutions on Azure",
+      "status": "active",
+      "domains": [
+        "Develop containerized solutions on Azure (20-25%)",
+        "Develop AI solutions by using Azure data management services (25-30%)",
+        "Connect to and consume Azure services (20-25%)",
+        "Secure, monitor, troubleshoot Azure solutions (20-25%)"
+      ],
+      "source": "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/ai-200",
+      "evidence": "read"
+    },
+    {
       "id": "AI-901",
       "vendor": "Microsoft",
       "credential": "Microsoft Certified: Azure AI Fundamentals",
@@ -452,6 +468,19 @@
       "quote": "The last day to take the AWS Certified Machine Learning - Specialty exam (MLS-C01) is March 31, 2026.",
       "evidence": "search-extract",
       "successor_note": "AWS names no single successor; it points holders to several credentials, of which Machine Learning Engineer - Associate is the closest match."
+    },
+    {
+      "code": "AZ-204",
+      "names": [
+        "Azure Developer Associate"
+      ],
+      "retired": "2026-07-31",
+      "successor": "AI-200",
+      "source": "https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/az-204",
+      "quote": "This exam was retired on July 31, 2026, at 11:59 PM Central Standard Time.",
+      "evidence": "read",
+      "successor_source": "https://learn.microsoft.com/partner-center/announcements/2026-july",
+      "successor_note": "The Partner Center July 2026 announcement lists Microsoft Certified: Azure Developer Associate as retiring with Azure AI Cloud Developer Associate as its replacement."
     }
   ],
   "frameworks": [

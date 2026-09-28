@@ -18,8 +18,19 @@
  */
 import { NEEDS } from './readiness.mjs';
 
-/** The one place the level vocabulary lives; new-leaf.mjs imports it too. */
-export const LEAF_LEVELS = ['Beginner', 'Intermediate', 'Advanced', 'Enterprise', 'Expert'];
+/**
+ * The one place the level vocabulary lives - names, reading order and what
+ * each level claims. new-leaf.mjs and the site's pager and browse page read
+ * it, so a made-up level fails here and the order is defined once.
+ */
+export const LEVEL_DEFINITIONS = {
+  Beginner: 'Assumes no prior AI-platform experience; every tree’s entry point starts here.',
+  Intermediate: 'Builds a working system on the Beginner material and the platform’s own tooling.',
+  Advanced: 'Production concerns - evaluation, cost, scale and failure modes - for a system other people depend on.',
+  Expert: 'Judgement calls that draw on everything below them, such as evaluating the security of a protocol or deciding where AI belongs at all.',
+  Enterprise: 'Estate-wide obligations - private data handling, governance and regulatory compliance - that outlive any single system.',
+};
+export const LEAF_LEVELS = Object.keys(LEVEL_DEFINITIONS);
 
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 

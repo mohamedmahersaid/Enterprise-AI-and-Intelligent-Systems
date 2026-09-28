@@ -19,6 +19,7 @@ import { checkSite } from './check-site.mjs';
 import { LEVELS, NEEDS, VALIDATION_PATH, latestRuns, loadValidation, needsSentence } from './lib/readiness.mjs';
 import { searchEntry, indexSizeProblem } from './lib/search-index.mjs';
 import { levelOrdered, stripHeaderBlock, tocOf, LEVEL_ORDER } from './lib/leaf-page.mjs';
+import { LEVEL_DEFINITIONS } from './lib/schema.mjs';
 
 const OUT = 'site';
 
@@ -360,11 +361,13 @@ function browsePage(catalog, base) {
     return `<li data-browse><a href="${base}${url}">${escapeHtml(leaf.name)}</a>` +
       ` <span class="badge lv-${escapeHtml(leaf.level)}">${escapeHtml(leaf.level)}</span>${validated}</li>`;
   };
-  const section = (id, label, leaves) => leaves.length
-    ? `<h3 id="${escapeHtml(id)}">${escapeHtml(label)} <span class="s">(${leaves.length})</span></h3>\n<ul>\n${leaves.map(row).join('\n')}\n</ul>`
+  const section = (id, label, leaves, note) => leaves.length
+    ? `<h3 id="${escapeHtml(id)}">${escapeHtml(label)} <span class="s">(${leaves.length})</span></h3>\n` +
+      (note ? `<p class="s">${escapeHtml(note)}</p>\n` : '') +
+      `<ul>\n${leaves.map(row).join('\n')}\n</ul>`
     : '';
   const byLevel = LEVEL_ORDER.map((level) =>
-    section(`level-${slug(level)}`, level, catalog.leaves.filter((l) => l.level === level))).filter(Boolean);
+    section(`level-${slug(level)}`, level, catalog.leaves.filter((l) => l.level === level), LEVEL_DEFINITIONS[level])).filter(Boolean);
   const byReadiness = Object.entries(LEVELS).map(([id, level]) =>
     section(`readiness-${id}`, level.label, catalog.leaves.filter((l) => l.readiness === id))).filter(Boolean);
   const byNeed = Object.entries(NEEDS).map(([id, need]) =>

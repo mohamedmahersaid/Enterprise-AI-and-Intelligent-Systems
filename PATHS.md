@@ -16,6 +16,7 @@ a step you already know is a step you skip.
 | [Run the model platform](#run-the-model-platform) | 7 | A platform or infrastructure engineer who now owns GPUs, training jobs and model artefacts. |
 | [Decide what to run, and what it costs](#decide-what-to-run-and-what-it-costs) | 6 | An architect or lead answering 'which model, hosted where, and what will this cost at scale'. |
 | [Put an agent in front of real systems](#put-an-agent-in-front-of-real-systems) | 6 | An engineer being asked to let a model take actions rather than only produce text. |
+| [Secure an AI estate](#secure-an-ai-estate) | 8 | A security engineer who has just been told the organisation is deploying AI, and must secure what already exists as much as what comes next. |
 
 ## Ship your first AI feature
 
@@ -144,3 +145,26 @@ An agent that can act can act wrongly, at machine speed, in a loop. This path co
    Loop limits, budgets and kill switches. An unbounded agent is a billing incident waiting to happen.
 6. **[AI Incident Response: Detection, Containment and Postmortems for Non-Deterministic Systems](docs/ai-tree-operations-governance/ai-branch-llmops-observability/ai-incident-response.md)** &middot; Advanced
    When an agent does something wrong, the blast radius question is 'what did it touch', and you need the answer fast.
+
+## Secure an AI estate
+
+**For:** A security engineer who has just been told the organisation is deploying AI, and must secure what already exists as much as what comes next.
+
+Security for AI systems in the order the controls actually stack: know what is running, lock down how models are reached, filter what goes in and comes out, control what retrieval can expose, vet the tools agents can call, bound what agents can do, and be ready for the incident anyway.
+
+1. **[Before the Framework: AI Inventory, Acceptable Use and Who Decides](docs/ai-tree-operations-governance/ai-branch-governance-adoption/ai-inventory-acceptable-use.md)** &middot; Beginner
+   You cannot secure what you have not enumerated. The inventory and acceptable-use policy define what is in scope before any technical control exists.
+2. **[Your First Managed Endpoint: Keys, Quotas and Responses You Cannot Trust](docs/ai-tree-model-platforms/ai-branch-managed-model-services/ai-first-managed-endpoint.md)** &middot; Beginner
+   The endpoint is the smallest unit of exposure: keys, quotas and the untrusted output stream are where AI security starts.
+3. **[Azure OpenAI Enterprise Integration](docs/ai-tree-model-platforms/ai-branch-managed-model-services/ai-azure-openai-integration.md)** &middot; Advanced
+   Replace keys with managed identity and take the endpoint off the public network - the two controls that remove whole classes of credential and exposure risk.
+4. **[Content Safety and Guardrails: Input Filtering, Output Classification and Refusal Design](docs/ai-tree-applied-systems/ai-branch-agents-integration/ai-content-safety-guardrails.md)** &middot; Intermediate
+   Input filtering and output guardrails sit between your users and the model; this is where injection attempts and unsafe output are caught in-line.
+5. **[Grounding Enterprise Data Privately: Offline RAG and Access Control](docs/ai-tree-applied-systems/ai-branch-rag-knowledge/ai-private-enterprise-rag.md)** &middot; Enterprise
+   Retrieval turns a document store into an answer machine, so access control must move into the search query itself or the index becomes an exfiltration path.
+6. **[MCP Servers, AI Security and Evaluation](docs/ai-tree-applied-systems/ai-branch-agents-integration/ai-mcp-security-evaluation.md)** &middot; Expert
+   Tools are the supply chain of an agent. Pin what a server offers, scan tool definitions, and give agents their own least-privilege identity.
+7. **[Agent Orchestration with LangGraph: State, Guardrails and Tool Authorisation](docs/ai-tree-production-systems/ai-branch-agent-runtime-cost/ai-agent-orchestration-guardrails.md)** &middot; Advanced
+   An agent that can act needs bounds: step caps, tool allowlists and human approval for anything irreversible.
+8. **[AI Incident Response: Detection, Containment and Postmortems for Non-Deterministic Systems](docs/ai-tree-operations-governance/ai-branch-llmops-observability/ai-incident-response.md)** &middot; Advanced
+   Some control will fail. Detection, containment and post-incident evidence for AI systems close the loop the inventory opened.

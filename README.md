@@ -31,7 +31,7 @@ Enterprise AI engineering: local and offline inference with Ollama, Azure OpenAI
 
 **Total:** 5 trees · 10 branches · 35 leaves
 
-**Level distribution:** Advanced: 14 · Beginner: 10 · Enterprise: 2 · Expert: 2 · Intermediate: 7
+**Level distribution:** Beginner: 10 · Intermediate: 7 · Advanced: 14 · Expert: 2 · Enterprise: 2
 
 **Readiness:** Lab: 29 · Validated: 6 ([what that means](READINESS.md))
 
