@@ -314,6 +314,7 @@ Track them on the same timeline but as genuinely separate axes, because optimisi
 - **Microsoft Certified: Azure AI Apps and Agents Developer Associate (AI-103)** - Plan and manage an Azure AI solution: provisioning Application Insights, pulling latency, error and token metrics from the Azure OpenAI resource with Azure Monitor, and alerting on refusal and tool-error rates through Log Analytics scheduled queries.
 - **Vendor-neutral** - OpenTelemetry practice: emitting spans for completion calls and distributed tracing for AI and agentic workloads.
 - **Vendor-neutral** - NIST AI RMF MEASURE function: ongoing performance and impact monitoring.
+- **Microsoft Certified: Machine Learning Operations Engineer Associate (AI-300)** - Implement generative AI quality assurance and observability: tracking token and cost metrics per deployment, and detailed logging and distributed tracing (Application Insights, OpenTelemetry spans) for production troubleshooting.
 
 ## References
 

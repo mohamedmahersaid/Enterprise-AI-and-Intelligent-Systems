@@ -347,6 +347,7 @@ When something simpler already answers the question. If a user wants "the invoic
 - **AWS Certified AI Practitioner** - Domain 3: Applications of Foundation Models: choosing between pasting content into the prompt, retrieval and tuning, and pricing pasting against retrieval at real query volume.
 - **Google Cloud Professional Machine Learning Engineer** - grounding generative applications on enterprise data sources.
 - **Vendor-neutral** - NIST AI RMF MAP function: framing the problem and establishing whether AI is the right approach.
+- **Vendor-neutral** - OWASP GenAI LLM Top 10 2026: LLM07:2026 Misinformation - grounding answers in text supplied with the request, with citations checkable against the source, instead of trusting trained-in recall.
 
 ## References
 

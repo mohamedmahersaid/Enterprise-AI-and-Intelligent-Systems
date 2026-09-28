@@ -321,6 +321,8 @@ Reranking, in almost every case, and the reasoning is about where the error actu
 - **Microsoft Certified: Azure AI Apps and Agents Developer Associate (AI-103)** - Implement generative AI and agentic solutions: grounding retrieval-augmented generation in hybrid dense and BM25 retrieval, reciprocal rank fusion and cross-encoder reranking, so the right passages reach the LLM.
 - **Google Cloud Professional Machine Learning Engineer** - Vertex AI Search and vector store design.
 - **Vendor-neutral** - Information retrieval fundamentals: BM25, rank fusion and cross-encoder reranking.
+- **Microsoft Certified: Machine Learning Operations Engineer Associate (AI-300)** - Optimize generative AI systems and model performance: implementing and optimizing hybrid search combining semantic vector and keyword retrieval, with rank fusion and cross-encoder reranking.
+- **Vendor-neutral** - OWASP GenAI LLM Top 10 2026: LLM09:2026 Vector and Embedding Weaknesses - applying tenant and ACL filters inside the search rather than post-filtering, which silently drops results and is the cross-tenant leakage path in a shared similarity index.
 
 ## References
 
