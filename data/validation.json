@@ -13,6 +13,84 @@
       "environment": "GitHub-hosted ubuntu-latest (image ubuntu24 20260920.314.1), CPU only; Ollama 0.34.4; repository at be50a13; llama3.1:8b-instruct-q4_K_M resolved to sha256:46e0c10c039e019119339687c3c1757cc81b9da49709a3b3924863ba87ca666e",
       "covered": "Commands 1, 2, 3, 4, 5, 6, 7, 8, 10, run as data/live/ai-ollama-local-inference.json describes; Command 9 skipped because it binds the API to every interface",
       "result": "pass"
+    },
+    {
+      "leaf": "ai-ollama-local-inference",
+      "date": "2026-09-28",
+      "workflow": ".github/workflows/live.yml",
+      "run": "https://github.com/mohamedmahersaid/Enterprise-AI-and-Intelligent-Systems/actions/runs/36414428271",
+      "run_id": 36414428271,
+      "head_sha": "c48498ee57b4f586ca111db4df8c97dfebb067bd",
+      "event": "workflow_dispatch",
+      "head_branch": "main",
+      "environment": "GitHub-hosted ubuntu-24.04 (image ubuntu24 20260920.314.1), CPU only; Ollama 0.34.4; repository at c48498e; llama3.1:8b-instruct-q4_K_M resolved to sha256:46e0c10c039e019119339687c3c1757cc81b9da49709a3b3924863ba87ca666e",
+      "covered": "Commands 1, 2, 3, 4, 5, 6, 7, 8, 10, run as data/live/ai-ollama-local-inference.json describes; Command 9 skipped because it binds the API to every interface",
+      "result": "pass"
+    },
+    {
+      "leaf": "ai-retrieval-test-collections",
+      "date": "2026-09-28",
+      "workflow": ".github/workflows/live.yml",
+      "run": "https://github.com/mohamedmahersaid/Enterprise-AI-and-Intelligent-Systems/actions/runs/36414428271",
+      "run_id": 36414428271,
+      "head_sha": "c48498ee57b4f586ca111db4df8c97dfebb067bd",
+      "event": "workflow_dispatch",
+      "head_branch": "main",
+      "environment": "GitHub-hosted ubuntu-24.04 (image ubuntu24 20260920.314.1), CPU only; Python 3.12 venv with ranx 0.3.21, ir-measures 0.4.3, rank_bm25 0.2.2 (numba 0.67.0, numpy 2.5.3); repository at c48498e",
+      "covered": "Commands 1, 2, 3, 4, 5, 6, run as data/live/ai-retrieval-test-collections.json describes, against runs built by the leaf's test_collection.py script over the committed fixtures",
+      "result": "pass"
+    },
+    {
+      "leaf": "ai-feature-store-skew",
+      "date": "2026-09-28",
+      "workflow": ".github/workflows/live.yml",
+      "run": "https://github.com/mohamedmahersaid/Enterprise-AI-and-Intelligent-Systems/actions/runs/36414428271",
+      "run_id": 36414428271,
+      "head_sha": "c48498ee57b4f586ca111db4df8c97dfebb067bd",
+      "event": "workflow_dispatch",
+      "head_branch": "main",
+      "environment": "GitHub-hosted ubuntu-24.04 (image ubuntu24 20260920.314.1), CPU only; Feast 0.66.0 with the sqlite online store and file offline store (pandas 2.3.3, pyarrow 25.0.1); repository at c48498e",
+      "covered": "Commands 1, 2, 3, 4, 5, 6, run as data/live/ai-feature-store-skew.json describes, over the committed feature repository and generated parquet fixture; the run shows the point-in-time value (tenure_days 50) differing from the online value (76)",
+      "result": "pass"
+    },
+    {
+      "leaf": "ai-reproducible-training-runs",
+      "date": "2026-09-28",
+      "workflow": ".github/workflows/live.yml",
+      "run": "https://github.com/mohamedmahersaid/Enterprise-AI-and-Intelligent-Systems/actions/runs/36414428271",
+      "run_id": 36414428271,
+      "head_sha": "c48498ee57b4f586ca111db4df8c97dfebb067bd",
+      "event": "workflow_dispatch",
+      "head_branch": "main",
+      "environment": "GitHub-hosted ubuntu-24.04 (image ubuntu24 20260920.314.1), CPU only; pip-compile 7.6.1, git 2.55.0, Python 3.12; repository at c48498e",
+      "covered": "Commands 1, 2, 3, 5, 6, run as data/live/ai-reproducible-training-runs.json describes; Command 4 skipped because train.py is the reader's own training script - the run records Command 5 compares are seeded by setup with identical inputs",
+      "result": "pass"
+    },
+    {
+      "leaf": "ai-what-to-log",
+      "date": "2026-09-28",
+      "workflow": ".github/workflows/live.yml",
+      "run": "https://github.com/mohamedmahersaid/Enterprise-AI-and-Intelligent-Systems/actions/runs/36414428271",
+      "run_id": 36414428271,
+      "head_sha": "c48498ee57b4f586ca111db4df8c97dfebb067bd",
+      "event": "workflow_dispatch",
+      "head_branch": "main",
+      "environment": "GitHub-hosted ubuntu-24.04 (image ubuntu24 20260920.314.1), CPU only; Ollama 0.34.4 serving llama3.1:8b-instruct-q4_K_M as the OpenAI-compatible endpoint; repository at c48498e",
+      "covered": "Commands 1, 2, 3, 4, 5, 6, run as data/live/ai-what-to-log.json describes: Command 1 against the live endpoint, Commands 2-6 over the declared log fixtures",
+      "result": "pass"
+    },
+    {
+      "leaf": "ai-do-you-need-an-agent",
+      "date": "2026-09-28",
+      "workflow": ".github/workflows/live.yml",
+      "run": "https://github.com/mohamedmahersaid/Enterprise-AI-and-Intelligent-Systems/actions/runs/36414428271",
+      "run_id": 36414428271,
+      "head_sha": "c48498ee57b4f586ca111db4df8c97dfebb067bd",
+      "event": "workflow_dispatch",
+      "head_branch": "main",
+      "environment": "GitHub-hosted ubuntu-24.04 (image ubuntu24 20260920.314.1), CPU only; Ollama 0.34.4 serving llama3.1:8b-instruct-q4_K_M as the OpenAI-compatible endpoint; repository at c48498e",
+      "covered": "Commands 1, 2, 3, 4, 5, 6, run as data/live/ai-do-you-need-an-agent.json describes: Commands 1 and 2 against the live endpoint with a tool-trained model, Commands 3-6 over the declared agent trace fixture",
+      "result": "pass"
     }
   ]
 }

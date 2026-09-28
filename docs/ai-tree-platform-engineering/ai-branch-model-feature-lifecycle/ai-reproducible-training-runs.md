@@ -2,7 +2,7 @@
 id: 'ai-reproducible-training-runs'
 title: 'From Notebook to a Reproducible Training Run: Environments, Seeds, Data Versions and Artifacts'
 level: 'Beginner'
-readiness: 'lab'
+readiness: 'validated'
 forest: 'AI & Intelligent Systems'
 tree: 'AI Platform Engineering'
 branch: 'Model and Feature Lifecycle'
@@ -14,7 +14,7 @@ branch: 'Model and Feature Lifecycle'
 **Tree:** [AI Platform Engineering](../README.md)
 **Branch:** [Model and Feature Lifecycle](README.md)
 **Forest:** [AI & Intelligent Systems](../../../README.md)
-**Readiness:** [Lab](../../../READINESS.md#lab) - checked offline, not yet run against a live service. A live run needs only a stock CI runner.
+**Readiness:** [Validated](../../../READINESS.md#validated) - run live on 2026-09-28 ([evidence](https://github.com/mohamedmahersaid/Enterprise-AI-and-Intelligent-Systems/actions/runs/36414428271)).
 
 ## Explanation
 

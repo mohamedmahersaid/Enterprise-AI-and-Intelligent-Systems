@@ -1,0 +1,105 @@
+{
+  "$comment": "The trimmed live-run report backing the data/validation.json record for run 36414428271, as the run's 'Print the run report' step printed it (each step's output kept to its last lines); the same content was uploaded as the live-run-ai-do-you-need-an-agent artifact, sha256 41e630aa9ec6a0cd08e85e13ac18fbb10c7efb251c6dc01e18f2496443c8c1ee. In the printed copy the Actions log masking replaced the leaf's literal 'Bearer $KEY' header text with '***' in Commands 1 and 2's text and ran fields; the uploaded artifact holds the unmasked text.",
+  "leaf": "ai-do-you-need-an-agent",
+  "run_id": 36414428271,
+  "head_sha": "c48498ee57b4f586ca111db4df8c97dfebb067bd",
+  "result": "pass",
+  "covered": "Commands 1, 2, 3, 4, 5, 6",
+  "planned": "Commands 1, 2, 3, 4, 5, 6",
+  "skipped": {},
+  "environment": "ubuntu24 20260920.314.1, ollama version is 0.34.4",
+  "setup": [
+    {
+      "run": "(ollama serve > ollama-server.log 2>&1 &) ; for i in $(seq 1 30); do curl -sf http://127.0.0.1:11434/api/version && exit 0; sleep 1; done; exit 1",
+      "seconds": 1,
+      "ok": true,
+      "why": "",
+      "output": "{\"version\":\"0.34.4\"}"
+    },
+    {
+      "run": "ollama pull llama3.1:8b-instruct-q4_K_M",
+      "seconds": 20,
+      "ok": true,
+      "why": "",
+      "output": "███████████▏ 4.9 GB                         \u001b[K\npulling 948af2743fc7: 100% ▕██████████████████▏ 1.5 KB                         \u001b[K\npulling 0ba8f0e314b4: 100% ▕██████████████████▏  12 KB                         \u001b[K\npulling 56bb8bd477a5: 100% ▕██████████████████▏   96 B                         \u001b[K\npulling 455f34728c9b: 100% ▕██████████████████▏  487 B                         \u001b[K\nverifying sha256 digest ⠏ \u001b[K\u001b[?25h\u001b[?2026l\u001b[?2026h\u001b[?25l\u001b[A\u001b[A\u001b[A\u001b[A\u001b[A\u001b[A\u001b[1Gpulling manifest \u001b[K\npulling 667b0c1932bc: 100% ▕██████████████████▏ 4.9 GB                         \u001b[K\npulling 948af2743fc7: 100% ▕██████████████████▏ 1.5 KB                         \u001b[K\npulling 0ba8f0e314b4: 100% ▕██████████████████▏  12 KB                         \u001b[K\npulling 56bb8bd477a5: 100% ▕██████████████████▏   96 B                         \u001b[K\npulling 455f34728c9b: 100% ▕██████████████████▏  487 B                         \u001b[K\nverifying sha256 digest ⠋ \u001b[K\u001b[?25h\u001b[?2026l\u001b[?2026h\u001b[?25l\u001b[A\u001b[A\u001b[A\u001b[A\u001b[A\u001b[A\u001b[1Gpulling manifest \u001b[K\npulling 667b0c1932bc: 100% ▕██████████████████▏ 4.9 GB                         \u001b[K\npulling 948af2743fc7: 100% ▕██████████████████▏ 1.5 KB                         \u001b[K\npulling 0ba8f0e314b4: 100% ▕██████████████████▏  12 KB                         \u001b[K\npulling 56bb8bd477a5: 100% ▕██████████████████▏   96 B                         \u001b[K\npulling 455f34728c9b: 100% ▕██████████████████▏  487 B                         \u001b[K\nverifying sha256 digest ⠙ \u001b[K\u001b[?25h\u001b[?2026l\u001b[?2026h\u001b[?25l\u001b[A\u001b[A\u001b[A\u001b[A\u001b[A\u001b[A\u001b[1Gpulling manifest \u001b[K\npulling 667b0c1932bc: 100% ▕██████████████████▏ 4.9 GB                         \u001b[K\npulling 948af2743fc7: 100% ▕██████████████████▏ 1.5 KB                         \u001b[K\npulling 0ba8f0e314b4: 100% ▕██████████████████▏  12 KB                         \u001b[K\npulling 56bb8bd477a5: 100% ▕██████████████████▏   96 B                         \u001b[K\npulling 455f34728c9b: 100% ▕██████████████████▏  487 B                         \u001b[K\nverifying sha256 digest \u001b[K\nwriting manifest \u001b[K\nsuccess \u001b[K\u001b[?25h\u001b[?2026l\n"
+    }
+  ],
+  "steps": [
+    {
+      "command": 1,
+      "text": "curl -s -X POST \"$ENDPOINT/v1/chat/completions\" -H \"Authorization: ***\" \\\n  -d '{\"model\":\"<model>\",\"messages\":[{\"role\":\"user\",\"content\":\"<task>\"}]}' | jq -r '.choices[0].message.content'",
+      "ran": "curl -s -X POST \"$ENDPOINT/v1/chat/completions\" -H \"Authorization: ***\" \\\n  -d '{\"model\":\"llama3.1:8b-instruct-q4_K_M\",\"messages\":[{\"role\":\"user\",\"content\":\"Reply with the single word ok.\"}]}' | jq -r '.choices[0].message.content'",
+      "seconds": 5,
+      "ok": true,
+      "why": "",
+      "output": [
+        "ok"
+      ]
+    },
+    {
+      "command": 2,
+      "text": "curl -s -X POST \"$ENDPOINT/v1/chat/completions\" -H \"Authorization: ***\" \\\n  -d @tools-request.json | jq '.choices[0].message.tool_calls'",
+      "seconds": 11,
+      "ok": true,
+      "why": "",
+      "output": [
+        "    \"index\": 0,",
+        "    \"type\": \"function\",",
+        "    \"function\": {",
+        "      \"name\": \"get_weather\",",
+        "      \"arguments\": \"{\\\"city\\\":\\\"Paris\\\"}\"",
+        "    }",
+        "  }",
+        "]"
+      ]
+    },
+    {
+      "command": 3,
+      "text": "jq -r 'select(.event==\"run_complete\") | .steps' agent.jsonl | sort -n | uniq -c",
+      "seconds": 0,
+      "ok": true,
+      "why": "",
+      "output": [
+        "      2 3",
+        "      1 4",
+        "      1 6"
+      ]
+    },
+    {
+      "command": 4,
+      "text": "jq -r 'select(.event==\"run_complete\") | [.run_id, .total_tokens] | @tsv' agent.jsonl | sort -k2 -rn | head",
+      "seconds": 0,
+      "ok": true,
+      "why": "",
+      "output": [
+        "run-1\t9400",
+        "run-4\t3300",
+        "run-2\t2100",
+        "run-3\t1900"
+      ]
+    },
+    {
+      "command": 5,
+      "text": "jq -r 'select(.event==\"tool_call\") | [.run_id, .tool, .arguments] | @tsv' agent.jsonl | sort | uniq -c | sort -rn | head",
+      "seconds": 0,
+      "ok": true,
+      "why": "",
+      "output": [
+        "      2 run-1\tsearch\t{\"q\": \"invoice INV-42\"}",
+        "      1 run-4\tsearch\t{\"q\": \"open tickets\"}",
+        "      1 run-2\tlookup\t{\"id\": 7}"
+      ]
+    },
+    {
+      "command": 6,
+      "text": "jq -r 'select(.event==\"run_complete\") | .stop_reason' agent.jsonl | sort | uniq -c",
+      "seconds": 0,
+      "ok": true,
+      "why": "",
+      "output": [
+        "      3 finished",
+        "      1 max_steps"
+      ]
+    }
+  ]
+}

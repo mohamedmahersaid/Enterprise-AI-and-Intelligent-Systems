@@ -1,0 +1,145 @@
+{
+  "$comment": "The trimmed live-run report backing the data/validation.json record for run 36414428271, as the run's 'Print the run report' step printed it (each step's output kept to its last lines); the same content was uploaded as the live-run-ai-ollama-local-inference artifact, sha256 eda2b480beeb3edb38b97f4bb0baaa31d73e37b70431d467c8d70b35a477cd1b.",
+  "leaf": "ai-ollama-local-inference",
+  "run_id": 36414428271,
+  "head_sha": "c48498ee57b4f586ca111db4df8c97dfebb067bd",
+  "result": "pass",
+  "covered": "Commands 1, 2, 3, 4, 5, 6, 7, 8, 10",
+  "planned": "Commands 1, 2, 3, 4, 5, 6, 7, 8, 10",
+  "skipped": {
+    "9": "Binds the API to every interface; the leaf teaches it only behind an authenticating proxy, and a second server would collide with Command 1 on port 11434."
+  },
+  "environment": "ubuntu24 20260920.314.1, ollama version is 0.34.4",
+  "steps": [
+    {
+      "command": 1,
+      "text": "ollama serve",
+      "seconds": 2,
+      "ok": true,
+      "why": "",
+      "output": [
+        "[GIN] 2026/09/28 - 11:14:59 | 200 |    1.566096ms |       127.0.0.1 | POST     \"/api/show\"",
+        "[GIN] 2026/09/28 - 11:14:59 | 200 |      54.302µs |       127.0.0.1 | HEAD     \"/\"",
+        "[GIN] 2026/09/28 - 11:14:59 | 200 |     115.076µs |       127.0.0.1 | GET      \"/api/ps\"",
+        "[GIN] 2026/09/28 - 11:14:59 | 200 |    2.064962ms |       127.0.0.1 | GET      \"/api/tags\"",
+        "[GIN] 2026/09/28 - 11:14:59 | 200 |      29.976µs |       127.0.0.1 | HEAD     \"/\"",
+        "[GIN] 2026/09/28 - 11:14:59 | 200 |     938.058µs |       127.0.0.1 | POST     \"/api/show\"",
+        "[GIN] 2026/09/28 - 11:14:59 | 200 |     888.176µs |       127.0.0.1 | POST     \"/api/generate\"",
+        "[GIN] 2026/09/28 - 11:14:59 | 200 |     757.931µs |       127.0.0.1 | DELETE   \"/api/delete\""
+      ]
+    },
+    {
+      "command": 2,
+      "text": "ollama pull llama3.1:8b-instruct-q4_K_M",
+      "seconds": 16,
+      "ok": true,
+      "why": "",
+      "output": [
+        "pulling 667b0c1932bc: 100% ▕██████████████████▏ 4.9 GB                         \u001b[K",
+        "pulling 948af2743fc7: 100% ▕██████████████████▏ 1.5 KB                         \u001b[K",
+        "pulling 0ba8f0e314b4: 100% ▕██████████████████▏  12 KB                         \u001b[K",
+        "pulling 56bb8bd477a5: 100% ▕██████████████████▏   96 B                         \u001b[K",
+        "pulling 455f34728c9b: 100% ▕██████████████████▏  487 B                         \u001b[K",
+        "verifying sha256 digest \u001b[K",
+        "writing manifest \u001b[K",
+        "success \u001b[K\u001b[?25h\u001b[?2026l"
+      ]
+    },
+    {
+      "command": 3,
+      "text": "ollama list",
+      "seconds": 0,
+      "ok": true,
+      "why": "",
+      "output": [
+        "NAME                           ID              SIZE      MODIFIED               ",
+        "llama3.1:8b-instruct-q4_K_M    46e0c10c039e    4.9 GB    Less than a second ago    "
+      ]
+    },
+    {
+      "command": 4,
+      "text": "ollama run llama3.1:8b --verbose",
+      "seconds": 7,
+      "ok": true,
+      "why": "",
+      "output": [
+        "load duration:        4.5707225s",
+        "prompt eval count:    17 token(s)",
+        "prompt eval duration: 1.45986s",
+        "prompt eval rate:     11.64 tokens/s",
+        "eval count:           2 token(s)",
+        "eval duration:        165.888ms",
+        "eval rate:            12.06 tokens/s",
+        "\u001b[?25l\u001b[?25h"
+      ]
+    },
+    {
+      "command": 5,
+      "text": "ollama create corp-assistant -f Modelfile",
+      "seconds": 0,
+      "ok": true,
+      "why": "",
+      "output": [
+        "\u001b[?2026h\u001b[?25l\u001b[1Ggathering model components \u001b[K",
+        "using existing layer sha256:667b0c1932bc6ffc593ed1d03f895bf2dc8dc6df21db3042284a6f4416b06a29 \u001b[K",
+        "using existing layer sha256:948af2743fc78a328dcb3b0f5a31b3d75f415840fdb699e8b1235978392ecf85 \u001b[K",
+        "using existing layer sha256:0ba8f0e314b4264dfd19df045cde9d4c394a52474bf92ed6a3de22a4ca31a177 \u001b[K",
+        "creating new layer sha256:1803d800b9d50b67fb9fec2c96e10f6bde68da8a1b9a5c66fd464603a42bbc72 \u001b[K",
+        "creating new layer sha256:8c07e4cf421fd50a8e6af9f3136f09c48400963b923ea54a4fc9bc60e54f84e8 \u001b[K",
+        "writing manifest \u001b[K",
+        "success \u001b[K\u001b[?25h\u001b[?2026l"
+      ]
+    },
+    {
+      "command": 6,
+      "text": "ollama show llama3.1:8b --modelfile",
+      "seconds": 0,
+      "ok": true,
+      "why": "",
+      "output": [
+        "    6. Generating or facilitating false online engagement, including fake reviews and other means of fake online engagement",
+        "4. Fail to appropriately disclose to end users any known dangers of your AI system",
+        "Please report any violation of this Policy, software “bug,” or other problems that could lead to a violation",
+        "of this Policy through one of the following means:",
+        "* Reporting issues with the model: [https://github.com/meta-llama/llama-models/issues](https://github.com/meta-llama/llama-models/issues)",
+        "* Reporting risky content generated by the model: developers.facebook.com/llama_output_feedback",
+        "* Reporting bugs and security concerns: facebook.com/whitehat/info",
+        "* Reporting violations of the Acceptable Use Policy or unlicensed uses of Llama 3.1: LlamaUseReport@meta.com\""
+      ]
+    },
+    {
+      "command": 7,
+      "text": "ollama ps",
+      "seconds": 0,
+      "ok": true,
+      "why": "",
+      "output": [
+        "NAME           ID              SIZE      PROCESSOR    CONTEXT    UNTIL              ",
+        "llama3.1:8b    46e0c10c039e    5.6 GB    100% CPU     4096       4 minutes from now    "
+      ]
+    },
+    {
+      "command": 8,
+      "text": "curl http://localhost:11434/api/tags",
+      "seconds": 0,
+      "ok": true,
+      "why": "",
+      "output": [
+        "  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current",
+        "                                 Dload  Upload   Total   Spent    Left  Speed",
+        "\r  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0\r100  1321  100  1321    0     0   423k      0 --:--:-- --:--:-- --:--:--  430k",
+        "{\"models\":[{\"name\":\"corp-assistant:latest\",\"model\":\"corp-assistant:latest\",\"modified_at\":\"2026-09-28T11:14:59.529628923Z\",\"size\":4920753100,\"digest\":\"d542908cc2b10acc6460f4cf63b6ea356bb75123c5f9bb141cdf14bec413e210\",\"details\":{\"parent_model\":\"llama3.1:8b-instruct-q4_K_M\",\"format\":\"gguf\",\"family\":\"llama\",\"families\":[\"llama\"],\"parameter_size\":\"8.0B\",\"quantization_level\":\"Q4_K_M\",\"context_length\":131072,\"embedding_length\":4096},\"capabilities\":[\"completion\",\"tools\"]},{\"name\":\"llama3.1:8b\",\"model\":\"llama3.1:8b\",\"modified_at\":\"2026-09-28T11:14:53.194199216Z\",\"size\":4920753328,\"digest\":\"46e0c10c039e019119339687c3c1757cc81b9da49709a3b3924863ba87ca666e\",\"details\":{\"parent_model\":\"\",\"format\":\"gguf\",\"family\":\"llama\",\"families\":[\"llama\"],\"parameter_size\":\"8.0B\",\"quantization_level\":\"Q4_K_M\",\"context_length\":131072,\"embedding_length\":4096},\"capabilities\":[\"completion\",\"tools\"]},{\"name\":\"llama3.1:8b-instruct-q4_K_M\",\"model\":\"llama3.1:8b-instruct-q4_K_M\",\"modified_at\":\"2026-09-28T11:14:52.820195225Z\",\"size\":4920753328,\"digest\":\"46e0c10c039e019119339687c3c1757cc81b9da49709a3b3924863ba87ca666e\",\"details\":{\"parent_model\":\"\",\"format\":\"gguf\",\"family\":\"llama\",\"families\":[\"llama\"],\"parameter_size\":\"8.0B\",\"quantization_level\":\"Q4_K_M\",\"context_length\":131072,\"embedding_length\":4096},\"capabilities\":[\"completion\",\"tools\"]}]}"
+      ]
+    },
+    {
+      "command": 10,
+      "text": "ollama rm llama3.1:8b",
+      "seconds": 0,
+      "ok": true,
+      "why": "",
+      "output": [
+        "\u001b[?2026h\u001b[?25l\u001b[1G\u001b[K\u001b[?25h\u001b[?2026l\u001b[?25l\u001b[2K\u001b[1G\u001b[?25hdeleted 'llama3.1:8b'"
+      ]
+    }
+  ]
+}

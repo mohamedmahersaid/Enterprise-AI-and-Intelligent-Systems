@@ -1,0 +1,113 @@
+{
+  "$comment": "The trimmed live-run report backing the data/validation.json record for run 36414428271, as the run's 'Print the run report' step printed it (each step's output kept to its last lines); the same content was uploaded as the live-run-ai-feature-store-skew artifact, sha256 15c3b635cd7660303bba55f19cfb9b302bc1dfe87298e2859fb97ad7591399b7.",
+  "leaf": "ai-feature-store-skew",
+  "run_id": 36414428271,
+  "head_sha": "c48498ee57b4f586ca111db4df8c97dfebb067bd",
+  "result": "pass",
+  "covered": "Commands 1, 2, 3, 4, 5, 6",
+  "planned": "Commands 1, 2, 3, 4, 5, 6",
+  "skipped": {},
+  "environment": "ubuntu24 20260920.314.1, Feast SDK Version: \"0.66.0\"; pandas==2.3.3 pyarrow==25.0.1",
+  "setup": [
+    {
+      "run": "python3 -m venv .venv && .venv/bin/pip install --quiet feast==0.66.0 && mkdir -p bin && ln -s \"$PWD/.venv/bin/feast\" bin/feast && bin/feast version",
+      "seconds": 33,
+      "ok": true,
+      "why": "",
+      "output": "\u001b[1m\u001b[34mFeast SDK Version: \u001b[1m\u001b[32m\"0.66.0\"\n"
+    },
+    {
+      "run": ".venv/bin/python fixtures/make_data.py",
+      "seconds": 0,
+      "ok": true,
+      "why": "",
+      "output": "wrote data/user_stats.parquet: 2 rows for user 1001\n"
+    }
+  ],
+  "steps": [
+    {
+      "command": 1,
+      "text": "feast apply",
+      "seconds": 3,
+      "ok": true,
+      "why": "",
+      "output": [
+        "/tmp/live-ai-feature-store-skew-A6dxwB/features.py:13: DeprecationWarning: Entity value_type will be mandatory in the next release. Please specify a value_type for entity 'user_id'.",
+        "  user = Entity(name=\"user_id\", join_keys=[\"user_id\"])",
+        "No project found in the repository. Using project name skew_lab defined in feature_store.yaml",
+        "Applying changes for project skew_lab",
+        "Created project skew_lab",
+        "Created entity user_id",
+        "Created feature view user_stats",
+        "Created sqlite table skew_lab_user_stats"
+      ]
+    },
+    {
+      "command": 2,
+      "text": "feast materialize-incremental $(date -u +%FT%T)",
+      "seconds": 3,
+      "ok": true,
+      "why": "",
+      "output": [
+        "Materializing \u001b[1m\u001b[32m1\u001b[0m feature views to \u001b[1m\u001b[32m2026-09-28 11:14:59+00:00\u001b[0m into the \u001b[1m\u001b[32msqlite\u001b[0m online store.",
+        "\u001b[1m\u001b[32muser_stats\u001b[0m from \u001b[1m\u001b[32m2026-09-26 11:15:01+00:00\u001b[0m to \u001b[1m\u001b[32m2026-09-28 11:14:59+00:00\u001b[0m:"
+      ]
+    },
+    {
+      "command": 3,
+      "text": "feast get-historical-features -d '[{\"user_id\": 1001, \"event_timestamp\": \"2026-09-01T12:00:00\"}]' -f user_stats:tenure_days -f user_stats:txn_count_7d",
+      "seconds": 3,
+      "ok": true,
+      "why": "",
+      "output": [
+        "[",
+        "    {",
+        "        \"user_id\":1001,",
+        "        \"event_timestamp\":1788264000000,",
+        "        \"tenure_days\":50,",
+        "        \"txn_count_7d\":7",
+        "    }",
+        "]"
+      ]
+    },
+    {
+      "command": 4,
+      "text": "feast get-online-features -e user_id=1001 -f user_stats:tenure_days -f user_stats:txn_count_7d",
+      "seconds": 3,
+      "ok": true,
+      "why": "",
+      "output": [
+        "    ],",
+        "    \"tenure_days\": [",
+        "        76",
+        "    ],",
+        "    \"txn_count_7d\": [",
+        "        3",
+        "    ]",
+        "}"
+      ]
+    },
+    {
+      "command": 5,
+      "text": "feast feature-views list",
+      "seconds": 3,
+      "ok": true,
+      "why": "",
+      "output": [
+        "NAME        ENTITIES     TYPE         ENABLED    STATE",
+        "user_stats  {'user_id'}  FeatureView  Yes        AVAILABLE_ONLINE"
+      ]
+    },
+    {
+      "command": 6,
+      "text": "feast feature-views describe user_stats | grep -E \"ttl:|endTime:\"",
+      "seconds": 3,
+      "ok": true,
+      "why": "",
+      "output": [
+        "  ttl: 172800s",
+        "    endTime: '2026-09-28T11:14:59Z'"
+      ]
+    }
+  ]
+}

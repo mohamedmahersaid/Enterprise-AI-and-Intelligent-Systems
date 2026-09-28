@@ -1,0 +1,114 @@
+{
+  "$comment": "The trimmed live-run report backing the data/validation.json record for run 36414428271, as the run's 'Print the run report' step printed it (each step's output kept to its last lines); the same content was uploaded as the live-run-ai-what-to-log artifact, sha256 1222e6cdfd2cdd3489cc87e92467f50df229d5d9183dbbf0c14dbdd4c170fc56. In the printed copy the Actions log masking replaced the leaf's literal 'Bearer $KEY' header text with '***' in Command 1's text and ran fields; the uploaded artifact holds the unmasked text.",
+  "leaf": "ai-what-to-log",
+  "run_id": 36414428271,
+  "head_sha": "c48498ee57b4f586ca111db4df8c97dfebb067bd",
+  "result": "pass",
+  "covered": "Commands 1, 2, 3, 4, 5, 6",
+  "planned": "Commands 1, 2, 3, 4, 5, 6",
+  "skipped": {},
+  "environment": "ubuntu24 20260920.314.1, ollama version is 0.34.4",
+  "setup": [
+    {
+      "run": "(ollama serve > ollama-server.log 2>&1 &) ; for i in $(seq 1 30); do curl -sf http://127.0.0.1:11434/api/version && exit 0; sleep 1; done; exit 1",
+      "seconds": 1,
+      "ok": true,
+      "why": "",
+      "output": "{\"version\":\"0.34.4\"}"
+    },
+    {
+      "run": "ollama pull llama3.1:8b-instruct-q4_K_M",
+      "seconds": 15,
+      "ok": true,
+      "why": "",
+      "output": "███████████▏ 4.9 GB                         \u001b[K\npulling 948af2743fc7: 100% ▕██████████████████▏ 1.5 KB                         \u001b[K\npulling 0ba8f0e314b4: 100% ▕██████████████████▏  12 KB                         \u001b[K\npulling 56bb8bd477a5: 100% ▕██████████████████▏   96 B                         \u001b[K\npulling 455f34728c9b: 100% ▕██████████████████▏  487 B                         \u001b[K\nverifying sha256 digest ⠇ \u001b[K\u001b[?25h\u001b[?2026l\u001b[?2026h\u001b[?25l\u001b[A\u001b[A\u001b[A\u001b[A\u001b[A\u001b[A\u001b[1Gpulling manifest \u001b[K\npulling 667b0c1932bc: 100% ▕██████████████████▏ 4.9 GB                         \u001b[K\npulling 948af2743fc7: 100% ▕██████████████████▏ 1.5 KB                         \u001b[K\npulling 0ba8f0e314b4: 100% ▕██████████████████▏  12 KB                         \u001b[K\npulling 56bb8bd477a5: 100% ▕██████████████████▏   96 B                         \u001b[K\npulling 455f34728c9b: 100% ▕██████████████████▏  487 B                         \u001b[K\nverifying sha256 digest ⠏ \u001b[K\u001b[?25h\u001b[?2026l\u001b[?2026h\u001b[?25l\u001b[A\u001b[A\u001b[A\u001b[A\u001b[A\u001b[A\u001b[1Gpulling manifest \u001b[K\npulling 667b0c1932bc: 100% ▕██████████████████▏ 4.9 GB                         \u001b[K\npulling 948af2743fc7: 100% ▕██████████████████▏ 1.5 KB                         \u001b[K\npulling 0ba8f0e314b4: 100% ▕██████████████████▏  12 KB                         \u001b[K\npulling 56bb8bd477a5: 100% ▕██████████████████▏   96 B                         \u001b[K\npulling 455f34728c9b: 100% ▕██████████████████▏  487 B                         \u001b[K\nverifying sha256 digest ⠋ \u001b[K\u001b[?25h\u001b[?2026l\u001b[?2026h\u001b[?25l\u001b[A\u001b[A\u001b[A\u001b[A\u001b[A\u001b[A\u001b[1Gpulling manifest \u001b[K\npulling 667b0c1932bc: 100% ▕██████████████████▏ 4.9 GB                         \u001b[K\npulling 948af2743fc7: 100% ▕██████████████████▏ 1.5 KB                         \u001b[K\npulling 0ba8f0e314b4: 100% ▕██████████████████▏  12 KB                         \u001b[K\npulling 56bb8bd477a5: 100% ▕██████████████████▏   96 B                         \u001b[K\npulling 455f34728c9b: 100% ▕██████████████████▏  487 B                         \u001b[K\nverifying sha256 digest \u001b[K\nwriting manifest \u001b[K\nsuccess \u001b[K\u001b[?25h\u001b[?2026l\n"
+    },
+    {
+      "run": "bash make-logs.sh && wc -l logs/app.jsonl",
+      "seconds": 0,
+      "ok": true,
+      "why": "",
+      "output": "2 logs/app.jsonl\n"
+    }
+  ],
+  "steps": [
+    {
+      "command": 1,
+      "text": "curl -s -X POST \"$ENDPOINT/v1/chat/completions\" -H \"Authorization: ***\" \\\n  -d '{\"model\":\"<model>\",\"messages\":[{\"role\":\"user\",\"content\":\"ping\"}]}' | jq '.model, .usage'",
+      "ran": "curl -s -X POST \"$ENDPOINT/v1/chat/completions\" -H \"Authorization: ***\" \\\n  -d '{\"model\":\"llama3.1:8b-instruct-q4_K_M\",\"messages\":[{\"role\":\"user\",\"content\":\"ping\"}]}' | jq '.model, .usage'",
+      "seconds": 11,
+      "ok": true,
+      "why": "",
+      "output": [
+        "{",
+        "  \"prompt_tokens\": 11,",
+        "  \"prompt_tokens_details\": {",
+        "    \"cached_tokens\": 0",
+        "  },",
+        "  \"completion_tokens\": 35,",
+        "  \"total_tokens\": 46",
+        "}"
+      ]
+    },
+    {
+      "command": 2,
+      "text": "jq -r '[.timestamp, .correlation_id, .usage.prompt_tokens, .usage.completion_tokens] | @tsv' app.log",
+      "seconds": 0,
+      "ok": true,
+      "why": "",
+      "output": [
+        "2026-09-26T09:00:01Z\trun-001\t212\t64",
+        "2026-09-26T09:04:12Z\trun-002\t198\t512",
+        "2026-09-26T10:11:40Z\trun-003\t240\t71",
+        "2026-09-27T08:02:19Z\trun-004\t205\t512",
+        "2026-09-27T08:30:00Z\trun-005\t219\t58",
+        "2026-09-27T09:15:33Z\trun-006\t231\t66"
+      ]
+    },
+    {
+      "command": 3,
+      "text": "jq 'select(.correlation_id == \"abc-123\") | .rendered_prompt, .response' logs/*.jsonl",
+      "seconds": 0,
+      "ok": true,
+      "why": "",
+      "output": [
+        "\"Summarise invoice INV-42 for the finance team.\"",
+        "\"INV-42 totals 1,240 EUR across three lines.\""
+      ]
+    },
+    {
+      "command": 4,
+      "text": "jq -s 'map(.latency_ms) | sort | {p50: .[length/2|floor], p95: .[length*0.95|floor]}' app.log",
+      "seconds": 0,
+      "ok": true,
+      "why": "",
+      "output": [
+        "{",
+        "  \"p50\": 1150,",
+        "  \"p95\": 2705",
+        "}"
+      ]
+    },
+    {
+      "command": 5,
+      "text": "jq -r 'select(.finish_reason==\"length\") | .timestamp[0:10]' app.log | sort | uniq -c",
+      "seconds": 0,
+      "ok": true,
+      "why": "",
+      "output": [
+        "      1 2026-09-26",
+        "      1 2026-09-27"
+      ]
+    },
+    {
+      "command": 6,
+      "text": ": \"${KEY:?set KEY to the API key your application uses}\"\nrc=0; grep -lF -- \"${KEY:0:12}\" logs/*.jsonl || rc=$?\nif [ \"$rc\" -eq 1 ]; then echo \"no key prefix found\"; else false; fi",
+      "seconds": 0,
+      "ok": true,
+      "why": "",
+      "output": [
+        "no key prefix found"
+      ]
+    }
+  ]
+}
