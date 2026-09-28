@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
-import { checkSpec, parseCommands } from '../scripts/lib/live-spec.mjs';
+import { checkLivePaths, checkSpec, parseCommands, scriptHeadings } from '../scripts/lib/live-spec.mjs';
 
 const command = (n, text, lang = 'text') =>
   [`### Command ${n}`, '', `What Command ${n} shows.`, '', `\`\`\`${lang}`, text, '```'].join('\n');
@@ -91,21 +91,21 @@ test('checkSpec passes a spec that runs and skips exactly the leaf commands', ()
 });
 
 test('checkSpec reports a step naming a Command the leaf lacks', () => {
-  const spec = { steps: [{ command: 1 }, { command: 7 }], skip: { 2: 'reason' } };
+  const spec = { steps: [{ command: 1, expect: 'x' }, { command: 7, expect: 'x' }], skip: { 2: 'reason' } };
   assert.deepEqual(checkSpec(spec, twoCommands(), 'spec.json'), [
     'spec.json: names Command 7, which the leaf does not have.',
   ]);
 });
 
 test('checkSpec reports a leaf Command neither run nor skipped', () => {
-  const spec = { steps: [{ command: 1 }] };
+  const spec = { steps: [{ command: 1, expect: 'x' }] };
   assert.deepEqual(checkSpec(spec, twoCommands(), 'spec.json'), [
     'spec.json: Command 2 is neither run nor skipped with a reason.',
   ]);
 });
 
 test('checkSpec rejects a skip without a reason, a non-numeric skip key, and run-and-skipped', () => {
-  const spec = { steps: [{ command: 1 }, { command: 2 }], skip: { 2: '  ', last: 'reason' } };
+  const spec = { steps: [{ command: 1, expect: 'x' }, { command: 2, expect: 'x' }], skip: { 2: '  ', last: 'reason' } };
   const errors = checkSpec(spec, twoCommands(), 'spec.json');
   assert.match(errors.join('\n'), /skip key "last" is not a Command number/);
   assert.match(errors.join('\n'), /skip 2 has no reason/);
@@ -115,7 +115,7 @@ test('checkSpec rejects a skip without a reason, a non-numeric skip key, and run
 // Phase 8 adds spec fields; an older checker must not fail a newer spec.
 test('checkSpec ignores keys it does not know, at the top level and in steps', () => {
   const spec = {
-    steps: [{ command: 1, retries: 3, matrix: { os: 'ubuntu' } }],
+    steps: [{ command: 1, expect: 'x', retries: 3, matrix: { os: 'ubuntu' } }],
     skip: { 2: 'reason' },
     version: 'tool -v',
     fixtures_v2: {},
@@ -125,7 +125,7 @@ test('checkSpec ignores keys it does not know, at the top level and in steps', (
 
 test('checkSpec rejects fixture names that escape the working directory', () => {
   for (const name of ['../evil', 'sub/dir', 'sub\\dir', ' ']) {
-    const spec = { steps: [{ command: 1 }, { command: 2 }], files: { [name]: 'content' } };
+    const spec = { steps: [{ command: 1, expect: 'x' }, { command: 2, expect: 'x' }], files: { [name]: 'content' } };
     assert.deepEqual(checkSpec(spec, twoCommands(), 'spec.json'), [
       `spec.json: files name "${name}" must be a bare file name inside the working directory.`,
     ]);
@@ -149,4 +149,108 @@ test('the ollama spec and leaf agree, through the same functions CI uses', () =>
   assert.deepEqual(errors, []);
   assert.equal(commands.size, 10);
   assert.deepEqual(checkSpec(spec, commands, 'data/live/ai-ollama-local-inference.json'), []);
+});
+
+// --- the spec fields that build and judge a run (Phase 8) --------------------
+
+const oneCommand = () => parseCommands(leaf(command(1, 'echo <model>')), 'leaf.md').commands;
+const step = (extra = {}) => ({ command: 1, expect: 'x', ...extra });
+
+test('a foreground step must assert output, or opt out with a reason', () => {
+  assert.match(checkSpec({ steps: [{ command: 1 }] }, oneCommand(), 'spec.json').join('\n'),
+    /Command 1 has no "expect"/);
+  assert.match(checkSpec({ steps: [{ command: 1, expect: null }] }, oneCommand(), 'spec.json').join('\n'),
+    /opts out of "expect" without an "expect_reason"/);
+  assert.deepEqual(
+    checkSpec({ steps: [{ command: 1, expect: null, expect_reason: 'a progress stream' }] }, oneCommand(), 'spec.json'),
+    []);
+});
+
+test('a background step needs its ready probe', () => {
+  assert.match(checkSpec({ steps: [{ command: 1, background: true }] }, oneCommand(), 'spec.json').join('\n'),
+    /background step with no "ready" probe/);
+});
+
+test('exit must be a status, and a non-zero exit requires a real expect', () => {
+  assert.match(checkSpec({ steps: [step({ exit: 'no' })] }, oneCommand(), 'spec.json').join('\n'),
+    /not an exit status/);
+  assert.match(
+    checkSpec({ steps: [{ command: 1, exit: 1, expect: null, expect_reason: 'r' }] }, oneCommand(), 'spec.json').join('\n'),
+    /a real failure could hide behind the status/);
+  assert.deepEqual(checkSpec({ steps: [step({ exit: [0, 2] })] }, oneCommand(), 'spec.json'), []);
+});
+
+test('until must be positive seconds on a foreground step with an expect', () => {
+  assert.match(checkSpec({ steps: [step({ until: -5 })] }, oneCommand(), 'spec.json').join('\n'),
+    /invalid "until"/);
+  assert.match(
+    checkSpec({ steps: [{ command: 1, until: 30, expect: null, expect_reason: 'r' }] }, oneCommand(), 'spec.json').join('\n'),
+    /streams with "until" but has no "expect"/);
+});
+
+test('capture needs a variable name and a compiling regex with a group', () => {
+  assert.match(checkSpec({ steps: [step({ capture: { name: '2bad', regex: '(x)' } })] }, oneCommand(), 'spec.json').join('\n'),
+    /without a valid variable name/);
+  assert.match(checkSpec({ steps: [step({ capture: { name: 'v', regex: '[' } })] }, oneCommand(), 'spec.json').join('\n'),
+    /does not compile/);
+  assert.match(checkSpec({ steps: [step({ capture: { name: 'v', regex: 'x' } })] }, oneCommand(), 'spec.json').join('\n'),
+    /no group to capture/);
+});
+
+test('copy is confined to the leaf directory, and its destinations to the working directory', () => {
+  const opts = { leafDir: 'docs/tree/branch' };
+  assert.match(
+    checkSpec({ steps: [step()], copy: { good: 'data/catalog.json' } }, oneCommand(), 'spec.json', opts).join('\n'),
+    /must be a path under the leaf's own directory \(docs\/tree\/branch\/\)/);
+  assert.match(
+    checkSpec({ steps: [step()], copy: { '../up': 'docs/tree/branch/fixtures/a' } }, oneCommand(), 'spec.json', opts).join('\n'),
+    /must stay inside the working directory/);
+  assert.deepEqual(
+    checkSpec({ steps: [step()], copy: { 'fixtures/': 'docs/tree/branch/fixtures/' } }, oneCommand(), 'spec.json', opts),
+    []);
+});
+
+test('scripts must name a heading under the leaf\'s Automation scripts', () => {
+  const opts = { scriptNames: new Set(['tool.py']) };
+  assert.match(
+    checkSpec({ steps: [step()], scripts: { 'x.py': 'other.py' } }, oneCommand(), 'spec.json', opts).join('\n'),
+    /is not a ` ?#* ?### ` heading|is not a `### ` heading/);
+  assert.deepEqual(checkSpec({ steps: [step()], scripts: { 'x.py': 'tool.py' } }, oneCommand(), 'spec.json', opts), []);
+});
+
+test('substitute keys are <placeholder> tokens that occur in a planned command', () => {
+  assert.match(
+    checkSpec({ steps: [step()], substitute: { model: 'toy' } }, oneCommand(), 'spec.json').join('\n'),
+    /is not a <placeholder> token/);
+  assert.match(
+    checkSpec({ steps: [step()], substitute: { '<absent>': 'toy' } }, oneCommand(), 'spec.json').join('\n'),
+    /occurs in no planned command/);
+  assert.deepEqual(checkSpec({ steps: [step()], substitute: { '<model>': 'toy' } }, oneCommand(), 'spec.json'), []);
+});
+
+test('setup lines need a run command, env names must be valid, versions must be commands', () => {
+  assert.match(checkSpec({ steps: [step()], setup: [{}] }, oneCommand(), 'spec.json').join('\n'),
+    /setup #1 has no "run" command/);
+  assert.match(checkSpec({ steps: [step()], env: { '2BAD': 'x' } }, oneCommand(), 'spec.json').join('\n'),
+    /must be a valid variable name/);
+  assert.match(checkSpec({ steps: [step()], versions: [''] }, oneCommand(), 'spec.json').join('\n'),
+    /"versions" must be a list of commands/);
+});
+
+test('scriptHeadings reads the Automation scripts section, fences excluded', () => {
+  const body = [
+    '# L', '', '## Automation scripts', '',
+    '### real.py', '', '```python', '# ### not-a-heading.py', 'x = 1', '```', '',
+    '### second.py', '', '```python', 'y = 2', '```', '',
+    '## After', '', '### outside.py', '',
+  ].join('\n');
+  assert.deepEqual([...scriptHeadings(body)].sort(), ['real.py', 'second.py']);
+});
+
+test('checkLivePaths requires every spec\'d leaf and fixtures directory in the filter', () => {
+  const yml = ['on:', '  pull_request:', '    paths:', '      - data/live/**',
+    '      - docs/a/b/one.md', '      - docs/a/b/fixtures/**'].join('\n');
+  assert.deepEqual(checkLivePaths(yml, [{ leafPath: 'docs/a/b/one.md', fixturesDir: 'docs/a/b/fixtures' }]), []);
+  const errors = checkLivePaths(yml, [{ leafPath: 'docs/a/b/two.md', fixturesDir: null }]);
+  assert.match(errors.join('\n'), /do not list docs\/a\/b\/two\.md/);
 });
