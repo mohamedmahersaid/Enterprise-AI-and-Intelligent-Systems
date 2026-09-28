@@ -1,0 +1,58 @@
+{
+  "$comment": "What scripts/live-run.mjs runs for this leaf. Setup gives the bare `python` and `pip-compile` the commands use (bin/python is the system interpreter, so Command 6 can build a fresh venv from it, and bin/pip-compile comes from a pinned tools venv), seeds the git history the leaf requires committed before a run, and writes the two run records Command 5 compares - the leaf ships no training script, so Command 4 is skipped and the records carry the shape run_record.py writes: identical inputs, differing timestamps and metrics.",
+  "files": {
+    "requirements.in": "six\n",
+    ".gitignore": "runs/\n.venv/\n.venv-tools/\nbin/\n"
+  },
+  "env": {
+    "PATH": "$WORK/bin:$PATH"
+  },
+  "setup": [
+    {
+      "run": "python3 -m venv .venv-tools && .venv-tools/bin/pip install --quiet pip-tools==7.6.1 && mkdir -p bin && ln -s \"$(command -v python3)\" bin/python && ln -s \"$PWD/.venv-tools/bin/pip-compile\" bin/pip-compile",
+      "timeout": 420
+    },
+    {
+      "run": "mkdir -p data && printf 'user,label\\n1,0\\n2,1\\n3,1\\n' > data/train.csv"
+    },
+    {
+      "run": "sha=$(sha256sum data/train.csv | cut -d' ' -f1); commit=seed; mkdir -p runs/run-a runs/run-b; for r in a b; do printf '{\"seed\": 42, \"data\": \"data/train.csv\", \"data_sha256\": \"%s\", \"git_commit\": \"%s\", \"python\": \"3.12\", \"started_at\": \"2026-09-27T0%s:00:00Z\", \"finished_at\": \"2026-09-27T0%s:01:00Z\", \"metrics\": {\"auc\": 0.9%s}}\\n' \"$sha\" \"$commit\" \"$([ $r = a ] && echo 1 || echo 2)\" \"$([ $r = a ] && echo 1 || echo 2)\" \"$([ $r = a ] && echo 1 || echo 3)\" > runs/run-$r/run.json; done"
+    },
+    {
+      "run": "git init -q && git config user.email lab@example.invalid && git config user.name 'Live Run' && git add -A && git commit -qm 'seed the lab inputs' && git rev-parse --short HEAD",
+      "expect": "[0-9a-f]{7}"
+    }
+  ],
+  "versions": [
+    "bin/pip-compile --version",
+    "git --version"
+  ],
+  "steps": [
+    {
+      "command": 1,
+      "expect": "Python 3\\.",
+      "timeout": 300
+    },
+    {
+      "command": 2,
+      "expect": "^[0-9a-f]{64}  data/train\\.csv"
+    },
+    {
+      "command": 3,
+      "expect": "^[0-9a-f]{40}$"
+    },
+    {
+      "command": 5,
+      "expect": null,
+      "expect_reason": "an empty diff IS the pass: the compared inputs match, so the command prints nothing and exits 0, which the runner asserts."
+    },
+    {
+      "command": 6,
+      "expect": "Successfully installed .*six",
+      "timeout": 300
+    }
+  ],
+  "skip": {
+    "4": "train.py is the reader's own training script - the leaf ships no model code. The run records Command 5 compares are written by setup in the shape run_record.py records, with identical inputs and differing timestamps and metrics."
+  }
+}

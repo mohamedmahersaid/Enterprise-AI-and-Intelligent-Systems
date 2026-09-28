@@ -1,0 +1,9 @@
+# The lab's minimal local feature store: a file registry, a SQLite online
+# store, everything inside the working directory.
+project: skew_lab
+registry: data/registry.db
+provider: local
+online_store:
+  type: sqlite
+  path: data/online.db
+entity_key_serialization_version: 3
