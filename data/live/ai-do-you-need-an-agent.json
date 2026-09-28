@@ -1,0 +1,58 @@
+{
+  "$comment": "What scripts/live-run.mjs runs for this leaf. Setup starts an Ollama server (daemonised: setup lines are foreground, and the CI job's teardown stops it) and pulls the model, so Commands 1 and 2 - the single call and the tool call, the leaf's first two rungs - run against the live endpoint with a tool-trained model. Commands 3-6 read agent.jsonl, a declared fixture trace in the shape the leaf's runner logs: run_complete and tool_call events, a repeated identical tool call, and one run stopped by the step cap, which is exactly what those commands exist to surface. KEY is a dummy: Ollama ignores it and the leaf's commands require one.",
+  "files": {
+    "tools-request.json": "{\n  \"model\": \"llama3.1:8b-instruct-q4_K_M\",\n  \"messages\": [{\"role\": \"user\", \"content\": \"What is the weather in Paris right now? You must call the get_weather tool to find out.\"}],\n  \"tools\": [{\n    \"type\": \"function\",\n    \"function\": {\n      \"name\": \"get_weather\",\n      \"description\": \"Current weather for a city\",\n      \"parameters\": {\n        \"type\": \"object\",\n        \"properties\": {\"city\": {\"type\": \"string\"}},\n        \"required\": [\"city\"]\n      }\n    }\n  }]\n}\n",
+    "agent.jsonl": "{\"event\": \"tool_call\", \"run_id\": \"run-1\", \"tool\": \"search\", \"arguments\": \"{\\\"q\\\": \\\"invoice INV-42\\\"}\"}\n{\"event\": \"tool_call\", \"run_id\": \"run-1\", \"tool\": \"search\", \"arguments\": \"{\\\"q\\\": \\\"invoice INV-42\\\"}\"}\n{\"event\": \"run_complete\", \"run_id\": \"run-1\", \"steps\": 6, \"total_tokens\": 9400, \"stop_reason\": \"max_steps\"}\n{\"event\": \"tool_call\", \"run_id\": \"run-2\", \"tool\": \"lookup\", \"arguments\": \"{\\\"id\\\": 7}\"}\n{\"event\": \"run_complete\", \"run_id\": \"run-2\", \"steps\": 3, \"total_tokens\": 2100, \"stop_reason\": \"finished\"}\n{\"event\": \"run_complete\", \"run_id\": \"run-3\", \"steps\": 3, \"total_tokens\": 1900, \"stop_reason\": \"finished\"}\n{\"event\": \"tool_call\", \"run_id\": \"run-4\", \"tool\": \"search\", \"arguments\": \"{\\\"q\\\": \\\"open tickets\\\"}\"}\n{\"event\": \"run_complete\", \"run_id\": \"run-4\", \"steps\": 4, \"total_tokens\": 3300, \"stop_reason\": \"finished\"}\n"
+  },
+  "env": {
+    "ENDPOINT": "http://127.0.0.1:11434",
+    "KEY": "unused-local-dummy-key-ollama-ignores-auth"
+  },
+  "substitute": {
+    "<model>": "llama3.1:8b-instruct-q4_K_M",
+    "<task>": "Reply with the single word ok."
+  },
+  "setup": [
+    {
+      "run": "(ollama serve > ollama-server.log 2>&1 &) ; for i in $(seq 1 30); do curl -sf http://127.0.0.1:11434/api/version && exit 0; sleep 1; done; exit 1",
+      "expect": "version",
+      "timeout": 60
+    },
+    {
+      "run": "ollama pull llama3.1:8b-instruct-q4_K_M",
+      "timeout": 1200
+    }
+  ],
+  "versions": [
+    "ollama -v"
+  ],
+  "steps": [
+    {
+      "command": 1,
+      "expect": "\\b[Oo][Kk]\\b",
+      "timeout": 600
+    },
+    {
+      "command": 2,
+      "expect": "\"function\"",
+      "timeout": 600
+    },
+    {
+      "command": 3,
+      "expect": "^ *2 3$"
+    },
+    {
+      "command": 4,
+      "expect": "run-1\\t9400"
+    },
+    {
+      "command": 5,
+      "expect": "^ *2 run-1"
+    },
+    {
+      "command": 6,
+      "expect": "max_steps"
+    }
+  ],
+  "skip": {}
+}

@@ -1,0 +1,31 @@
+{
+  "$comment": "What scripts/live-run.mjs runs for this leaf. Setup starts an Ollama server (daemonised: setup lines are foreground, and the CI job's teardown stops it) and pulls the model, so Command 1's completion - the leaf's 'what did the provider actually serve' check - runs against the live endpoint. Commands 2-5 read the log fixtures declared here: honest, spec-authored records in the exact shape the leaf's logging section writes, with the fields, the space-after-colon JSON and the length-stopped day the commands exist to find. Command 6 proves the leak check passes on a clean log. KEY is a dummy: Ollama ignores it, the leaf's commands require one, and Command 6 needs its first twelve characters to grep for.",
+  "files": {
+    "app.log": "{\"timestamp\": \"2026-09-26T09:00:01Z\", \"correlation_id\": \"run-001\", \"usage\": {\"prompt_tokens\": 212, \"completion_tokens\": 64}, \"latency_ms\": 840, \"finish_reason\": \"stop\"}\n{\"timestamp\": \"2026-09-26T09:04:12Z\", \"correlation_id\": \"run-002\", \"usage\": {\"prompt_tokens\": 198, \"completion_tokens\": 512}, \"latency_ms\": 2610, \"finish_reason\": \"length\"}\n{\"timestamp\": \"2026-09-26T10:11:40Z\", \"correlation_id\": \"run-003\", \"usage\": {\"prompt_tokens\": 240, \"completion_tokens\": 71}, \"latency_ms\": 930, \"finish_reason\": \"stop\"}\n{\"timestamp\": \"2026-09-27T08:02:19Z\", \"correlation_id\": \"run-004\", \"usage\": {\"prompt_tokens\": 205, \"completion_tokens\": 512}, \"latency_ms\": 2705, \"finish_reason\": \"length\"}\n{\"timestamp\": \"2026-09-27T08:30:00Z\", \"correlation_id\": \"run-005\", \"usage\": {\"prompt_tokens\": 219, \"completion_tokens\": 58}, \"latency_ms\": 780, \"finish_reason\": \"stop\"}\n{\"timestamp\": \"2026-09-27T09:15:33Z\", \"correlation_id\": \"run-006\", \"usage\": {\"prompt_tokens\": 231, \"completion_tokens\": 66}, \"latency_ms\": 1150, \"finish_reason\": \"stop\"}\n",
+    "make-logs.sh": "mkdir -p logs && printf '%s\\n' '{\"correlation_id\": \"abc-123\", \"rendered_prompt\": \"Summarise invoice INV-42 for the finance team.\", \"response\": \"INV-42 totals 1,240 EUR across three lines.\"}' '{\"correlation_id\": \"def-456\", \"rendered_prompt\": \"List open tickets.\", \"response\": \"Two tickets are open.\"}' > logs/app.jsonl\n"
+  },
+  "env": {
+    "ENDPOINT": "http://127.0.0.1:11434",
+    "KEY": "unused-local-dummy-key-ollama-ignores-auth"
+  },
+  "substitute": {
+    "<model>": "llama3.1:8b-instruct-q4_K_M"
+  },
+  "setup": [
+    { "run": "(ollama serve > ollama-server.log 2>&1 &) ; for i in $(seq 1 30); do curl -sf http://127.0.0.1:11434/api/version && exit 0; sleep 1; done; exit 1", "expect": "version", "timeout": 60 },
+    { "run": "ollama pull llama3.1:8b-instruct-q4_K_M", "timeout": 1200 },
+    { "run": "bash make-logs.sh && wc -l logs/app.jsonl", "expect": "^2 " }
+  ],
+  "versions": [
+    "ollama -v"
+  ],
+  "steps": [
+    { "command": 1, "expect": "prompt_tokens", "timeout": 600 },
+    { "command": 2, "expect": "\\t[0-9]+\\t[0-9]+$" },
+    { "command": 3, "expect": "INV-42" },
+    { "command": 4, "expect": "\"p95\": 2[67]" },
+    { "command": 5, "expect": "2026-09-2[67]" },
+    { "command": 6, "expect": "no key prefix found" }
+  ],
+  "skip": {}
+}
