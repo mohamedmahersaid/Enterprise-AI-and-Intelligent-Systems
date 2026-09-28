@@ -6,7 +6,7 @@ Every leaf says how far its content has been proven. The level is a claim the
 repository backs with evidence, and `npm run validate` fails when a leaf claims
 more than its evidence supports.
 
-**35 leaves:** Lab: 34 · Validated: 1
+**35 leaves:** Lab: 29 · Validated: 6
 
 ## Lab
 
@@ -80,7 +80,7 @@ at no cost. The rest need infrastructure or credentials this repository does not
 
 | Leaf | Level | Readiness | A live run needs | Latest run |
 | --- | --- | --- | --- | --- |
-| [Ollama and Local Model Serving](docs/ai-tree-model-platforms/ai-branch-local-inference/ai-ollama-local-inference.md) | Beginner | Validated | Ollama | [pass 2026-09-26](https://github.com/mohamedmahersaid/Enterprise-AI-and-Intelligent-Systems/actions/runs/36244545499) |
+| [Ollama and Local Model Serving](docs/ai-tree-model-platforms/ai-branch-local-inference/ai-ollama-local-inference.md) | Beginner | Validated | Ollama | [pass 2026-09-28](https://github.com/mohamedmahersaid/Enterprise-AI-and-Intelligent-Systems/actions/runs/36414428271) |
 | [Model Selection, Sizing and Cost Control](docs/ai-tree-model-platforms/ai-branch-local-inference/ai-model-selection-cost.md) | Intermediate | Lab | Ollama, NVIDIA GPU, Azure subscription | none recorded |
 | [Local Inference at Production Scale: Batching, KV Cache and the Point It Stops Being Cheaper](docs/ai-tree-model-platforms/ai-branch-local-inference/ai-local-inference-at-scale.md) | Advanced | Lab | NVIDIA GPU | none recorded |
 | [Azure OpenAI Enterprise Integration](docs/ai-tree-model-platforms/ai-branch-managed-model-services/ai-azure-openai-integration.md) | Advanced | Lab | Azure subscription | none recorded |
@@ -93,11 +93,11 @@ at no cost. The rest need infrastructure or credentials this repository does not
 | [AI Agents and Orchestration Patterns](docs/ai-tree-applied-systems/ai-branch-agents-integration/ai-agents-orchestration.md) | Advanced | Lab | Ollama, Azure subscription | none recorded |
 | [MCP Servers, AI Security and Evaluation](docs/ai-tree-applied-systems/ai-branch-agents-integration/ai-mcp-security-evaluation.md) | Expert | Lab | Ollama, Azure subscription | none recorded |
 | [Content Safety and Guardrails: Input Filtering, Output Classification and Refusal Design](docs/ai-tree-applied-systems/ai-branch-agents-integration/ai-content-safety-guardrails.md) | Intermediate | Lab | Azure subscription | none recorded |
-| [Do You Need an Agent? Loops, Tools and the Cost of Letting a Model Decide](docs/ai-tree-applied-systems/ai-branch-agents-integration/ai-do-you-need-an-agent.md) | Beginner | Lab | Ollama | none recorded |
+| [Do You Need an Agent? Loops, Tools and the Cost of Letting a Model Decide](docs/ai-tree-applied-systems/ai-branch-agents-integration/ai-do-you-need-an-agent.md) | Beginner | Validated | Ollama | [pass 2026-09-28](https://github.com/mohamedmahersaid/Enterprise-AI-and-Intelligent-Systems/actions/runs/36414428271) |
 | [LLMOps: Deployment, Versioning and Drift Detection](docs/ai-tree-operations-governance/ai-branch-llmops-observability/ai-llmops-deployment-lifecycle.md) | Intermediate | Lab | Azure subscription, Kubernetes cluster | none recorded |
 | [AI Observability and Production Performance Monitoring](docs/ai-tree-operations-governance/ai-branch-llmops-observability/ai-observability-performance-monitoring.md) | Advanced | Lab | Ollama, NVIDIA GPU, Azure subscription, Kubernetes cluster | none recorded |
 | [AI Incident Response: Detection, Containment and Postmortems for Non-Deterministic Systems](docs/ai-tree-operations-governance/ai-branch-llmops-observability/ai-incident-response.md) | Advanced | Lab | Ollama, Azure subscription, Your own service | none recorded |
-| [What to Log When Your AI Feature Goes Live](docs/ai-tree-operations-governance/ai-branch-llmops-observability/ai-what-to-log.md) | Beginner | Lab | Ollama | none recorded |
+| [What to Log When Your AI Feature Goes Live](docs/ai-tree-operations-governance/ai-branch-llmops-observability/ai-what-to-log.md) | Beginner | Validated | Ollama | [pass 2026-09-28](https://github.com/mohamedmahersaid/Enterprise-AI-and-Intelligent-Systems/actions/runs/36414428271) |
 | [AI Governance and Compliance: ISO 42001, EU AI Act and Data Residency](docs/ai-tree-operations-governance/ai-branch-governance-adoption/ai-governance-compliance-framework.md) | Enterprise | Lab | Azure subscription | none recorded |
 | [Enterprise AI Adoption Patterns and Use-Case Selection](docs/ai-tree-operations-governance/ai-branch-governance-adoption/ai-enterprise-adoption-patterns.md) | Expert | Lab | Azure subscription | none recorded |
 | [Before the Framework: AI Inventory, Acceptable Use and Who Decides](docs/ai-tree-operations-governance/ai-branch-governance-adoption/ai-inventory-acceptable-use.md) | Beginner | Lab | Your own service | none recorded |
@@ -105,13 +105,13 @@ at no cost. The rest need infrastructure or credentials this repository does not
 | [Distributed Training on Kubernetes with Kubeflow Pipelines and Ray](docs/ai-tree-platform-engineering/ai-branch-training-gpu-infrastructure/ai-distributed-training-kubeflow-ray.md) | Advanced | Lab | NVIDIA GPU, Kubernetes cluster | none recorded |
 | [Model Quantisation and GPU Sharing: Precision, MIG Partitioning and KV Cache Sizing](docs/ai-tree-platform-engineering/ai-branch-training-gpu-infrastructure/ai-quantisation-gpu-sharing.md) | Advanced | Lab | NVIDIA GPU | none recorded |
 | [Your First GPU Job: What You Are Renting, Why It Queues and How Not to Waste It](docs/ai-tree-platform-engineering/ai-branch-training-gpu-infrastructure/ai-first-gpu-job.md) | Beginner | Lab | NVIDIA GPU, Slurm cluster | none recorded |
-| [Feature Stores and Training-Serving Skew: Point-in-Time Correctness with Feast](docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/ai-feature-store-skew.md) | Advanced | Lab | Stock CI runner | none recorded |
+| [Feature Stores and Training-Serving Skew: Point-in-Time Correctness with Feast](docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/ai-feature-store-skew.md) | Advanced | Validated | Stock CI runner | [pass 2026-09-28](https://github.com/mohamedmahersaid/Enterprise-AI-and-Intelligent-Systems/actions/runs/36414428271) |
 | [Fine-Tuning and PEFT: When to Tune, LoRA Adapters and Evaluation](docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/ai-fine-tuning-peft.md) | Intermediate | Lab | NVIDIA GPU | none recorded |
-| [From Notebook to a Reproducible Training Run: Environments, Seeds, Data Versions and Artifacts](docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/ai-reproducible-training-runs.md) | Beginner | Lab | Stock CI runner | none recorded |
+| [From Notebook to a Reproducible Training Run: Environments, Seeds, Data Versions and Artifacts](docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/ai-reproducible-training-runs.md) | Beginner | Validated | Stock CI runner | [pass 2026-09-28](https://github.com/mohamedmahersaid/Enterprise-AI-and-Intelligent-Systems/actions/runs/36414428271) |
 | [Vector Database Selection and Hybrid Retrieval: pgvector, Qdrant, Milvus and Reranking](docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/ai-vector-db-hybrid-retrieval.md) | Advanced | Lab | Stock CI runner | none recorded |
 | [LLM Evaluation Harnesses and Regression Gates for Production AI](docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/ai-evaluation-harness-gates.md) | Advanced | Lab | Ollama | none recorded |
 | [How Retrieval Finds Things: Keywords, Meaning and Why Each One Misses](docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/ai-how-retrieval-finds-things.md) | Beginner | Lab | Azure subscription | none recorded |
-| [Retrieval Test Collections: Graded Judgements, Pooling and Telling a Real Improvement from Noise](docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/ai-retrieval-test-collections.md) | Intermediate | Lab | Stock CI runner | none recorded |
+| [Retrieval Test Collections: Graded Judgements, Pooling and Telling a Real Improvement from Noise](docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/ai-retrieval-test-collections.md) | Intermediate | Validated | Stock CI runner | [pass 2026-09-28](https://github.com/mohamedmahersaid/Enterprise-AI-and-Intelligent-Systems/actions/runs/36414428271) |
 | [Agent Orchestration with LangGraph: State, Guardrails and Tool Authorisation](docs/ai-tree-production-systems/ai-branch-agent-runtime-cost/ai-agent-orchestration-guardrails.md) | Advanced | Lab | Ollama, Kubernetes cluster, Your own service | none recorded |
 | [AI FinOps: Token Cost Attribution, GPU Utilisation and Build-versus-Buy Crossover](docs/ai-tree-production-systems/ai-branch-agent-runtime-cost/ai-finops-build-vs-buy.md) | Advanced | Lab | NVIDIA GPU, Kubernetes cluster | none recorded |
 | [From Prototype to Production: Gateway, Limits, Logging and Rollback](docs/ai-tree-production-systems/ai-branch-agent-runtime-cost/ai-prototype-to-production.md) | Beginner | Lab | Hosted model API | none recorded |

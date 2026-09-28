@@ -2,7 +2,7 @@
 id: 'ai-retrieval-test-collections'
 title: 'Retrieval Test Collections: Graded Judgements, Pooling and Telling a Real Improvement from Noise'
 level: 'Intermediate'
-readiness: 'lab'
+readiness: 'validated'
 forest: 'AI & Intelligent Systems'
 tree: 'Production AI Systems'
 branch: 'Retrieval and Evaluation'
@@ -14,7 +14,7 @@ branch: 'Retrieval and Evaluation'
 **Tree:** [Production AI Systems](../README.md)
 **Branch:** [Retrieval and Evaluation](README.md)
 **Forest:** [AI & Intelligent Systems](../../../README.md)
-**Readiness:** [Lab](../../../READINESS.md#lab) - checked offline, not yet run against a live service. A live run needs only a stock CI runner.
+**Readiness:** [Validated](../../../READINESS.md#validated) - run live on 2026-09-28 ([evidence](https://github.com/mohamedmahersaid/Enterprise-AI-and-Intelligent-Systems/actions/runs/36414428271)).
 
 ## Explanation
 

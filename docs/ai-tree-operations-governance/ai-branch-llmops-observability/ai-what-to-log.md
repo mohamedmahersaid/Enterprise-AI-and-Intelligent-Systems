@@ -2,7 +2,7 @@
 id: 'ai-what-to-log'
 title: 'What to Log When Your AI Feature Goes Live'
 level: 'Beginner'
-readiness: 'lab'
+readiness: 'validated'
 forest: 'AI & Intelligent Systems'
 tree: 'AI Operations & Governance'
 branch: 'LLMOps and Production Observability'
@@ -14,7 +14,7 @@ branch: 'LLMOps and Production Observability'
 **Tree:** [AI Operations & Governance](../README.md)
 **Branch:** [LLMOps and Production Observability](README.md)
 **Forest:** [AI & Intelligent Systems](../../../README.md)
-**Readiness:** [Lab](../../../READINESS.md#lab) - checked offline, not yet run against a live service. A live run needs a local Ollama server.
+**Readiness:** [Validated](../../../READINESS.md#validated) - run live on 2026-09-28 ([evidence](https://github.com/mohamedmahersaid/Enterprise-AI-and-Intelligent-Systems/actions/runs/36414428271)).
 
 ## Explanation
 

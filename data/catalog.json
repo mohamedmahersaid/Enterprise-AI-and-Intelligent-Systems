@@ -184,7 +184,7 @@
       "id": "ai-do-you-need-an-agent",
       "name": "Do You Need an Agent? Loops, Tools and the Cost of Letting a Model Decide",
       "level": "Beginner",
-      "readiness": "lab",
+      "readiness": "validated",
       "needs": [
         "ollama"
       ],
@@ -238,7 +238,7 @@
       "id": "ai-what-to-log",
       "name": "What to Log When Your AI Feature Goes Live",
       "level": "Beginner",
-      "readiness": "lab",
+      "readiness": "validated",
       "needs": [
         "ollama"
       ],
@@ -336,7 +336,7 @@
       "id": "ai-feature-store-skew",
       "name": "Feature Stores and Training-Serving Skew: Point-in-Time Correctness with Feast",
       "level": "Advanced",
-      "readiness": "lab",
+      "readiness": "validated",
       "needs": [
         "runner"
       ],
@@ -360,7 +360,7 @@
       "id": "ai-reproducible-training-runs",
       "name": "From Notebook to a Reproducible Training Run: Environments, Seeds, Data Versions and Artifacts",
       "level": "Beginner",
-      "readiness": "lab",
+      "readiness": "validated",
       "needs": [
         "runner"
       ],
@@ -408,7 +408,7 @@
       "id": "ai-retrieval-test-collections",
       "name": "Retrieval Test Collections: Graded Judgements, Pooling and Telling a Real Improvement from Noise",
       "level": "Intermediate",
-      "readiness": "lab",
+      "readiness": "validated",
       "needs": [
         "runner"
       ],

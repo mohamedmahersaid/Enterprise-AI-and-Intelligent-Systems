@@ -1,0 +1,105 @@
+{
+  "$comment": "The trimmed live-run report backing the data/validation.json record for run 36414428271, as the run's 'Print the run report' step printed it (each step's output kept to its last lines); the same content was uploaded as the live-run-ai-reproducible-training-runs artifact, sha256 515c71f77ab51c3513647b3cb9caa22b4fa9495dbd678e3269fd79b3b0059858.",
+  "leaf": "ai-reproducible-training-runs",
+  "run_id": 36414428271,
+  "head_sha": "c48498ee57b4f586ca111db4df8c97dfebb067bd",
+  "result": "pass",
+  "covered": "Commands 1, 2, 3, 5, 6",
+  "planned": "Commands 1, 2, 3, 5, 6",
+  "skipped": {
+    "4": "train.py is the reader's own training script - the leaf ships no model code. The run records Command 5 compares are written by setup in the shape run_record.py records, with identical inputs and differing timestamps and metrics."
+  },
+  "environment": "ubuntu24 20260920.314.1, pip-compile, version 7.6.1; git version 2.55.0",
+  "setup": [
+    {
+      "run": "python3 -m venv .venv-tools && .venv-tools/bin/pip install --quiet pip-tools==7.6.1 && mkdir -p bin && ln -s \"$(command -v python3)\" bin/python && ln -s \"$PWD/.venv-tools/bin/pip-compile\" bin/pip-compile",
+      "seconds": 5,
+      "ok": true,
+      "why": "",
+      "output": ""
+    },
+    {
+      "run": "mkdir -p data && printf 'user,label\\n1,0\\n2,1\\n3,1\\n' > data/train.csv",
+      "seconds": 0,
+      "ok": true,
+      "why": "",
+      "output": ""
+    },
+    {
+      "run": "sha=$(sha256sum data/train.csv | cut -d' ' -f1); commit=seed; mkdir -p runs/run-a runs/run-b; for r in a b; do printf '{\"seed\": 42, \"data\": \"data/train.csv\", \"data_sha256\": \"%s\", \"git_commit\": \"%s\", \"python\": \"3.12\", \"started_at\": \"2026-09-27T0%s:00:00Z\", \"finished_at\": \"2026-09-27T0%s:01:00Z\", \"metrics\": {\"auc\": 0.9%s}}\\n' \"$sha\" \"$commit\" \"$([ $r = a ] && echo 1 || echo 2)\" \"$([ $r = a ] && echo 1 || echo 2)\" \"$([ $r = a ] && echo 1 || echo 3)\" > runs/run-$r/run.json; done",
+      "seconds": 0,
+      "ok": true,
+      "why": "",
+      "output": ""
+    },
+    {
+      "run": "git init -q && git config user.email lab@example.invalid && git config user.name 'Live Run' && git add -A && git commit -qm 'seed the lab inputs' && git rev-parse --short HEAD",
+      "seconds": 0,
+      "ok": true,
+      "why": "",
+      "output": "f5a3fc9\n"
+    }
+  ],
+  "steps": [
+    {
+      "command": 1,
+      "text": "python --version && pip-compile --generate-hashes --allow-unsafe --strip-extras --output-file=requirements.lock.txt requirements.in",
+      "seconds": 8,
+      "ok": true,
+      "why": "",
+      "output": [
+        "# by the following command:",
+        "#",
+        "#    pip-compile --allow-unsafe --generate-hashes --no-index --output-file=requirements.lock.txt --strip-extras requirements.in",
+        "#",
+        "six==1.17.0 \\",
+        "    --hash=sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274 \\",
+        "    --hash=sha256:ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81",
+        "    # via -r requirements.in"
+      ]
+    },
+    {
+      "command": 2,
+      "text": "sha256sum data/train.csv | tee data/train.csv.sha256",
+      "seconds": 0,
+      "ok": true,
+      "why": "",
+      "output": [
+        "32807342d74c85c4b8e3dedb654b5f0fedf56f79ceff99c344c2e495831f7f14  data/train.csv"
+      ]
+    },
+    {
+      "command": 3,
+      "text": "git rev-parse HEAD && git status --porcelain",
+      "seconds": 0,
+      "ok": true,
+      "why": "",
+      "output": [
+        "f5a3fc964d2270b5569d8ba3219ec3a522b90c9e",
+        "?? data/train.csv.sha256",
+        "?? requirements.lock.txt"
+      ]
+    },
+    {
+      "command": 5,
+      "text": "diff <(jq -S 'del(.started_at, .finished_at, .metrics)' runs/run-a/run.json) <(jq -S 'del(.started_at, .finished_at, .metrics)' runs/run-b/run.json)",
+      "seconds": 0,
+      "ok": true,
+      "why": "",
+      "output": []
+    },
+    {
+      "command": 6,
+      "text": "python -m venv .venv && .venv/bin/pip install --require-hashes -r requirements.lock.txt",
+      "seconds": 3,
+      "ok": true,
+      "why": "",
+      "output": [
+        "Collecting six==1.17.0 (from -r requirements.lock.txt (line 7))",
+        "  Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)",
+        "Installing collected packages: six",
+        "Successfully installed six-1.17.0"
+      ]
+    }
+  ]
+}

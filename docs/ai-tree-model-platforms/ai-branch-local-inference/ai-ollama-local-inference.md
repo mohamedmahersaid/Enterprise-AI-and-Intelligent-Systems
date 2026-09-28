@@ -14,7 +14,7 @@ branch: 'Local and Private Inference'
 **Tree:** [Running and Integrating Models](../README.md)
 **Branch:** [Local and Private Inference](README.md)
 **Forest:** [AI & Intelligent Systems](../../../README.md)
-**Readiness:** [Validated](../../../READINESS.md#validated) - run live on 2026-09-26 ([evidence](https://github.com/mohamedmahersaid/Enterprise-AI-and-Intelligent-Systems/actions/runs/36244545499)).
+**Readiness:** [Validated](../../../READINESS.md#validated) - run live on 2026-09-28 ([evidence](https://github.com/mohamedmahersaid/Enterprise-AI-and-Intelligent-Systems/actions/runs/36414428271)).
 
 ## Explanation
 

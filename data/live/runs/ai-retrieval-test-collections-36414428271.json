@@ -1,0 +1,123 @@
+{
+  "$comment": "The trimmed live-run report backing the data/validation.json record for run 36414428271, as the run's 'Print the run report' step printed it (each step's output kept to its last lines); the same content was uploaded as the live-run-ai-retrieval-test-collections artifact, sha256 4a39bc927eda757bb56757a4e0cf63d9e3415762f11802cd87dd55ee16475255.",
+  "leaf": "ai-retrieval-test-collections",
+  "run_id": 36414428271,
+  "head_sha": "c48498ee57b4f586ca111db4df8c97dfebb067bd",
+  "result": "pass",
+  "covered": "Commands 1, 2, 3, 4, 5, 6",
+  "planned": "Commands 1, 2, 3, 4, 5, 6",
+  "skipped": {},
+  "environment": "ubuntu24 20260920.314.1, numba==0.67.0 numpy==2.5.3 rank-bm25==0.2.2 ranx==0.3.21",
+  "setup": [
+    {
+      "run": "python3 -m venv .venv-eval && .venv-eval/bin/pip install --quiet ranx==0.3.21 ir-measures==0.4.3 rank_bm25==0.2.2",
+      "seconds": 23,
+      "ok": true,
+      "why": "",
+      "output": ""
+    },
+    {
+      "run": ".venv-eval/bin/python test_collection.py runs fixtures/corpus.jsonl fixtures/queries.jsonl runs --synonyms fixtures/synonyms.json",
+      "seconds": 0,
+      "ok": true,
+      "why": "",
+      "output": "wrote runs/bm25_raw.json, chunk=whole document\nwrote runs/bm25.json, chunk=whole document\nwrote runs/cosine.json, chunk=whole document\nwrote runs/expand.json, chunk=whole document\n"
+    },
+    {
+      "run": "jq -s '.[0] * .[1]' fixtures/qrels.json fixtures/qrels-repool.json > qrels-v2.json",
+      "seconds": 0,
+      "ok": true,
+      "why": "",
+      "output": ""
+    },
+    {
+      "run": ".venv-eval/bin/python test_collection.py runs fixtures/corpus.jsonl fixtures/queries.jsonl runs-leaky --synonyms fixtures/synonyms-leaky.json",
+      "seconds": 0,
+      "ok": true,
+      "why": "",
+      "output": "wrote runs-leaky/bm25_raw.json, chunk=whole document\nwrote runs-leaky/bm25.json, chunk=whole document\nwrote runs-leaky/cosine.json, chunk=whole document\nwrote runs-leaky/expand.json, chunk=whole document\n"
+    }
+  ],
+  "scripts_sha256": {
+    "test_collection.py": "5dbc8dc94c0b36b607cd54fb2ce34f82da655ca8cffd15100266e0c14be2c70a"
+  },
+  "steps": [
+    {
+      "command": 1,
+      "text": "python3 -m venv .venv-eval && .venv-eval/bin/pip install ranx==0.3.21 ir-measures==0.4.3 rank_bm25==0.2.2",
+      "seconds": 2,
+      "ok": true,
+      "why": "",
+      "output": [
+        "Requirement already satisfied: kiwisolver>=1.3.1 in ./.venv-eval/lib/python3.12/site-packages (from matplotlib!=3.6.1,>=3.4->seaborn->ranx==0.3.21) (1.5.1)",
+        "Requirement already satisfied: pillow>=9 in ./.venv-eval/lib/python3.12/site-packages (from matplotlib!=3.6.1,>=3.4->seaborn->ranx==0.3.21) (12.3.0)",
+        "Requirement already satisfied: pyparsing>=3 in ./.venv-eval/lib/python3.12/site-packages (from matplotlib!=3.6.1,>=3.4->seaborn->ranx==0.3.21) (3.3.3)",
+        "Requirement already satisfied: six>=1.5 in ./.venv-eval/lib/python3.12/site-packages (from python-dateutil>=2.8.2->pandas->ranx==0.3.21) (1.17.0)",
+        "Requirement already satisfied: charset_normalizer<4,>=2 in ./.venv-eval/lib/python3.12/site-packages (from requests>=2.22.0->ir-datasets->ranx==0.3.21) (3.5.1)",
+        "Requirement already satisfied: idna<4,>=2.5 in ./.venv-eval/lib/python3.12/site-packages (from requests>=2.22.0->ir-datasets->ranx==0.3.21) (3.20)",
+        "Requirement already satisfied: urllib3<3,>=1.26 in ./.venv-eval/lib/python3.12/site-packages (from requests>=2.22.0->ir-datasets->ranx==0.3.21) (2.8.0)",
+        "Requirement already satisfied: certifi>=2023.5.7 in ./.venv-eval/lib/python3.12/site-packages (from requests>=2.22.0->ir-datasets->ranx==0.3.21) (2026.7.22)"
+      ]
+    },
+    {
+      "command": 2,
+      "text": "jq -r 'to_entries[] | .key as $q | .value | to_entries | sort_by(-.value) | .[:10][] | [$q, .key] | @tsv' runs/bm25_raw.json runs/bm25.json runs/cosine.json | sort -u > pool.tsv && wc -l < pool.tsv",
+      "seconds": 0,
+      "ok": true,
+      "why": "",
+      "output": [
+        "511"
+      ]
+    },
+    {
+      "command": 3,
+      "text": "jq -r --slurpfile qrels fixtures/qrels.json '[to_entries[] | .key as $q | .value | to_entries | sort_by(-.value) | .[:10][] | ($qrels[0][$q][.key] != null)] | \"judged@10: \\(map(select(.)) | length) of \\(length)\"' runs/expand.json",
+      "seconds": 0,
+      "ok": true,
+      "why": "",
+      "output": [
+        "judged@10: 319 of 322"
+      ]
+    },
+    {
+      "command": 4,
+      "text": "jq 'with_entries(select((.key | startswith(\"D\")) and any(.value[]; . >= 2)))' qrels-v2.json > qrels-dev.json && jq 'with_entries(select((.key | startswith(\"T\")) and any(.value[]; . >= 2)))' qrels-v2.json > qrels-test.json && NUMBA_NUM_THREADS=1 .venv-eval/bin/python -c \"from ranx import Qrels, Run, compare; [print(s, compare(Qrels.from_file(f'qrels-{s}.json'), [Run.from_file(f'{p}.json', name=p) for p in ('runs/bm25_raw', 'runs/bm25', 'runs/expand', 'runs-leaky/expand')], metrics=['ndcg@10', 'recall@20-l2', 'mrr-l2'], stat_test='fisher', n_permutations=10000, max_p=0.05, make_comparable=True), sep='\\n') for s in ('dev', 'test')]\"",
+      "seconds": 29,
+      "ok": true,
+      "why": "",
+      "output": [
+        "d    runs-leaky/expand  0.900ᵃ              1      0.933ᵃ",
+        "test",
+        "#    Model              NDCG@10      Recall@20-l2  MRR-l2",
+        "---  -----------------  ---------  --------------  --------",
+        "a    runs/bm25_raw      0.768               0.883  0.843",
+        "b    runs/bm25          0.791               0.9    0.836",
+        "c    runs/expand        0.791               0.9    0.836",
+        "d    runs-leaky/expand  0.893ᵃᵇᶜ            0.967  0.967ᵃᵇᶜ"
+      ]
+    },
+    {
+      "command": 5,
+      "text": ".venv-eval/bin/python -c \"from ranx import Qrels, Run, evaluate; print(evaluate(Qrels.from_file('qrels-test.json'), Run.from_file('runs/bm25.json'), ['recall@20', 'recall@20-l2', 'ndcg@10', 'ndcg_burges@10'], make_comparable=True))\"",
+      "seconds": 5,
+      "ok": true,
+      "why": "",
+      "output": [
+        "{'recall@20': np.float64(0.7683333333333334), 'recall@20-l2': np.float64(0.9), 'ndcg@10': np.float64(0.7909462799379487), 'ndcg_burges@10': np.float64(0.8118704102435679)}"
+      ]
+    },
+    {
+      "command": 6,
+      "text": ".venv-eval/bin/python -c \"from ranx import Qrels, Run; Qrels.from_file('qrels-test.json').save('qrels-test.trec'); Run.from_file('runs/bm25.json').save('runs/bm25.trec')\" && .venv-eval/bin/ir_measures qrels-test.trec runs/bm25.trec 'nDCG@10' 'Judged@10' 'R(rel=2)@20' && .venv-eval/bin/ir_measures qrels-test.trec runs/bm25.trec 'nDCG(gains={0:0,1:1,2:3,3:7})@10'",
+      "seconds": 7,
+      "ok": true,
+      "why": "",
+      "output": [
+        "nDCG@10\t0.7909",
+        "Judged@10\t1.0000",
+        "R(rel=2)@20\t0.9000",
+        "nDCG(gains={2:3,3:7})@10\t0.8119"
+      ]
+    }
+  ]
+}
