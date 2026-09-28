@@ -378,8 +378,10 @@ function checkReadme() {
   expect('the total branch count', /\*\*Total:\*\* \d+ trees · (\d+) branches/, catalog.branchCount);
   expect('the total leaf count', /\*\*Total:\*\* \d+ trees · \d+ branches · (\d+) leaves/, leafCount);
 
-  const levels = Object.keys(catalog.levelCounts).sort()
-    .map((k) => `${k}: ${catalog.levelCounts[k]}`).join(' · ');
+  // In the catalog's own (recounted, reading-order) key order, exactly as
+  // derive.mjs renders it into the README.
+  const levels = Object.entries(catalog.levelCounts)
+    .map(([k, v]) => `${k}: ${v}`).join(' · ');
   expect('the level distribution', /\*\*Level distribution:\*\* (.+)/, levels);
   expect('the readiness summary', /\*\*Readiness:\*\* (.+?) \(\[what that means\]\(READINESS\.md\)\)/,
     readinessSummary(catalog));

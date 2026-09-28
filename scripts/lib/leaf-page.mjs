@@ -6,9 +6,10 @@
 
 import { parseLines } from './sections.mjs';
 import { slug } from './derive.mjs';
+import { LEAF_LEVELS } from './schema.mjs';
 
-/** The reading order of the levels; the catalog stores no rank of its own. */
-export const LEVEL_ORDER = ['Beginner', 'Intermediate', 'Advanced', 'Expert', 'Enterprise'];
+/** The reading order of the levels: schema.mjs defines it once. */
+export const LEVEL_ORDER = LEAF_LEVELS;
 
 /**
  * The pager's sequence: every Beginner leaf before the first Intermediate

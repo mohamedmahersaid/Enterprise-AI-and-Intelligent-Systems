@@ -7,13 +7,13 @@
   "branchCount": 10,
   "expectedLeafCount": 35,
   "levelCounts": {
-    "Advanced": 14,
     "Beginner": 10,
-    "Enterprise": 2,
+    "Intermediate": 7,
+    "Advanced": 14,
     "Expert": 2,
-    "Intermediate": 7
+    "Enterprise": 2
   },
-  "pathCount": 6,
+  "pathCount": 7,
   "leaves": [
     {
       "id": "ai-ollama-local-inference",
@@ -674,6 +674,46 @@
         {
           "leaf": "ai-incident-response",
           "why": "When an agent does something wrong, the blast radius question is 'what did it touch', and you need the answer fast."
+        }
+      ]
+    },
+    {
+      "id": "secure-ai-estate",
+      "name": "Secure an AI estate",
+      "audience": "A security engineer who has just been told the organisation is deploying AI, and must secure what already exists as much as what comes next.",
+      "summary": "Security for AI systems in the order the controls actually stack: know what is running, lock down how models are reached, filter what goes in and comes out, control what retrieval can expose, vet the tools agents can call, bound what agents can do, and be ready for the incident anyway.",
+      "steps": [
+        {
+          "leaf": "ai-inventory-acceptable-use",
+          "why": "You cannot secure what you have not enumerated. The inventory and acceptable-use policy define what is in scope before any technical control exists."
+        },
+        {
+          "leaf": "ai-first-managed-endpoint",
+          "why": "The endpoint is the smallest unit of exposure: keys, quotas and the untrusted output stream are where AI security starts."
+        },
+        {
+          "leaf": "ai-azure-openai-integration",
+          "why": "Replace keys with managed identity and take the endpoint off the public network - the two controls that remove whole classes of credential and exposure risk."
+        },
+        {
+          "leaf": "ai-content-safety-guardrails",
+          "why": "Input filtering and output guardrails sit between your users and the model; this is where injection attempts and unsafe output are caught in-line."
+        },
+        {
+          "leaf": "ai-private-enterprise-rag",
+          "why": "Retrieval turns a document store into an answer machine, so access control must move into the search query itself or the index becomes an exfiltration path."
+        },
+        {
+          "leaf": "ai-mcp-security-evaluation",
+          "why": "Tools are the supply chain of an agent. Pin what a server offers, scan tool definitions, and give agents their own least-privilege identity."
+        },
+        {
+          "leaf": "ai-agent-orchestration-guardrails",
+          "why": "An agent that can act needs bounds: step caps, tool allowlists and human approval for anything irreversible."
+        },
+        {
+          "leaf": "ai-incident-response",
+          "why": "Some control will fail. Detection, containment and post-incident evidence for AI systems close the loop the inventory opened."
         }
       ]
     }

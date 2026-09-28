@@ -8,6 +8,7 @@
 import fs from 'node:fs';
 import { deriveAssumptions, renderAssumptionsMd } from './assumptions.mjs';
 import { LEVELS, renderReadinessMd } from './readiness.mjs';
+import { LEAF_LEVELS } from './schema.mjs';
 import path from 'node:path';
 
 export const CATALOG_PATH = 'data/catalog.json';
@@ -54,7 +55,12 @@ export function recount(catalog) {
   catalog.pathCount = (catalog.paths ?? []).length;
   const levels = {};
   for (const leaf of catalog.leaves) levels[leaf.level] = (levels[leaf.level] ?? 0) + 1;
-  catalog.levelCounts = Object.fromEntries(Object.keys(levels).sort().map((k) => [k, levels[k]]));
+  // In reading order, not alphabetically: the README's level distribution
+  // should open on Beginner, not Advanced.
+  const rank = (k) => (LEAF_LEVELS.includes(k) ? LEAF_LEVELS.indexOf(k) : LEAF_LEVELS.length);
+  catalog.levelCounts = Object.fromEntries(
+    Object.keys(levels).sort((a, b) => rank(a) - rank(b) || a.localeCompare(b)).map((k) => [k, levels[k]])
+  );
   return catalog;
 }
 
