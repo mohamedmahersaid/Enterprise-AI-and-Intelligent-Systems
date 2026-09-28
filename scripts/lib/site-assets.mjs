@@ -138,6 +138,7 @@ footer.site { border-top: 1px solid var(--line); padding: 20px 16px 40px; color:
 #results a[aria-selected="true"] { outline: 2px solid var(--accent); outline-offset: -2px; }
 #results .t { display: block; font-weight: 600; }
 #results .s { display: block; font-size: 12px; color: var(--muted); }
+#results .d { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 12px; color: var(--muted); margin-top: 2px; }
 @media (max-width: 900px) {
   /* On a phone the header scrolls away and the curriculum listing collapses
      behind a summary, so the page's own h1 is the first thing on screen. */
@@ -280,9 +281,11 @@ export const SCRIPT = `
       a.tabIndex = -1;
       a.setAttribute('role', 'option');
       a.setAttribute('aria-selected', 'false');
-      a.innerHTML = '<span class="t"></span><span class="s"></span>';
-      a.firstChild.textContent = item.title;
-      a.lastChild.textContent = item.level + ' \\u00b7 ' + item.readiness + ' \\u00b7 ' + item.branch;
+      a.innerHTML = '<span class="t"></span><span class="s"></span><span class="d"></span>';
+      a.children[0].textContent = item.title;
+      a.children[1].textContent = item.level + ' \\u00b7 ' + item.readiness + ' \\u00b7 ' + item.branch;
+      if (item.description) a.children[2].textContent = item.description;
+      else a.children[2].remove();
       box.appendChild(a);
     });
     box.hidden = false;

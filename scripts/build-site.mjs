@@ -17,6 +17,7 @@ import { readCatalog, group, slug } from './lib/derive.mjs';
 import { STYLE, SCRIPT, THEME_BOOTSTRAP, SIDEBAR_TOGGLE, mermaidLoader } from './lib/site-assets.mjs';
 import { checkSite } from './check-site.mjs';
 import { LEVELS, VALIDATION_PATH, needsSentence } from './lib/readiness.mjs';
+import { searchEntry, indexSizeProblem } from './lib/search-index.mjs';
 
 const OUT = 'site';
 
@@ -344,6 +345,7 @@ function main() {
   mkdirSync(OUT, { recursive: true });
 
   const sources = markdownFiles('.');
+  const entries = new Map();
   let written = 0;
 
   for (const source of sources) {
@@ -352,6 +354,8 @@ function main() {
     const base = depth === 0 ? './' : '../'.repeat(depth);
     const raw = stripFrontmatter(readFileSync(source, 'utf8'));
     const leaf = byPath.get(relative('.', source).split(sep).join('/'));
+    const entry = leaf ? searchEntry(leaf, raw) : null;
+    if (leaf) entries.set(leaf.id, entry);
 
     let body = rewriteLinks(marked.parse(raw));
     if (leaf) body = leafHeader(leaf, base) + body + pager(leaf, ordered, base);
@@ -363,7 +367,10 @@ function main() {
     mkdirSync(dirname(target), { recursive: true });
     writeFileSync(target, pageShell({
       title: `${title} - ${catalog.name}`,
-      description: leaf ? `${leaf.level} leaf in ${leaf.branch}.` : catalog.description || '',
+      // The leaf's own opening sentences, the same text its search result
+      // shows; the catalog row is only the fallback for a leaf without an
+      // Explanation.
+      description: leaf ? entry.description || `${leaf.level} leaf in ${leaf.branch}.` : catalog.description || '',
       body, sidebar, depth, current: out,
     }));
     written += 1;
@@ -378,15 +385,17 @@ function main() {
     sidebar, depth: 0, current: 'index.html',
   }));
 
-  const index = catalog.leaves.map((leaf) => ({
-    title: leaf.name,
-    level: leaf.level,
-    readiness: LEVELS[leaf.readiness].label,
-    branch: leaf.branch,
-    url: leaf.path.replace(/\.md$/, '.html'),
-    haystack: [leaf.name, leaf.level, LEVELS[leaf.readiness].label, leaf.tree, leaf.branch, leaf.id].join(' ').toLowerCase(),
-  }));
-  writeFileSync(join(OUT, 'search-index.json'), JSON.stringify(index));
+  // In catalog order, from the entries collected while each leaf's page was
+  // rendered; a catalog leaf whose file the walk never met would already have
+  // failed validate-content.
+  const index = catalog.leaves.map((leaf) => entries.get(leaf.id)).filter(Boolean);
+  const indexJson = JSON.stringify(index);
+  const oversize = indexSizeProblem(indexJson);
+  if (oversize) {
+    console.error(oversize);
+    return 1;
+  }
+  writeFileSync(join(OUT, 'search-index.json'), indexJson);
 
   // Pages would otherwise run the output through Jekyll and drop nothing here,
   // but underscore-prefixed paths are a silent trap; disable it explicitly.
