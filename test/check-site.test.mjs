@@ -146,13 +146,14 @@ test('control borders need 3:1 against the background in every theme', () => {
 
 test('the search input and theme button draw their border with the checked token', () => {
   assert.deepEqual(checkControlBorders(STYLE), []);
-  const good = '#search { width: 100%; border: 1px solid var(--control-border); border-radius: 6px; }\nbutton.theme { border: 1px solid var(--control-border); }';
+  const good = '#search { width: 100%; border: 1px solid var(--control-border); border-radius: 6px; }\nbutton.theme { border: 1px solid var(--control-border); }\n' +
+    '#browse-filter { border: 1px solid var(--control-border); }\npre .copy { border: 1px solid var(--control-border); }';
   assert.deepEqual(checkControlBorders(good), []);
   // --line is 1.43:1 on the light background, so a control drawn with it has no visible edge.
   const reverted = good.replace('button.theme { border: 1px solid var(--control-border); }', 'button.theme { border: 1px solid var(--line); }');
   assert.match(checkControlBorders(reverted).join('\n'), /button\.theme border is "1px solid var\(--line\)"/);
   const colour = good + '\n#search { border-color: var(--line); }';
   assert.match(checkControlBorders(colour).join('\n'), /#search border is "var\(--line\)"/);
-  const none = '#search:focus { border: 1px solid var(--control-border); }\nbutton.theme { border: 1px solid var(--control-border); }';
+  const none = good.replace(/^#search \{[^}]*\}/, '#search:focus { border: 1px solid var(--control-border); }');
   assert.match(checkControlBorders(none).join('\n'), /no rule for #search sets its border/);
 });
