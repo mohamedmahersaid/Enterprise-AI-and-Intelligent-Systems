@@ -28,6 +28,8 @@ The second is **explicit refusal paths**. Operational prompts must tell the mode
 
 The third is **grounding discipline**: instruct the model to answer only from provided context and to cite which supplied document supports each claim. Where citation is absent, the claim is a candidate hallucination and can be flagged automatically.
 
+One boundary matters as much as any of these: the prompt itself is not a secret. Everything placed in the system message or template - instructions, reference context, tool descriptions - sits in the model's context window beside user input, and a model can be led to repeat it, so OWASP's 2026 guidance on hidden context exposure is that hidden context should not be considered a secret. Keep credentials, internal URLs and security-relevant logic out of prompts, and enforce authorisation in the application, where the caller cannot negotiate with it; a prompt that would embarrass no one if printed is the standard.
+
 Finally, pin what varies the output. On models that accept it, such as a local Llama, that means temperature near zero. Reasoning models - the GPT-5 family on Azure OpenAI - reject temperature, so there it means a pinned model version, a fixed reasoning effort and a strict output schema. Then an evaluation set that runs on every prompt change.
 
 ## Architecture and flow
@@ -454,15 +456,16 @@ Prompts live in Git in the application repository with the same branch protectio
 
 - **Microsoft Certified: Azure AI Apps and Agents Developer Associate (AI-103)** - Implement generative AI and agentic solutions: applying the five-part prompt structure and enforcing a strict JSON schema through structured output on Azure OpenAI.
 - **Microsoft Certified: Azure AI Fundamentals (AI-901)** - Identify AI concepts and capabilities: grounding a model in supplied context, why a model hallucinates a root cause, and which settings make a deterministic task repeatable.
-- **Vendor-neutral** - OWASP GenAI LLM Top 10 2026: LLM01:2026 Prompt Injection and LLM10:2026 Improper Output Handling.
+- **Vendor-neutral** - OWASP GenAI LLM Top 10 2026: LLM01:2026 Prompt Injection, LLM10:2026 Improper Output Handling, and LLM08:2026 Hidden Context Exposure - the system message is not a secret store.
 - **Vendor-neutral** - NIST AI RMF MEASURE function: test, evaluate, verify and validate AI system outputs.
+- **Microsoft Certified: Machine Learning Operations Engineer Associate (AI-300)** - Design and implement a GenAIOps infrastructure: implementing version control for prompts by using Git repositories - prompts as reviewed production configuration, with an evaluation set run on every change.
 
 ## References
 
 - [Microsoft Learn: Prompt engineering techniques](https://learn.microsoft.com/azure/ai-foundry/openai/concepts/prompt-engineering) - Prompt structure, few-shot examples, grounding and refusal-path techniques for Azure OpenAI.
 - [Microsoft Learn: How to configure Azure OpenAI in Microsoft Foundry Models with Microsoft Entra ID authentication (classic)](https://learn.microsoft.com/azure/foundry-classic/openai/how-to/managed-identity) - Keyless calls with an Entra ID bearer token, DefaultAzureCredential and the Cognitive Services OpenAI User role.
 - [Microsoft Learn: Structured outputs](https://learn.microsoft.com/azure/foundry/openai/how-to/structured-outputs) - Enforcing a strict JSON schema through structured output (vs JSON mode) on Azure OpenAI.
-- [OWASP Gen AI Security Project: OWASP GenAI LLM Top 10 2026](https://genai.owasp.org/resource/owasp-genai-llm-top-10-2026/) - LLM01:2026 Prompt Injection and LLM10:2026 Improper Output Handling.
+- [OWASP Gen AI Security Project: OWASP GenAI LLM Top 10 2026](https://genai.owasp.org/resource/owasp-genai-llm-top-10-2026/) - LLM01:2026 Prompt Injection, LLM10:2026 Improper Output Handling and LLM08:2026 Hidden Context Exposure.
 - [Ollama: Structured Outputs](https://docs.ollama.com/capabilities/structured-outputs) - JSON format mode and schema-constrained output from a local Ollama model.
 - [NIST: Artificial Intelligence Risk Management Framework (AI RMF 1.0) (NIST AI 100-1)](https://doi.org/10.6028/NIST.AI.100-1) - MEASURE function: test, evaluate, verify and validate AI system outputs.
 

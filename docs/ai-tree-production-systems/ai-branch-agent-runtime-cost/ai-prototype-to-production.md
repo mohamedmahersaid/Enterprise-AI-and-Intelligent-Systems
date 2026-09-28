@@ -353,6 +353,7 @@ Unbounded spend, and it is almost never malicious. The usual shape is a retry lo
 - **AWS Certified AI Practitioner** - Domain 5: Security, Compliance, and Governance for AI Solutions: requiring authentication at the gateway, forwarding end-user identity, and setting log retention and redaction for logged prompts.
 - **FinOps Certified Practitioner** - showback, budget alerting and per-team cost attribution.
 - **Vendor-neutral** - NIST AI RMF GOVERN and MANAGE functions: documented controls and oversight before deployment.
+- **Microsoft Certified: Cloud and AI Security Engineer Associate (SC-500)** - Secure compute: an AI gateway in Azure API Management in front of the model endpoint - authentication, token limit policies, request logging and budget alerts before the hard stop.
 
 ## References
 

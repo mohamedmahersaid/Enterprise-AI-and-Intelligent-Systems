@@ -272,6 +272,7 @@ I never trust the architecture diagram alone, because 'local' components frequen
 - **Microsoft Certified: Azure Solutions Architect Expert (AZ-305)** - Design identity, governance, and monitoring solutions: resolving caller group membership for security-trimmed retrieval and auditing each query's identity, ACL filter and contributing sources.
 - **Vendor-neutral** - NIST AI RMF GOVERN and MANAGE functions: data governance and access control for AI systems.
 - **Vendor-neutral** - ISO/IEC 27001: information classification and access control applied to AI knowledge bases.
+- **Vendor-neutral** - OWASP GenAI LLM Top 10 2026: LLM09:2026 Vector and Embedding Weaknesses - security trimming inside the search query (ACL groups in the filter, never post-hoc) and index segregation by sensitivity tier, so a shared vector index cannot leak across permission boundaries.
 
 ## References
 

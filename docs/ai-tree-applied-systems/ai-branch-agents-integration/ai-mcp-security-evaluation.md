@@ -374,6 +374,7 @@ Governance has to be embedded in the same workflow teams already use, or it gets
 - **Microsoft Certified: Azure Solutions Architect Expert (AZ-305)** - Design identity, governance, and monitoring solutions: full-trajectory audit logging to a retained, access-controlled log store and governance approval workflows for new agent capabilities.
 - **Vendor-neutral** - OWASP GenAI LLM Top 10 2026: LLM01:2026 Prompt Injection through MCP tool results and LLM03:2026 Excessive Agency bounded by least-privilege tool scoping and approval gates.
 - **Vendor-neutral** - NIST AI RMF and ISO/IEC 42001 AI management systems: a model/agent inventory, risk classification, approval workflows and audit logging sufficient to reconstruct automated decisions.
+- **Microsoft Certified: Cloud and AI Security Engineer Associate (SC-500)** - Secure compute: managing agent identity access - least-privilege roles for an agent's own identity, token audience validation at the MCP boundary, and Microsoft Entra tokens instead of keys for Content Safety and Search.
 
 ## References
 

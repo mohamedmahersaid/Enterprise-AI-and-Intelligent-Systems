@@ -321,6 +321,8 @@ It has to grow from production, not stay as assembled. Every real failure - a wr
 - **Google Cloud Professional Machine Learning Engineer** - model evaluation, monitoring and continuous improvement.
 - **Vendor-neutral** - ISO/IEC 42001: AI management system requirements for performance evaluation and continual improvement.
 - **Vendor-neutral** - NIST AI RMF MEASURE function: documented, repeatable evaluation of AI system behaviour.
+- **Microsoft Certified: Machine Learning Operations Engineer Associate (AI-300)** - Implement generative AI quality assurance and observability: AI quality metrics (faithfulness, relevance) scored by an LLM judge, and automated evaluation workflows gating every change in CI.
+- **Vendor-neutral** - OWASP GenAI LLM Top 10 2026: LLM07:2026 Misinformation - regression gates on faithfulness catch a change that makes the system state things its sources do not support.
 
 ## References
 

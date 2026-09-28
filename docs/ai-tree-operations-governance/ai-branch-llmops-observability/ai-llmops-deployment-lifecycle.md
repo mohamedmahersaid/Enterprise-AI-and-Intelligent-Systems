@@ -384,6 +384,7 @@ A system prompt directly determines model behaviour with the same blast radius a
 - **Microsoft Certified: DevOps Engineer Expert (AZ-400)** - Design and implement build and release pipelines: gating merges on a golden-set evaluation check and progressing releases through shadow, canary and automatic rollback before full promotion.
 - **Vendor-neutral** - CNCF Progressive Delivery practice: canary analysis and automated rollback with Argo Rollouts.
 - **Vendor-neutral** - NIST AI RMF MEASURE function: continuous monitoring of deployed AI system performance.
+- **Microsoft Certified: Machine Learning Operations Engineer Associate (AI-300)** - Design and implement a GenAIOps infrastructure: prompt templates versioned in the application repository through pull-request review, released in a manifest that pins prompt, tool schemas, index build and model version together.
 
 ## References
 
