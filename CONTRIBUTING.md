@@ -243,9 +243,17 @@ also resolve workflow paths against the repository itself.
 
 ## Live validation
 
-Two workflows run what no offline check can, on the pull requests that change
-what they test, every Tuesday, and on demand:
+Three workflows run what no offline check can, on the pull requests that change
+what they test, on a weekly schedule, and on demand:
 
+- **Currency** (`currency.yml`, Wednesdays). `node scripts/check-currency.mjs` reads
+  `data/currency.json` - hosted-model retirement dates, service api-versions and
+  npx pins, each with the source it was read from and a `review_by` date - and
+  fails when a pinned model retires within 120 days or a review date has passed.
+  It also compares the npm and direct PyPI pins with their registries and
+  annotates a pin a major version behind without failing, because some holds
+  are deliberate. It reports and never writes; update a pin, the leaves that
+  carry it and `data/currency.json` together in one pull request.
 - **Ollama tags** (`model-tags.yml`, on any leaf change). `node scripts/check-ollama-tags.mjs` asks the Ollama registry
   for every tag the leaves pin - read from the same derivation as
   `ASSUMPTIONS.md` - fails when one is no longer published, and records the

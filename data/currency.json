@@ -1,0 +1,63 @@
+{
+  "$comment": [
+    "The pins the leaves carry that no package registry can check: hosted-model retirement dates, service api-versions and npx package pins. Maintained by hand from vendor sources, like data/certifications.json; each entry records where its facts were read.",
+    "scripts/check-currency.mjs reads this weekly (`.github/workflows/currency.yml`, read-only): a model retirement inside its warning window fails the run, a passed review_by date fails the run, and a pinned npm or PyPI package whose major version is behind is annotated but does not fail - some pins (mermaid on 11.x) are deliberate holds.",
+    "review_by is the editorial deadline to re-read the entry's source: api-versions and tool pins do not retire on a published date, so the deadline is ours. Reviewing means re-reading the source and moving review_by forward (or changing the pin)."
+  ],
+  "verified": "2026-09-28",
+  "models": [
+    {
+      "name": "gpt-5.1",
+      "version": "2025-11-13",
+      "retires": "2027-05-15",
+      "source": "https://learn.microsoft.com/en-us/azure/foundry/openai/concepts/model-retirement-schedule",
+      "used_in": "Azure OpenAI examples across the leaves (deployment names and pinned model versions)"
+    },
+    {
+      "name": "gpt-5.4",
+      "version": "2026-03-05",
+      "retires": "2027-09-02",
+      "source": "https://learn.microsoft.com/en-us/azure/foundry/openai/concepts/model-retirement-schedule",
+      "used_in": "Azure OpenAI examples across the leaves"
+    },
+    {
+      "name": "gpt-5.4-mini",
+      "version": "2026-03-17",
+      "retires": "2027-09-21",
+      "source": "https://learn.microsoft.com/en-us/azure/foundry/openai/concepts/model-retirement-schedule",
+      "used_in": "Azure OpenAI examples across the leaves"
+    }
+  ],
+  "api_versions": [
+    {
+      "service": "Azure AI Search",
+      "version": "2026-04-01",
+      "review_by": "2027-03-28",
+      "source": "https://learn.microsoft.com/rest/api/searchservice/search-service-api-versions",
+      "used_in": "search and vector query commands in the retrieval and RAG leaves"
+    },
+    {
+      "service": "Azure AI Content Safety",
+      "version": "2024-09-01",
+      "review_by": "2027-03-28",
+      "source": "https://learn.microsoft.com/azure/ai-services/content-safety/overview",
+      "used_in": "text:analyze and text:shieldPrompt commands in the guardrail and agent leaves"
+    },
+    {
+      "service": "Azure Cost Management Query",
+      "version": "2026-06-01",
+      "review_by": "2027-03-28",
+      "source": "https://learn.microsoft.com/rest/api/cost-management/query/usage",
+      "used_in": "cost attribution commands in the FinOps and adoption leaves"
+    }
+  ],
+  "npx": [
+    {
+      "package": "@modelcontextprotocol/inspector",
+      "version": "2.8.0",
+      "review_by": "2027-03-28",
+      "source": "https://www.npmjs.com/package/@modelcontextprotocol/inspector",
+      "used_in": "MCP tool-definition listing and hash pinning in ai-mcp-security-evaluation; the recorded MCP_TOOLS_SHA256 is valid only for this Inspector version's output shape"
+    }
+  ]
+}

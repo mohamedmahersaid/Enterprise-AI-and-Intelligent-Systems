@@ -1,0 +1,69 @@
+name: Currency
+
+# Weekly, read-only drift check for the pins nothing else watches: hosted
+# model retirement dates, service api-versions and npx pins reviewed in
+# data/currency.json, and package pins checked against the npm and PyPI
+# APIs. scripts/check-currency.mjs reports and exits - it never writes -
+# and a major version behind only annotates, because some holds (mermaid
+# on 11.x) are deliberate. It also runs on the pull requests that change
+# what it reads, so a broken check cannot merge quietly.
+on:
+  pull_request:
+    paths:
+      - data/currency.json
+      - scripts/check-currency.mjs
+      - .github/workflows/currency.yml
+  schedule:
+    - cron: '23 6 * * 3'
+  workflow_dispatch:
+
+# Read-only: the job that talks to external registries holds no write token
+# and no secrets - keep it that way in review.
+permissions:
+  contents: read
+
+concurrency:
+  group: currency-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22'
+      - run: node scripts/check-currency.mjs
+
+  # Separate job so the token that can write issues never shares a job with
+  # the one that fetched external data, the same split as live.yml. The
+  # issue text is a fixed template plus the run id from the github context.
+  report:
+    needs: check
+    if: failure() && github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      issues: write
+    steps:
+      - name: Open or update the currency issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          title="Scheduled currency check failed"
+          body=$(printf 'The weekly currency check failed: a pinned model is near retirement, a reviewed pin passed its review date, or the registries could not be reached. Read the run log and update the pin, the leaves that carry it, and data/currency.json in a pull request.\n\nFailed run: %s\n' "$RUN_URL")
+          # Only an issue this workflow opened, with exactly this title: anyone can
+          # open an issue with a similar name, and the report must not land on it.
+          existing=$(gh issue list --state open --author app/github-actions --search "in:title \"$title\"" \
+            --json number,title --jq "map(select(.title == \"$title\")) | .[0].number // empty")
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "$body"
+          else
+            gh issue create --title "$title" --body "$body"
+          fi
