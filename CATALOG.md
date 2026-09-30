@@ -87,3 +87,4 @@ Running AI systems in production: vector store selection and retrieval quality, 
 - **Advanced:** [Agent Orchestration with LangGraph: State, Guardrails and Tool Authorisation](docs/ai-tree-production-systems/ai-branch-agent-runtime-cost/ai-agent-orchestration-guardrails.md)
 - **Advanced:** [AI FinOps: Token Cost Attribution, GPU Utilisation and Build-versus-Buy Crossover](docs/ai-tree-production-systems/ai-branch-agent-runtime-cost/ai-finops-build-vs-buy.md)
 - **Beginner:** [From Prototype to Production: Gateway, Limits, Logging and Rollback](docs/ai-tree-production-systems/ai-branch-agent-runtime-cost/ai-prototype-to-production.md)
+- **Intermediate:** [Agent Memory and Context: Compaction, Summary Drift, Tenant Isolation and Poisoned Memory](docs/ai-tree-production-systems/ai-branch-agent-runtime-cost/ai-agent-memory-context.md)

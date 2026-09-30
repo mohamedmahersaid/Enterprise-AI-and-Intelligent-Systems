@@ -15,7 +15,7 @@ a step you already know is a step you skip.
 | [Govern AI across an organisation](#govern-ai-across-an-organisation) | 6 | Whoever has been handed responsibility for AI risk, policy or approval. |
 | [Run the model platform](#run-the-model-platform) | 8 | A platform or infrastructure engineer who now owns GPUs, training jobs and model artefacts. |
 | [Decide what to run, and what it costs](#decide-what-to-run-and-what-it-costs) | 6 | An architect or lead answering 'which model, hosted where, and what will this cost at scale'. |
-| [Put an agent in front of real systems](#put-an-agent-in-front-of-real-systems) | 6 | An engineer being asked to let a model take actions rather than only produce text. |
+| [Put an agent in front of real systems](#put-an-agent-in-front-of-real-systems) | 7 | An engineer being asked to let a model take actions rather than only produce text. |
 | [Secure an AI estate](#secure-an-ai-estate) | 9 | A security engineer who has just been told the organisation is deploying AI, and must secure what already exists as much as what comes next. |
 
 ## Ship your first AI feature
@@ -137,15 +137,17 @@ An agent that can act can act wrongly, at machine speed, in a loop. This path co
 
 1. **[Do You Need an Agent? Loops, Tools and the Cost of Letting a Model Decide](docs/ai-tree-applied-systems/ai-branch-agents-integration/ai-do-you-need-an-agent.md)** &middot; Beginner
    Settle which of three architectures you actually need before building any of them. Most things called agents are a single call with tools, and the loop is the expensive part.
-2. **[AI Agents and Orchestration Patterns](docs/ai-tree-applied-systems/ai-branch-agents-integration/ai-agents-orchestration.md)** &middot; Advanced
+2. **[Agent Memory and Context: Compaction, Summary Drift, Tenant Isolation and Poisoned Memory](docs/ai-tree-production-systems/ai-branch-agent-runtime-cost/ai-agent-memory-context.md)** &middot; Intermediate
+   Before orchestrating several agents, get one agent's memory right: what it keeps, for whom, for how long, and how compaction is checked so the details that matter do not drift away.
+3. **[AI Agents and Orchestration Patterns](docs/ai-tree-applied-systems/ai-branch-agents-integration/ai-agents-orchestration.md)** &middot; Advanced
    How multi-step agent workflows are actually structured, and where they fail.
-3. **[Content Safety and Guardrails: Input Filtering, Output Classification and Refusal Design](docs/ai-tree-applied-systems/ai-branch-agents-integration/ai-content-safety-guardrails.md)** &middot; Intermediate
+4. **[Content Safety and Guardrails: Input Filtering, Output Classification and Refusal Design](docs/ai-tree-applied-systems/ai-branch-agents-integration/ai-content-safety-guardrails.md)** &middot; Intermediate
    An agent consumes untrusted input from tools and documents, not just from users.
-4. **[MCP Servers, AI Security and Evaluation](docs/ai-tree-applied-systems/ai-branch-agents-integration/ai-mcp-security-evaluation.md)** &middot; Expert
+5. **[MCP Servers, AI Security and Evaluation](docs/ai-tree-applied-systems/ai-branch-agents-integration/ai-mcp-security-evaluation.md)** &middot; Expert
    Every MCP server is code you are trusting with your agent's permissions. Evaluate before connecting.
-5. **[Agent Orchestration with LangGraph: State, Guardrails and Tool Authorisation](docs/ai-tree-production-systems/ai-branch-agent-runtime-cost/ai-agent-orchestration-guardrails.md)** &middot; Advanced
+6. **[Agent Orchestration with LangGraph: State, Guardrails and Tool Authorisation](docs/ai-tree-production-systems/ai-branch-agent-runtime-cost/ai-agent-orchestration-guardrails.md)** &middot; Advanced
    Loop limits, budgets and kill switches. An unbounded agent is a billing incident waiting to happen.
-6. **[AI Incident Response: Detection, Containment and Postmortems for Non-Deterministic Systems](docs/ai-tree-operations-governance/ai-branch-llmops-observability/ai-incident-response.md)** &middot; Advanced
+7. **[AI Incident Response: Detection, Containment and Postmortems for Non-Deterministic Systems](docs/ai-tree-operations-governance/ai-branch-llmops-observability/ai-incident-response.md)** &middot; Advanced
    When an agent does something wrong, the blast radius question is 'what did it touch', and you need the answer fast.
 
 ## Secure an AI estate

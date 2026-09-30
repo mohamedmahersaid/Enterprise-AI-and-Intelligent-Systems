@@ -60,7 +60,7 @@ Tags are withdrawn and re-pointed upstream; a pull can fail or change. An untagg
 | Value | Used by |
 | --- | --- |
 | `llama3.1:8b` | `ai-agents-orchestration`, `ai-model-selection-cost`, `ai-ollama-local-inference`, `ai-private-enterprise-rag`, `ai-prompt-engineering-ops` |
-| `llama3.1:8b-instruct-q4_K_M` | `ai-ollama-local-inference` |
+| `llama3.1:8b-instruct-q4_K_M` | `ai-agent-memory-context`, `ai-ollama-local-inference` |
 | `nomic-embed-text (untagged - resolves to latest)` | `ai-rag-architecture` |
 | `qwen2.5:7b-instruct-q4_K_M` | `ai-ollama-local-inference` |
 
@@ -82,7 +82,7 @@ From `data/certifications.json`, last checked against vendor sources on 2026-09-
 | [Microsoft Certified: Azure AI Cloud Developer Associate](https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/ai-200) | active | read | `ai-vector-db-hybrid-retrieval` |
 | [Microsoft Certified: Azure AI Fundamentals](https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/ai-901) | active | read | `ai-agents-orchestration`, `ai-do-you-need-rag`, `ai-enterprise-adoption-patterns`, `ai-first-gpu-job`, `ai-how-retrieval-finds-things`, `ai-model-selection-cost`, `ai-ollama-local-inference`, `ai-private-enterprise-rag`, `ai-prompt-engineering-ops`, `ai-rag-architecture` |
 | [Microsoft Certified: Machine Learning Operations Engineer Associate](https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/ai-300) | active | read | `ai-evaluation-harness-gates`, `ai-feature-store-skew`, `ai-fine-tuning-peft`, `ai-first-gpu-job`, `ai-llmops-deployment-lifecycle`, `ai-mlops-mlflow-registry`, `ai-model-supply-chain`, `ai-observability-performance-monitoring`, `ai-prompt-engineering-ops`, `ai-reproducible-training-runs`, `ai-retrieval-test-collections`, `ai-vector-db-hybrid-retrieval` |
-| [Microsoft Certified: Multi-Agent AI Solutions Expert](https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/ai-500) | beta | read | `ai-agent-orchestration-guardrails`, `ai-agents-orchestration`, `ai-content-safety-guardrails`, `ai-mcp-security-evaluation` |
+| [Microsoft Certified: Multi-Agent AI Solutions Expert](https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/ai-500) | beta | read | `ai-agent-memory-context`, `ai-agent-orchestration-guardrails`, `ai-agents-orchestration`, `ai-content-safety-guardrails`, `ai-mcp-security-evaluation` |
 | [Microsoft Certified: Cloud and AI Security Engineer Associate](https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/sc-500) | active | read | `ai-mcp-security-evaluation`, `ai-prototype-to-production` |
 | [Microsoft Certified: Security, Compliance, and Identity Fundamentals](https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/sc-900) | active | read | `ai-first-managed-endpoint`, `ai-inventory-acceptable-use` |
 | [Microsoft Certified: Cybersecurity Architect Expert](https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/sc-100) | active | read | `ai-azure-openai-integration`, `ai-content-safety-guardrails` |
@@ -168,3 +168,4 @@ Derived from the leading command in every `text` block. A leaf listing a tool as
 | `ai-agent-orchestration-guardrails` | Python 3, curl, jq, kubectl, pip |
 | `ai-finops-build-vs-buy` | NVIDIA driver and CUDA runtime, curl, jq, kubectl |
 | `ai-prototype-to-production` | curl, jq |
+| `ai-agent-memory-context` | Python 3, curl, jq |

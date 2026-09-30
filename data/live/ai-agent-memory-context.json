@@ -1,0 +1,77 @@
+{
+  "$comment": "What scripts/live-run.mjs runs for this leaf. Setup starts an Ollama server (daemonised: setup lines are foreground, and the CI job's teardown stops it) and pulls the model. Commands 1-7 exercise memory_store.py's write validation, tenant-scoped recall, expiry and audit deterministically; Commands 8 and 10 call the live endpoint, and Command 9 checks the model's summary for the pinned entities. Command 9 reports and exits 0 whatever the summary kept - how many survive is the model's behaviour, not a pass condition - so its expect is the report line. transcript.txt and entities.txt are the declared fixtures the leaf's Command 8 and 9 describe. KEY is a dummy: Ollama ignores it and the leaf's commands send one.",
+  "files": {
+    "transcript.txt": "Conversation, 2026-09-29:\nCustomer: My order ORD-7731 arrived damaged and I would like a refund.\nAgent: I am sorry to hear that. I have issued a full refund for ORD-7731; it will show in three to five working days.\nCustomer: Thanks. Please send any updates by email rather than phoning me - I am in meetings all day.\nAgent: Noted, we will use email from now on.\n",
+    "entities.txt": "ORD-7731\nrefund\nemail\n"
+  },
+  "scripts": {
+    "memory_store.py": "memory_store.py"
+  },
+  "env": {
+    "ENDPOINT": "http://127.0.0.1:11434",
+    "KEY": "unused-local-dummy-key-ollama-ignores-auth"
+  },
+  "substitute": {
+    "<model>": "llama3.1:8b-instruct-q4_K_M"
+  },
+  "setup": [
+    {
+      "run": "(ollama serve > ollama-server.log 2>&1 &) ; for i in $(seq 1 30); do curl -sf http://127.0.0.1:11434/api/version && exit 0; sleep 1; done; exit 1",
+      "expect": "version",
+      "timeout": 60
+    },
+    {
+      "run": "ollama pull llama3.1:8b-instruct-q4_K_M",
+      "timeout": 1200
+    }
+  ],
+  "versions": [
+    "ollama -v"
+  ],
+  "steps": [
+    {
+      "command": 1,
+      "expect": "^stored m1 tenant=acme source=user:42 expires="
+    },
+    {
+      "command": 2,
+      "expect": "^stored m2 tenant=acme source=ticket:ORD-7731"
+    },
+    {
+      "command": 3,
+      "exit": 1,
+      "expect": "^QUARANTINED m3: instruction-like content"
+    },
+    {
+      "command": 4,
+      "expect": "^stored m4 tenant=globex"
+    },
+    {
+      "command": 5,
+      "expect": "Prefers email over phone[\\s\\S]*ORD-7731 was refunded[\\s\\S]*^2 memory item\\(s\\) for tenant acme$"
+    },
+    {
+      "command": 6,
+      "expect": "Prefers email over phone[\\s\\S]*^1 memory item\\(s\\) for tenant acme$"
+    },
+    {
+      "command": 7,
+      "expect": "m2\\tacme\\tticket:ORD-7731\\texpired[\\s\\S]*m3\\tacme\\tuser:42\\tquarantined[\\s\\S]*m4\\tglobex"
+    },
+    {
+      "command": 8,
+      "expect": "[A-Za-z].{20,}",
+      "timeout": 600
+    },
+    {
+      "command": 9,
+      "expect": "^entities kept: [0-3] of 3$"
+    },
+    {
+      "command": 10,
+      "expect": "[Ee]-?mail",
+      "timeout": 600
+    }
+  ],
+  "skip": {}
+}
