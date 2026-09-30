@@ -2,7 +2,7 @@
 
 Enterprise AI engineering: local and offline inference with Ollama, Azure OpenAI integration, prompt engineering for operations, model selection and cost control, retrieval-augmented generation over private data, agent frameworks, Model Context Protocol servers, and AI security and evaluation.
 
-![Leaves](https://img.shields.io/badge/leaves-35-1f6feb) ![Coverage](https://img.shields.io/badge/catalog%20coverage-100%25-2ea44f) ![License](https://img.shields.io/badge/license-MIT-blue)
+![Leaves](https://img.shields.io/badge/leaves-36-1f6feb) ![Coverage](https://img.shields.io/badge/catalog%20coverage-100%25-2ea44f) ![License](https://img.shields.io/badge/license-MIT-blue)
 
 > [!CAUTION]
 > Commands, scripts, labs, and architecture patterns must be validated against current vendor documentation, product versions, licensing, permissions, security policy, and rollback requirements before production use.
@@ -26,14 +26,14 @@ Enterprise AI engineering: local and offline inference with Ollama, Azure OpenAI
 | [Running and Integrating Models](docs/ai-tree-model-platforms/README.md) | 2 | 7 |
 | [Applied AI Systems](docs/ai-tree-applied-systems/README.md) | 2 | 7 |
 | [AI Operations & Governance](docs/ai-tree-operations-governance/README.md) | 2 | 7 |
-| [AI Platform Engineering](docs/ai-tree-platform-engineering/README.md) | 2 | 7 |
+| [AI Platform Engineering](docs/ai-tree-platform-engineering/README.md) | 2 | 8 |
 | [Production AI Systems](docs/ai-tree-production-systems/README.md) | 2 | 7 |
 
-**Total:** 5 trees · 10 branches · 35 leaves
+**Total:** 5 trees · 10 branches · 36 leaves
 
-**Level distribution:** Beginner: 10 · Intermediate: 7 · Advanced: 14 · Expert: 2 · Enterprise: 2
+**Level distribution:** Beginner: 10 · Intermediate: 8 · Advanced: 14 · Expert: 2 · Enterprise: 2
 
-**Readiness:** Lab: 29 · Validated: 6 ([what that means](READINESS.md))
+**Readiness:** Lab: 30 · Validated: 6 ([what that means](READINESS.md))
 
 Browse the complete [leaf catalog](CATALOG.md), or follow a [learning path](PATHS.md)
 if you would rather be told what to read in what order. The catalog lists every leaf
@@ -55,7 +55,7 @@ verify the ones you depend on.
 
 ## Coverage statement
 
-Catalog coverage is 100%: all 35 authoritative leaves are present. Coverage indicates documentation completeness, not universal production validation; [READINESS.md](READINESS.md) records which leaves have been run against a live service and what each of the rest would need. Product behavior changes across releases and environments.
+Catalog coverage is 100%: all 36 authoritative leaves are present. Coverage indicates documentation completeness, not universal production validation; [READINESS.md](READINESS.md) records which leaves have been run against a live service and what each of the rest would need. Product behavior changes across releases and environments.
 
 ## Contributing and security
 

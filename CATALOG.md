@@ -63,6 +63,7 @@ Building the platform beneath the models: MLOps registries and promotion gates, 
 - **Advanced:** [Feature Stores and Training-Serving Skew: Point-in-Time Correctness with Feast](docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/ai-feature-store-skew.md)
 - **Intermediate:** [Fine-Tuning and PEFT: When to Tune, LoRA Adapters and Evaluation](docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/ai-fine-tuning-peft.md)
 - **Beginner:** [From Notebook to a Reproducible Training Run: Environments, Seeds, Data Versions and Artifacts](docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/ai-reproducible-training-runs.md)
+- **Intermediate:** [Model Supply Chain Security: Pickle, Safetensors, Digests and Dependency Provenance](docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/ai-model-supply-chain.md)
 
 ### Training and GPU Infrastructure
 

@@ -1,0 +1,4 @@
+# The imports a clean numpy weights pickle needs, and nothing else.
+numpy._core.multiarray._reconstruct
+numpy.ndarray
+numpy.dtype

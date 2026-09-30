@@ -81,7 +81,7 @@ From `data/certifications.json`, last checked against vendor sources on 2026-09-
 | [Microsoft Certified: Azure AI Apps and Agents Developer Associate](https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/ai-103) | active | read | `ai-agent-orchestration-guardrails`, `ai-agents-orchestration`, `ai-azure-openai-integration`, `ai-content-safety-guardrails`, `ai-do-you-need-an-agent`, `ai-do-you-need-rag`, `ai-enterprise-adoption-patterns`, `ai-evaluation-harness-gates`, `ai-fine-tuning-peft`, `ai-first-managed-endpoint`, `ai-governance-compliance-framework`, `ai-how-retrieval-finds-things`, `ai-incident-response`, `ai-llmops-deployment-lifecycle`, `ai-local-inference-at-scale`, `ai-mcp-security-evaluation`, `ai-model-selection-cost`, `ai-observability-performance-monitoring`, `ai-ollama-local-inference`, `ai-private-enterprise-rag`, `ai-prompt-engineering-ops`, `ai-prototype-to-production`, `ai-provider-failover`, `ai-quantisation-gpu-sharing`, `ai-rag-architecture`, `ai-vector-db-hybrid-retrieval`, `ai-what-to-log` |
 | [Microsoft Certified: Azure AI Cloud Developer Associate](https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/ai-200) | active | read | `ai-vector-db-hybrid-retrieval` |
 | [Microsoft Certified: Azure AI Fundamentals](https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/ai-901) | active | read | `ai-agents-orchestration`, `ai-do-you-need-rag`, `ai-enterprise-adoption-patterns`, `ai-first-gpu-job`, `ai-how-retrieval-finds-things`, `ai-model-selection-cost`, `ai-ollama-local-inference`, `ai-private-enterprise-rag`, `ai-prompt-engineering-ops`, `ai-rag-architecture` |
-| [Microsoft Certified: Machine Learning Operations Engineer Associate](https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/ai-300) | active | read | `ai-evaluation-harness-gates`, `ai-feature-store-skew`, `ai-fine-tuning-peft`, `ai-first-gpu-job`, `ai-llmops-deployment-lifecycle`, `ai-mlops-mlflow-registry`, `ai-observability-performance-monitoring`, `ai-prompt-engineering-ops`, `ai-reproducible-training-runs`, `ai-retrieval-test-collections`, `ai-vector-db-hybrid-retrieval` |
+| [Microsoft Certified: Machine Learning Operations Engineer Associate](https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/ai-300) | active | read | `ai-evaluation-harness-gates`, `ai-feature-store-skew`, `ai-fine-tuning-peft`, `ai-first-gpu-job`, `ai-llmops-deployment-lifecycle`, `ai-mlops-mlflow-registry`, `ai-model-supply-chain`, `ai-observability-performance-monitoring`, `ai-prompt-engineering-ops`, `ai-reproducible-training-runs`, `ai-retrieval-test-collections`, `ai-vector-db-hybrid-retrieval` |
 | [Microsoft Certified: Multi-Agent AI Solutions Expert](https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/ai-500) | beta | read | `ai-agent-orchestration-guardrails`, `ai-agents-orchestration`, `ai-content-safety-guardrails`, `ai-mcp-security-evaluation` |
 | [Microsoft Certified: Cloud and AI Security Engineer Associate](https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/sc-500) | active | read | `ai-mcp-security-evaluation`, `ai-prototype-to-production` |
 | [Microsoft Certified: Security, Compliance, and Identity Fundamentals](https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/sc-900) | active | read | `ai-first-managed-endpoint`, `ai-inventory-acceptable-use` |
@@ -106,7 +106,7 @@ From `data/certifications.json`, last checked against vendor sources on 2026-09-
 | [PMI Agile Certified Practitioner (PMI-ACP)](https://www.pmi.org/certifications/agile-acp) | unverified | unverified | `ai-do-you-need-an-agent` |
 | [ISACA Certified Information Systems Auditor (CISA)](https://www.isaca.org/credentialing/cisa) | unverified | unverified | `ai-what-to-log` |
 | [ISACA Certified in Risk and Information Systems Control (CRISC)](https://www.isaca.org/credentialing/crisc) | unverified | unverified | `ai-do-you-need-an-agent` |
-| [CompTIA Security+](https://www.comptia.org/en-us/certifications/security/) | unverified | unverified | `ai-first-managed-endpoint` |
+| [CompTIA Security+](https://www.comptia.org/en-us/certifications/security/) | unverified | unverified | `ai-first-managed-endpoint`, `ai-model-supply-chain` |
 | [Prometheus Certified Associate (PCA)](https://training.linuxfoundation.org/certification/prometheus-certified-associate/) | unverified | unverified | `ai-what-to-log` |
 
 No leaf may cite these; validate-content fails if one does.
@@ -160,6 +160,7 @@ Derived from the leading command in every `text` block. A leaf listing a tool as
 | `ai-feature-store-skew` | Feast |
 | `ai-fine-tuning-peft` | Python 3, jq, vLLM |
 | `ai-reproducible-training-runs` | Python 3, git, jq, pip |
+| `ai-model-supply-chain` | Python 3, curl, jq, pip |
 | `ai-vector-db-hybrid-retrieval` | curl, psql (PostgreSQL client) |
 | `ai-evaluation-harness-gates` | Python 3, git, pip, promptfoo |
 | `ai-how-retrieval-finds-things` | Azure CLI, curl, jq |
