@@ -6,7 +6,7 @@ Every leaf says how far its content has been proven. The level is a claim the
 repository backs with evidence, and `npm run validate` fails when a leaf claims
 more than its evidence supports.
 
-**35 leaves:** Lab: 29 · Validated: 6
+**36 leaves:** Lab: 30 · Validated: 6
 
 ## Lab
 
@@ -64,7 +64,7 @@ data and diagrams. Tools called from inside a Python script are not detected.
 
 | Need | What it means | Leaves |
 | --- | --- | ---: |
-| Stock CI runner | Nothing beyond a GitHub-hosted Ubuntu runner: Python 3, Docker, packages installed from public registries, and services started in containers. | 5 |
+| Stock CI runner | Nothing beyond a GitHub-hosted Ubuntu runner: Python 3, Docker, packages installed from public registries, and services started in containers. | 6 |
 | Ollama | A local Ollama server with a small model pulled. A CPU is enough, so a CI runner can host it. | 13 |
 | NVIDIA GPU | An NVIDIA GPU with its driver and CUDA runtime. Not available on standard hosted runners. | 8 |
 | Azure subscription | An Azure subscription with rights to create the resources the leaf creates, and a budget for them. Runs cost money and need credentials, so none are automated here yet. | 15 |
@@ -73,7 +73,7 @@ data and diagrams. Tools called from inside a Python script are not detected.
 | Hosted model API | An API key for a hosted model provider other than Azure. | 4 |
 | Your own service | A system the leaf assumes you run already - a gateway, an application, an inventory export - which its commands address only through a placeholder. | 4 |
 
-9 of 35 leaves need only a stock runner or Ollama, so CI can validate them
+10 of 36 leaves need only a stock runner or Ollama, so CI can validate them
 at no cost. The rest need infrastructure or credentials this repository does not hold.
 
 ## Every leaf
@@ -108,6 +108,7 @@ at no cost. The rest need infrastructure or credentials this repository does not
 | [Feature Stores and Training-Serving Skew: Point-in-Time Correctness with Feast](docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/ai-feature-store-skew.md) | Advanced | Validated | Stock CI runner | [pass 2026-09-28](https://github.com/mohamedmahersaid/Enterprise-AI-and-Intelligent-Systems/actions/runs/36414428271) |
 | [Fine-Tuning and PEFT: When to Tune, LoRA Adapters and Evaluation](docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/ai-fine-tuning-peft.md) | Intermediate | Lab | NVIDIA GPU | none recorded |
 | [From Notebook to a Reproducible Training Run: Environments, Seeds, Data Versions and Artifacts](docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/ai-reproducible-training-runs.md) | Beginner | Validated | Stock CI runner | [pass 2026-09-28](https://github.com/mohamedmahersaid/Enterprise-AI-and-Intelligent-Systems/actions/runs/36414428271) |
+| [Model Supply Chain Security: Pickle, Safetensors, Digests and Dependency Provenance](docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/ai-model-supply-chain.md) | Intermediate | Lab | Stock CI runner | none recorded |
 | [Vector Database Selection and Hybrid Retrieval: pgvector, Qdrant, Milvus and Reranking](docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/ai-vector-db-hybrid-retrieval.md) | Advanced | Lab | Stock CI runner | none recorded |
 | [LLM Evaluation Harnesses and Regression Gates for Production AI](docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/ai-evaluation-harness-gates.md) | Advanced | Lab | Ollama | none recorded |
 | [How Retrieval Finds Things: Keywords, Meaning and Why Each One Misses](docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/ai-how-retrieval-finds-things.md) | Beginner | Lab | Azure subscription | none recorded |

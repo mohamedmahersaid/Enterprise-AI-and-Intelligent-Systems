@@ -26,6 +26,7 @@ on:
       - docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/fixtures/**
       - docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/ai-feature-store-skew.md
       - docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/ai-reproducible-training-runs.md
+      - docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/ai-model-supply-chain.md
       - docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/fixtures/**
       - .github/workflows/live.yml
   schedule:

@@ -1,0 +1,67 @@
+{
+  "$comment": "What scripts/live-run.mjs runs for this leaf. Setup installs the pinned scanners and writes the fixtures with make_models.py: a clean numpy pickle, two inert malicious pickles whose only effect when loaded is a marker file, a safetensors file with provenance metadata, and the digest manifest. Nothing here loads a malicious pickle without fickling's hook; Command 6 proves the hook blocked both and no marker file exists. Commands 8 and 9 query the live PyPI JSON API.",
+  "copy": {
+    "make_models.py": "docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/fixtures/ai-model-supply-chain/make_models.py",
+    "allowlist.txt": "docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/fixtures/ai-model-supply-chain/allowlist.txt"
+  },
+  "scripts": {
+    "pickle_imports.py": "pickle_imports.py"
+  },
+  "setup": [
+    {
+      "run": "python3 -m venv .venv && .venv/bin/pip install --quiet picklescan==1.0.5 fickling==0.1.12 safetensors==0.8.0 numpy==2.5.3",
+      "timeout": 420
+    },
+    {
+      "run": ".venv/bin/python make_models.py",
+      "expect": "wrote 4 files to models/"
+    }
+  ],
+  "versions": [
+    ".venv/bin/pip freeze | grep -E '^(picklescan|fickling|safetensors|numpy)==' | tr '\\n' ' '"
+  ],
+  "steps": [
+    {
+      "command": 1,
+      "expect": "Requirement already satisfied|Successfully installed",
+      "timeout": 420
+    },
+    {
+      "command": 2,
+      "expect": "models/model\\.safetensors: OK[\\s\\S]*models/clean\\.pkl: OK"
+    },
+    {
+      "command": 3,
+      "exit": 1,
+      "expect": "dangerous import 'builtins exec' FOUND[\\s\\S]*Infected files: 1"
+    },
+    {
+      "command": 4,
+      "expect": "Infected files: 0[\\s\\S]*Suspicious globals: 2"
+    },
+    {
+      "command": 5,
+      "exit": 1,
+      "expect": "exec\\.pkl\\tbuiltins\\.exec\\tNOT ALLOWED[\\s\\S]*sneaky\\.pkl\\tpathlib\\.Path\\.write_text\\tNOT ALLOWED"
+    },
+    {
+      "command": 6,
+      "expect": "clean loaded[\\s\\S]*exec BLOCKED[\\s\\S]*sneaky BLOCKED[\\s\\S]*marker files: none"
+    },
+    {
+      "command": 7,
+      "expect": "\"license\": \"apache-2\\.0\"[\\s\\S]*\"dtype\": \"F32\""
+    },
+    {
+      "command": 8,
+      "expect": "\"first_release\": \"2022-09-22",
+      "timeout": 60
+    },
+    {
+      "command": 9,
+      "expect": "^404$",
+      "timeout": 60
+    }
+  ],
+  "skip": {}
+}

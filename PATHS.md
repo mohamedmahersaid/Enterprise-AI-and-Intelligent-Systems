@@ -13,10 +13,10 @@ a step you already know is a step you skip.
 | [Ship your first AI feature](#ship-your-first-ai-feature) | 10 | An engineer with a working prototype who has been asked when it can go live. |
 | [Build retrieval that actually answers](#build-retrieval-that-actually-answers) | 8 | An engineer whose search or RAG system returns plausible things that are not the right things. |
 | [Govern AI across an organisation](#govern-ai-across-an-organisation) | 6 | Whoever has been handed responsibility for AI risk, policy or approval. |
-| [Run the model platform](#run-the-model-platform) | 7 | A platform or infrastructure engineer who now owns GPUs, training jobs and model artefacts. |
+| [Run the model platform](#run-the-model-platform) | 8 | A platform or infrastructure engineer who now owns GPUs, training jobs and model artefacts. |
 | [Decide what to run, and what it costs](#decide-what-to-run-and-what-it-costs) | 6 | An architect or lead answering 'which model, hosted where, and what will this cost at scale'. |
 | [Put an agent in front of real systems](#put-an-agent-in-front-of-real-systems) | 6 | An engineer being asked to let a model take actions rather than only produce text. |
-| [Secure an AI estate](#secure-an-ai-estate) | 8 | A security engineer who has just been told the organisation is deploying AI, and must secure what already exists as much as what comes next. |
+| [Secure an AI estate](#secure-an-ai-estate) | 9 | A security engineer who has just been told the organisation is deploying AI, and must secure what already exists as much as what comes next. |
 
 ## Ship your first AI feature
 
@@ -97,15 +97,17 @@ From a first GPU job to distributed training, with the reproducibility and regis
    Get one job running and learn to read utilisation properly. Most GPU spend is wasted on jobs that look busy and are not.
 2. **[From Notebook to a Reproducible Training Run: Environments, Seeds, Data Versions and Artifacts](docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/ai-reproducible-training-runs.md)** &middot; Beginner
    Reproducibility is cheap to build in now and near-impossible to retrofit. Note the script that refuses to run from uncommitted code.
-3. **[MLOps with MLflow: Experiment Tracking, Model Registry and Promotion Gates](docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/ai-mlops-mlflow-registry.md)** &middot; Advanced
+3. **[Model Supply Chain Security: Pickle, Safetensors, Digests and Dependency Provenance](docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/ai-model-supply-chain.md)** &middot; Intermediate
+   A run you can reproduce is only as trustworthy as the artifacts it loads. Pin models by revision, verify digests, and keep pickle out of anything past intake.
+4. **[MLOps with MLflow: Experiment Tracking, Model Registry and Promotion Gates](docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/ai-mlops-mlflow-registry.md)** &middot; Advanced
    A registry is how a model artefact acquires provenance instead of being a file someone remembers training.
-4. **[Fine-Tuning and PEFT: When to Tune, LoRA Adapters and Evaluation](docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/ai-fine-tuning-peft.md)** &middot; Intermediate
+5. **[Fine-Tuning and PEFT: When to Tune, LoRA Adapters and Evaluation](docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/ai-fine-tuning-peft.md)** &middot; Intermediate
    Fine-tuning is the point where training discipline stops being theoretical, and PEFT is what makes it affordable.
-5. **[Feature Stores and Training-Serving Skew: Point-in-Time Correctness with Feast](docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/ai-feature-store-skew.md)** &middot; Advanced
+6. **[Feature Stores and Training-Serving Skew: Point-in-Time Correctness with Feast](docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/ai-feature-store-skew.md)** &middot; Advanced
    Training-serving skew is the failure that passes every test and degrades silently in production.
-6. **[Model Quantisation and GPU Sharing: Precision, MIG Partitioning and KV Cache Sizing](docs/ai-tree-platform-engineering/ai-branch-training-gpu-infrastructure/ai-quantisation-gpu-sharing.md)** &middot; Advanced
+7. **[Model Quantisation and GPU Sharing: Precision, MIG Partitioning and KV Cache Sizing](docs/ai-tree-platform-engineering/ai-branch-training-gpu-infrastructure/ai-quantisation-gpu-sharing.md)** &middot; Advanced
    Getting more out of the hardware you already have, before asking for more of it.
-7. **[Distributed Training on Kubernetes with Kubeflow Pipelines and Ray](docs/ai-tree-platform-engineering/ai-branch-training-gpu-infrastructure/ai-distributed-training-kubeflow-ray.md)** &middot; Advanced
+8. **[Distributed Training on Kubernetes with Kubeflow Pipelines and Ray](docs/ai-tree-platform-engineering/ai-branch-training-gpu-infrastructure/ai-distributed-training-kubeflow-ray.md)** &middot; Advanced
    Scaling past one machine, once the single-node discipline above is actually in place.
 
 ## Decide what to run, and what it costs
@@ -162,9 +164,11 @@ Security for AI systems in the order the controls actually stack: know what is r
    Input filtering and output guardrails sit between your users and the model; this is where injection attempts and unsafe output are caught in-line.
 5. **[Grounding Enterprise Data Privately: Offline RAG and Access Control](docs/ai-tree-applied-systems/ai-branch-rag-knowledge/ai-private-enterprise-rag.md)** &middot; Enterprise
    Retrieval turns a document store into an answer machine, so access control must move into the search query itself or the index becomes an exfiltration path.
-6. **[MCP Servers, AI Security and Evaluation](docs/ai-tree-applied-systems/ai-branch-agents-integration/ai-mcp-security-evaluation.md)** &middot; Expert
+6. **[Model Supply Chain Security: Pickle, Safetensors, Digests and Dependency Provenance](docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/ai-model-supply-chain.md)** &middot; Intermediate
+   The model file itself is code until proven otherwise. Allowlist-scan pickle, convert to safetensors, and pin every artifact by digest before anything loads it.
+7. **[MCP Servers, AI Security and Evaluation](docs/ai-tree-applied-systems/ai-branch-agents-integration/ai-mcp-security-evaluation.md)** &middot; Expert
    Tools are the supply chain of an agent. Pin what a server offers, scan tool definitions, and give agents their own least-privilege identity.
-7. **[Agent Orchestration with LangGraph: State, Guardrails and Tool Authorisation](docs/ai-tree-production-systems/ai-branch-agent-runtime-cost/ai-agent-orchestration-guardrails.md)** &middot; Advanced
+8. **[Agent Orchestration with LangGraph: State, Guardrails and Tool Authorisation](docs/ai-tree-production-systems/ai-branch-agent-runtime-cost/ai-agent-orchestration-guardrails.md)** &middot; Advanced
    An agent that can act needs bounds: step caps, tool allowlists and human approval for anything irreversible.
-8. **[AI Incident Response: Detection, Containment and Postmortems for Non-Deterministic Systems](docs/ai-tree-operations-governance/ai-branch-llmops-observability/ai-incident-response.md)** &middot; Advanced
+9. **[AI Incident Response: Detection, Containment and Postmortems for Non-Deterministic Systems](docs/ai-tree-operations-governance/ai-branch-llmops-observability/ai-incident-response.md)** &middot; Advanced
    Some control will fail. Detection, containment and post-incident evidence for AI systems close the loop the inventory opened.
