@@ -1,0 +1,14 @@
+# rapidocr-onnxruntime is installed with --no-deps from Command 1, because it
+# declares opencv-python, the build that links against the system's libGL.
+# These are its other requirements, with the headless OpenCV build instead.
+onnxruntime==1.30.0
+opencv-python-headless==5.0.0.93
+numpy==2.5.3
+pillow==12.3.0
+pyclipper==1.4.0
+shapely==2.1.2
+pyyaml==6.0.3
+six==1.17.0
+tqdm==4.70.1
+pdfplumber==0.11.10
+reportlab==5.0.1

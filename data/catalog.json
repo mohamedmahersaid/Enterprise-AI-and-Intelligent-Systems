@@ -5,10 +5,10 @@
   "repository": "Enterprise-AI-and-Intelligent-Systems",
   "treeCount": 5,
   "branchCount": 10,
-  "expectedLeafCount": 37,
+  "expectedLeafCount": 38,
   "levelCounts": {
     "Beginner": 10,
-    "Intermediate": 9,
+    "Intermediate": 10,
     "Advanced": 14,
     "Expert": 2,
     "Enterprise": 2
@@ -141,6 +141,18 @@
       "tree": "Applied AI Systems",
       "branch": "RAG & Knowledge Systems",
       "path": "docs/ai-tree-applied-systems/ai-branch-rag-knowledge/ai-do-you-need-rag.md"
+    },
+    {
+      "id": "ai-document-multimodal-ingestion",
+      "name": "Document and Image Ingestion for RAG: Layout, Tables, OCR and Hidden Text",
+      "level": "Intermediate",
+      "readiness": "lab",
+      "needs": [
+        "runner"
+      ],
+      "tree": "Applied AI Systems",
+      "branch": "RAG & Knowledge Systems",
+      "path": "docs/ai-tree-applied-systems/ai-branch-rag-knowledge/ai-document-multimodal-ingestion.md"
     },
     {
       "id": "ai-agents-orchestration",
@@ -542,6 +554,10 @@
         {
           "leaf": "ai-how-retrieval-finds-things",
           "why": "Understand what similarity search is actually comparing before tuning anything, or you will tune blind."
+        },
+        {
+          "leaf": "ai-document-multimodal-ingestion",
+          "why": "Retrieval can only return what ingestion indexed. Decide what text a reader actually saw, keep tables as records, OCR only what has no text layer, and keep hidden or instruction-like content out of the index."
         },
         {
           "leaf": "ai-retrieval-test-collections",
