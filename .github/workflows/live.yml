@@ -22,6 +22,7 @@ on:
       - docs/ai-tree-model-platforms/ai-branch-local-inference/ai-ollama-local-inference.md
       - docs/ai-tree-operations-governance/ai-branch-llmops-observability/ai-what-to-log.md
       - docs/ai-tree-applied-systems/ai-branch-agents-integration/ai-do-you-need-an-agent.md
+      - docs/ai-tree-production-systems/ai-branch-agent-runtime-cost/ai-agent-memory-context.md
       - docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/ai-retrieval-test-collections.md
       - docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/fixtures/**
       - docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/ai-feature-store-skew.md

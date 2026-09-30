@@ -5,10 +5,10 @@
   "repository": "Enterprise-AI-and-Intelligent-Systems",
   "treeCount": 5,
   "branchCount": 10,
-  "expectedLeafCount": 36,
+  "expectedLeafCount": 37,
   "levelCounts": {
     "Beginner": 10,
-    "Intermediate": 8,
+    "Intermediate": 9,
     "Advanced": 14,
     "Expert": 2,
     "Enterprise": 2
@@ -466,6 +466,18 @@
       "tree": "Production AI Systems",
       "branch": "Agent Runtime and Cost Control",
       "path": "docs/ai-tree-production-systems/ai-branch-agent-runtime-cost/ai-prototype-to-production.md"
+    },
+    {
+      "id": "ai-agent-memory-context",
+      "name": "Agent Memory and Context: Compaction, Summary Drift, Tenant Isolation and Poisoned Memory",
+      "level": "Intermediate",
+      "readiness": "lab",
+      "needs": [
+        "ollama"
+      ],
+      "tree": "Production AI Systems",
+      "branch": "Agent Runtime and Cost Control",
+      "path": "docs/ai-tree-production-systems/ai-branch-agent-runtime-cost/ai-agent-memory-context.md"
     }
   ],
   "paths": [
@@ -670,6 +682,10 @@
         {
           "leaf": "ai-do-you-need-an-agent",
           "why": "Settle which of three architectures you actually need before building any of them. Most things called agents are a single call with tools, and the loop is the expensive part."
+        },
+        {
+          "leaf": "ai-agent-memory-context",
+          "why": "Before orchestrating several agents, get one agent's memory right: what it keeps, for whom, for how long, and how compaction is checked so the details that matter do not drift away."
         },
         {
           "leaf": "ai-agents-orchestration",
