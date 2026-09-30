@@ -6,7 +6,7 @@ Every leaf says how far its content has been proven. The level is a claim the
 repository backs with evidence, and `npm run validate` fails when a leaf claims
 more than its evidence supports.
 
-**38 leaves:** Lab: 32 · Validated: 6
+**38 leaves:** Lab: 29 · Validated: 9
 
 ## Lab
 
@@ -90,7 +90,7 @@ at no cost. The rest need infrastructure or credentials this repository does not
 | [RAG Architecture: Embeddings, Chunking and Vector Search](docs/ai-tree-applied-systems/ai-branch-rag-knowledge/ai-rag-architecture.md) | Advanced | Lab | Ollama, Azure subscription | none recorded |
 | [Grounding Enterprise Data Privately: Offline RAG and Access Control](docs/ai-tree-applied-systems/ai-branch-rag-knowledge/ai-private-enterprise-rag.md) | Enterprise | Lab | Ollama, Azure subscription | none recorded |
 | [Do You Need RAG? Context Windows, Grounding and the Cheapest Thing That Works](docs/ai-tree-applied-systems/ai-branch-rag-knowledge/ai-do-you-need-rag.md) | Beginner | Lab | Hosted model API | none recorded |
-| [Document and Image Ingestion for RAG: Layout, Tables, OCR and Hidden Text](docs/ai-tree-applied-systems/ai-branch-rag-knowledge/ai-document-multimodal-ingestion.md) | Intermediate | Lab | Stock CI runner | none recorded |
+| [Document and Image Ingestion for RAG: Layout, Tables, OCR and Hidden Text](docs/ai-tree-applied-systems/ai-branch-rag-knowledge/ai-document-multimodal-ingestion.md) | Intermediate | Validated | Stock CI runner | [pass 2026-09-30](https://github.com/mohamedmahersaid/Enterprise-AI-and-Intelligent-Systems/actions/runs/36703600504) |
 | [AI Agents and Orchestration Patterns](docs/ai-tree-applied-systems/ai-branch-agents-integration/ai-agents-orchestration.md) | Advanced | Lab | Ollama, Azure subscription | none recorded |
 | [MCP Servers, AI Security and Evaluation](docs/ai-tree-applied-systems/ai-branch-agents-integration/ai-mcp-security-evaluation.md) | Expert | Lab | Ollama, Azure subscription | none recorded |
 | [Content Safety and Guardrails: Input Filtering, Output Classification and Refusal Design](docs/ai-tree-applied-systems/ai-branch-agents-integration/ai-content-safety-guardrails.md) | Intermediate | Lab | Azure subscription | none recorded |
@@ -109,7 +109,7 @@ at no cost. The rest need infrastructure or credentials this repository does not
 | [Feature Stores and Training-Serving Skew: Point-in-Time Correctness with Feast](docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/ai-feature-store-skew.md) | Advanced | Validated | Stock CI runner | [pass 2026-09-28](https://github.com/mohamedmahersaid/Enterprise-AI-and-Intelligent-Systems/actions/runs/36414428271) |
 | [Fine-Tuning and PEFT: When to Tune, LoRA Adapters and Evaluation](docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/ai-fine-tuning-peft.md) | Intermediate | Lab | NVIDIA GPU | none recorded |
 | [From Notebook to a Reproducible Training Run: Environments, Seeds, Data Versions and Artifacts](docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/ai-reproducible-training-runs.md) | Beginner | Validated | Stock CI runner | [pass 2026-09-28](https://github.com/mohamedmahersaid/Enterprise-AI-and-Intelligent-Systems/actions/runs/36414428271) |
-| [Model Supply Chain Security: Pickle, Safetensors, Digests and Dependency Provenance](docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/ai-model-supply-chain.md) | Intermediate | Lab | Stock CI runner | none recorded |
+| [Model Supply Chain Security: Pickle, Safetensors, Digests and Dependency Provenance](docs/ai-tree-platform-engineering/ai-branch-model-feature-lifecycle/ai-model-supply-chain.md) | Intermediate | Validated | Stock CI runner | [pass 2026-09-30](https://github.com/mohamedmahersaid/Enterprise-AI-and-Intelligent-Systems/actions/runs/36703600504) |
 | [Vector Database Selection and Hybrid Retrieval: pgvector, Qdrant, Milvus and Reranking](docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/ai-vector-db-hybrid-retrieval.md) | Advanced | Lab | Stock CI runner | none recorded |
 | [LLM Evaluation Harnesses and Regression Gates for Production AI](docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/ai-evaluation-harness-gates.md) | Advanced | Lab | Ollama | none recorded |
 | [How Retrieval Finds Things: Keywords, Meaning and Why Each One Misses](docs/ai-tree-production-systems/ai-branch-retrieval-evaluation/ai-how-retrieval-finds-things.md) | Beginner | Lab | Azure subscription | none recorded |
@@ -117,7 +117,7 @@ at no cost. The rest need infrastructure or credentials this repository does not
 | [Agent Orchestration with LangGraph: State, Guardrails and Tool Authorisation](docs/ai-tree-production-systems/ai-branch-agent-runtime-cost/ai-agent-orchestration-guardrails.md) | Advanced | Lab | Ollama, Kubernetes cluster, Your own service | none recorded |
 | [AI FinOps: Token Cost Attribution, GPU Utilisation and Build-versus-Buy Crossover](docs/ai-tree-production-systems/ai-branch-agent-runtime-cost/ai-finops-build-vs-buy.md) | Advanced | Lab | NVIDIA GPU, Kubernetes cluster | none recorded |
 | [From Prototype to Production: Gateway, Limits, Logging and Rollback](docs/ai-tree-production-systems/ai-branch-agent-runtime-cost/ai-prototype-to-production.md) | Beginner | Lab | Hosted model API | none recorded |
-| [Agent Memory and Context: Compaction, Summary Drift, Tenant Isolation and Poisoned Memory](docs/ai-tree-production-systems/ai-branch-agent-runtime-cost/ai-agent-memory-context.md) | Intermediate | Lab | Ollama | none recorded |
+| [Agent Memory and Context: Compaction, Summary Drift, Tenant Isolation and Poisoned Memory](docs/ai-tree-production-systems/ai-branch-agent-runtime-cost/ai-agent-memory-context.md) | Intermediate | Validated | Ollama | [pass 2026-09-30](https://github.com/mohamedmahersaid/Enterprise-AI-and-Intelligent-Systems/actions/runs/36703600504) |
 
 ## How a leaf becomes validated
 

@@ -91,6 +91,45 @@
       "environment": "GitHub-hosted ubuntu-24.04 (image ubuntu24 20260920.314.1), CPU only; Ollama 0.34.4 serving llama3.1:8b-instruct-q4_K_M as the OpenAI-compatible endpoint; repository at c48498e",
       "covered": "Commands 1, 2, 3, 4, 5, 6, run as data/live/ai-do-you-need-an-agent.json describes: Commands 1 and 2 against the live endpoint with a tool-trained model, Commands 3-6 over the declared agent trace fixture",
       "result": "pass"
+    },
+    {
+      "leaf": "ai-model-supply-chain",
+      "date": "2026-09-30",
+      "workflow": ".github/workflows/live.yml",
+      "run": "https://github.com/mohamedmahersaid/Enterprise-AI-and-Intelligent-Systems/actions/runs/36703600504",
+      "run_id": 36703600504,
+      "head_sha": "a5739bf3e64530fce4f8c77d25c77b4546612656",
+      "event": "workflow_dispatch",
+      "head_branch": "main",
+      "environment": "GitHub-hosted ubuntu-24.04 (image ubuntu24 20260920.314.1), CPU only; Python venv with picklescan 1.0.5, fickling 0.1.12, safetensors 0.8.0 and numpy 2.5.3; repository at a5739bf",
+      "covered": "Commands 1, 2, 3, 4, 5, 6, 7, 8, 9, run as data/live/ai-model-supply-chain.json describes: over the model files fixtures/ai-model-supply-chain/make_models.py generates, with the leaf's pickle_imports.py allowlist script",
+      "result": "pass"
+    },
+    {
+      "leaf": "ai-agent-memory-context",
+      "date": "2026-09-30",
+      "workflow": ".github/workflows/live.yml",
+      "run": "https://github.com/mohamedmahersaid/Enterprise-AI-and-Intelligent-Systems/actions/runs/36703600504",
+      "run_id": 36703600504,
+      "head_sha": "a5739bf3e64530fce4f8c77d25c77b4546612656",
+      "event": "workflow_dispatch",
+      "head_branch": "main",
+      "environment": "GitHub-hosted ubuntu-24.04 (image ubuntu24 20260920.314.1), CPU only; Ollama 0.34.4 serving llama3.1:8b-instruct-q4_K_M as the OpenAI-compatible endpoint; repository at a5739bf",
+      "covered": "Commands 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, run as data/live/ai-agent-memory-context.json describes: Commands 1-7 and 9 with the leaf's memory_store.py over the declared transcript and entity fixtures, Commands 8 and 10 against the live endpoint",
+      "result": "pass"
+    },
+    {
+      "leaf": "ai-document-multimodal-ingestion",
+      "date": "2026-09-30",
+      "workflow": ".github/workflows/live.yml",
+      "run": "https://github.com/mohamedmahersaid/Enterprise-AI-and-Intelligent-Systems/actions/runs/36703600504",
+      "run_id": 36703600504,
+      "head_sha": "a5739bf3e64530fce4f8c77d25c77b4546612656",
+      "event": "workflow_dispatch",
+      "head_branch": "main",
+      "environment": "GitHub-hosted ubuntu-24.04 (image ubuntu24 20260920.314.1), CPU only; Python venv with pdfplumber 0.11.10, rapidocr-onnxruntime 1.4.4, onnxruntime 1.30.0, opencv-python-headless 5.0.0.93 and numpy 2.5.3; repository at a5739bf",
+      "covered": "Commands 1, 2, 3, 4, 5, 6, 7, 8, run as data/live/ai-document-multimodal-ingestion.json describes: over the documents fixtures/ai-document-multimodal-ingestion/make_docs.py generates, with the leaf's ingest.py",
+      "result": "pass"
     }
   ]
 }

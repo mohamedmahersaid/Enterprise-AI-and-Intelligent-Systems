@@ -1,0 +1,157 @@
+{
+  "$comment": "The trimmed live-run report backing the data/validation.json record for run 36703600504, as the run's 'Print the run report' step printed it (each step's output kept to its last lines); the same content was uploaded as the live-run-ai-model-supply-chain artifact, sha256 7e906a1bf547f6b87f824d31898eb7351c1016b10c117da64565b61609cb7ed3.",
+  "leaf": "ai-model-supply-chain",
+  "run_id": 36703600504,
+  "head_sha": "a5739bf3e64530fce4f8c77d25c77b4546612656",
+  "result": "pass",
+  "covered": "Commands 1, 2, 3, 4, 5, 6, 7, 8, 9",
+  "planned": "Commands 1, 2, 3, 4, 5, 6, 7, 8, 9",
+  "skipped": {},
+  "environment": "ubuntu24 20260920.314.1, fickling==0.1.12 numpy==2.5.3 picklescan==1.0.5 safetensors==0.8.0",
+  "setup": [
+    {
+      "run": "python3 -m venv .venv && .venv/bin/pip install --quiet picklescan==1.0.5 fickling==0.1.12 safetensors==0.8.0 numpy==2.5.3",
+      "seconds": 6,
+      "ok": true,
+      "why": "",
+      "output": ""
+    },
+    {
+      "run": ".venv/bin/python make_models.py",
+      "seconds": 0,
+      "ok": true,
+      "why": "",
+      "output": "wrote 4 files to models/ and models.sha256\n"
+    }
+  ],
+  "scripts_sha256": {
+    "pickle_imports.py": "58e020c1bc8a352524a08bc07df55674dc23d10c71261bf346ba30334b761385"
+  },
+  "steps": [
+    {
+      "command": 1,
+      "text": "python3 -m venv .venv && .venv/bin/pip install picklescan==1.0.5 fickling==0.1.12 safetensors==0.8.0 numpy==2.5.3",
+      "seconds": 2,
+      "ok": true,
+      "why": "",
+      "output": [
+        "Requirement already satisfied: picklescan==1.0.5 in ./.venv/lib/python3.12/site-packages (1.0.5)",
+        "Requirement already satisfied: fickling==0.1.12 in ./.venv/lib/python3.12/site-packages (0.1.12)",
+        "Requirement already satisfied: safetensors==0.8.0 in ./.venv/lib/python3.12/site-packages (0.8.0)",
+        "Requirement already satisfied: numpy==2.5.3 in ./.venv/lib/python3.12/site-packages (2.5.3)"
+      ]
+    },
+    {
+      "command": 2,
+      "text": "sha256sum -c models.sha256",
+      "seconds": 0,
+      "ok": true,
+      "why": "",
+      "output": [
+        "models/model.safetensors: OK",
+        "models/clean.pkl: OK"
+      ]
+    },
+    {
+      "command": 3,
+      "text": ".venv/bin/picklescan -p models/exec.pkl",
+      "seconds": 0,
+      "ok": true,
+      "why": "",
+      "output": [
+        "/tmp/live-ai-model-supply-chain-HhQpWu/models/exec.pkl: dangerous import 'builtins exec' FOUND",
+        "----------- SCAN SUMMARY -----------",
+        "Scanned files: 1",
+        "Infected files: 1",
+        "Suspicious globals: 0",
+        "Dangerous globals: 1"
+      ]
+    },
+    {
+      "command": 4,
+      "text": ".venv/bin/picklescan -p models/sneaky.pkl",
+      "seconds": 0,
+      "ok": true,
+      "why": "",
+      "output": [
+        "----------- SCAN SUMMARY -----------",
+        "Scanned files: 1",
+        "Infected files: 0",
+        "Suspicious globals: 2",
+        "Dangerous globals: 0"
+      ]
+    },
+    {
+      "command": 5,
+      "text": ".venv/bin/python pickle_imports.py --allow allowlist.txt models/*.pkl",
+      "seconds": 0,
+      "ok": true,
+      "why": "",
+      "output": [
+        "models/exec.pkl\tnumpy.ndarray\tok",
+        "models/exec.pkl\tnumpy.dtype\tok",
+        "models/exec.pkl\tbuiltins.exec\tNOT ALLOWED",
+        "models/sneaky.pkl\tnumpy._core.multiarray._reconstruct\tok",
+        "models/sneaky.pkl\tnumpy.ndarray\tok",
+        "models/sneaky.pkl\tnumpy.dtype\tok",
+        "models/sneaky.pkl\tpathlib.Path.write_text\tNOT ALLOWED",
+        "models/sneaky.pkl\tpathlib.PosixPath\tNOT ALLOWED"
+      ]
+    },
+    {
+      "command": 6,
+      "text": ".venv/bin/python - <<'EOF'\nimport fickling, pickle, pathlib\nfickling.hook.activate_safe_ml_environment()\nfor name in (\"clean\", \"exec\", \"sneaky\"):\n    try:\n        pickle.load(open(f\"models/{name}.pkl\", \"rb\"))\n        print(name, \"loaded\")\n    except fickling.exception.UnsafeFileError as err:\n        print(name, \"BLOCKED:\", str(err).split(\";\")[0])\nprint(\"marker files:\", sorted(p.name for p in pathlib.Path(\".\").glob(\"PWNED-*\")) or \"none\")\nEOF",
+      "seconds": 0,
+      "ok": true,
+      "why": "",
+      "output": [
+        "clean loaded",
+        "exec BLOCKED: Safety results for <file> : `builtins.exec` imports a Python module outside of the standard library that is not whitelisted",
+        "sneaky BLOCKED: Safety results for <file> : `pathlib.Path.write_text` imports a Python module outside of the standard library that is not whitelisted",
+        "marker files: none"
+      ]
+    },
+    {
+      "command": 7,
+      "text": ".venv/bin/python -c \"import json, struct; f = open('models/model.safetensors', 'rb'); n = struct.unpack('<Q', f.read(8))[0]; print(json.dumps(json.loads(f.read(n)), indent=1))\"",
+      "seconds": 0,
+      "ok": true,
+      "why": "",
+      "output": [
+        "   3",
+        "  ],",
+        "  \"data_offsets\": [",
+        "   0,",
+        "   24",
+        "  ]",
+        " }",
+        "}"
+      ]
+    },
+    {
+      "command": 8,
+      "text": "curl -s https://pypi.org/pypi/safetensors/json | jq '{name: .info.name, latest: .info.version, first_release: ([.releases[][]?.upload_time] | min), releases: (.releases | length)}'",
+      "seconds": 0,
+      "ok": true,
+      "why": "",
+      "output": [
+        "{",
+        "  \"name\": \"safetensors\",",
+        "  \"latest\": \"0.8.0\",",
+        "  \"first_release\": \"2022-09-22T15:22:34\",",
+        "  \"releases\": 52",
+        "}"
+      ]
+    },
+    {
+      "command": 9,
+      "text": "curl -s -o /dev/null -w '%{http_code}\\n' https://pypi.org/pypi/safetensors-fast-loader-llm-suggested/json",
+      "seconds": 0,
+      "ok": true,
+      "why": "",
+      "output": [
+        "404"
+      ]
+    }
+  ]
+}
