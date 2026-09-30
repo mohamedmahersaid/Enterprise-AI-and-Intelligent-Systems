@@ -2,7 +2,7 @@
 id: 'ai-agent-memory-context'
 title: 'Agent Memory and Context: Compaction, Summary Drift, Tenant Isolation and Poisoned Memory'
 level: 'Intermediate'
-readiness: 'lab'
+readiness: 'validated'
 forest: 'AI & Intelligent Systems'
 tree: 'Production AI Systems'
 branch: 'Agent Runtime and Cost Control'
@@ -14,7 +14,7 @@ branch: 'Agent Runtime and Cost Control'
 **Tree:** [Production AI Systems](../README.md)
 **Branch:** [Agent Runtime and Cost Control](README.md)
 **Forest:** [AI & Intelligent Systems](../../../README.md)
-**Readiness:** [Lab](../../../READINESS.md#lab) - checked offline, not yet run against a live service. A live run needs a local Ollama server.
+**Readiness:** [Validated](../../../READINESS.md#validated) - run live on 2026-09-30 ([evidence](https://github.com/mohamedmahersaid/Enterprise-AI-and-Intelligent-Systems/actions/runs/36703600504)).
 
 ## Explanation
 

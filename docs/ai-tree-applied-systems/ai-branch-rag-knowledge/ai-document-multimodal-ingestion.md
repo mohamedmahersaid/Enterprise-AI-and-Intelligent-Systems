@@ -2,7 +2,7 @@
 id: 'ai-document-multimodal-ingestion'
 title: 'Document and Image Ingestion for RAG: Layout, Tables, OCR and Hidden Text'
 level: 'Intermediate'
-readiness: 'lab'
+readiness: 'validated'
 forest: 'AI & Intelligent Systems'
 tree: 'Applied AI Systems'
 branch: 'RAG & Knowledge Systems'
@@ -14,7 +14,7 @@ branch: 'RAG & Knowledge Systems'
 **Tree:** [Applied AI Systems](../README.md)
 **Branch:** [RAG & Knowledge Systems](README.md)
 **Forest:** [AI & Intelligent Systems](../../../README.md)
-**Readiness:** [Lab](../../../READINESS.md#lab) - checked offline, not yet run against a live service. A live run needs only a stock CI runner.
+**Readiness:** [Validated](../../../READINESS.md#validated) - run live on 2026-09-30 ([evidence](https://github.com/mohamedmahersaid/Enterprise-AI-and-Intelligent-Systems/actions/runs/36703600504)).
 
 ## Explanation
 
