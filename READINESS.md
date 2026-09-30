@@ -6,7 +6,7 @@ Every leaf says how far its content has been proven. The level is a claim the
 repository backs with evidence, and `npm run validate` fails when a leaf claims
 more than its evidence supports.
 
-**37 leaves:** Lab: 31 · Validated: 6
+**38 leaves:** Lab: 32 · Validated: 6
 
 ## Lab
 
@@ -64,7 +64,7 @@ data and diagrams. Tools called from inside a Python script are not detected.
 
 | Need | What it means | Leaves |
 | --- | --- | ---: |
-| Stock CI runner | Nothing beyond a GitHub-hosted Ubuntu runner: Python 3, Docker, packages installed from public registries, and services started in containers. | 6 |
+| Stock CI runner | Nothing beyond a GitHub-hosted Ubuntu runner: Python 3, Docker, packages installed from public registries, and services started in containers. | 7 |
 | Ollama | A local Ollama server with a small model pulled. A CPU is enough, so a CI runner can host it. | 14 |
 | NVIDIA GPU | An NVIDIA GPU with its driver and CUDA runtime. Not available on standard hosted runners. | 8 |
 | Azure subscription | An Azure subscription with rights to create the resources the leaf creates, and a budget for them. Runs cost money and need credentials, so none are automated here yet. | 15 |
@@ -73,7 +73,7 @@ data and diagrams. Tools called from inside a Python script are not detected.
 | Hosted model API | An API key for a hosted model provider other than Azure. | 4 |
 | Your own service | A system the leaf assumes you run already - a gateway, an application, an inventory export - which its commands address only through a placeholder. | 4 |
 
-11 of 37 leaves need only a stock runner or Ollama, so CI can validate them
+12 of 38 leaves need only a stock runner or Ollama, so CI can validate them
 at no cost. The rest need infrastructure or credentials this repository does not hold.
 
 ## Every leaf
@@ -90,6 +90,7 @@ at no cost. The rest need infrastructure or credentials this repository does not
 | [RAG Architecture: Embeddings, Chunking and Vector Search](docs/ai-tree-applied-systems/ai-branch-rag-knowledge/ai-rag-architecture.md) | Advanced | Lab | Ollama, Azure subscription | none recorded |
 | [Grounding Enterprise Data Privately: Offline RAG and Access Control](docs/ai-tree-applied-systems/ai-branch-rag-knowledge/ai-private-enterprise-rag.md) | Enterprise | Lab | Ollama, Azure subscription | none recorded |
 | [Do You Need RAG? Context Windows, Grounding and the Cheapest Thing That Works](docs/ai-tree-applied-systems/ai-branch-rag-knowledge/ai-do-you-need-rag.md) | Beginner | Lab | Hosted model API | none recorded |
+| [Document and Image Ingestion for RAG: Layout, Tables, OCR and Hidden Text](docs/ai-tree-applied-systems/ai-branch-rag-knowledge/ai-document-multimodal-ingestion.md) | Intermediate | Lab | Stock CI runner | none recorded |
 | [AI Agents and Orchestration Patterns](docs/ai-tree-applied-systems/ai-branch-agents-integration/ai-agents-orchestration.md) | Advanced | Lab | Ollama, Azure subscription | none recorded |
 | [MCP Servers, AI Security and Evaluation](docs/ai-tree-applied-systems/ai-branch-agents-integration/ai-mcp-security-evaluation.md) | Expert | Lab | Ollama, Azure subscription | none recorded |
 | [Content Safety and Guardrails: Input Filtering, Output Classification and Refusal Design](docs/ai-tree-applied-systems/ai-branch-agents-integration/ai-content-safety-guardrails.md) | Intermediate | Lab | Azure subscription | none recorded |
