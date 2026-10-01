@@ -72,11 +72,31 @@ jobs:
       # The deploy job below is skipped until the owner sets PAGES_ENABLED, so
       # say so where someone reading a green run will look, rather than letting
       # the skip pass silently as if the site had published.
+      #
+      # It also prints the value this run actually saw, so a skip can be told
+      # apart: empty means no repository variable of that name is visible here
+      # (not created, created as a secret, or created on an environment, which
+      # this job does not use); anything else is a mistyped value. The value
+      # reaches the shell through env, never interpolated into the script, and
+      # a repository variable is not confidential.
       - name: Note when deployment is skipped
         if: vars.PAGES_ENABLED != 'true'
+        env:
+          SEEN: ${{ vars.PAGES_ENABLED }}
         run: |
-          echo 'The site was built but NOT deployed: the repository variable PAGES_ENABLED is not `true`.' >> "$GITHUB_STEP_SUMMARY"
-          echo 'Enable Pages (Settings > Pages > Source: GitHub Actions), then set the variable (Settings > Secrets and variables > Actions > Variables > PAGES_ENABLED = true).' >> "$GITHUB_STEP_SUMMARY"
+          if [ -z "$SEEN" ]; then
+            seen='empty: no repository variable named PAGES_ENABLED is visible to this run'
+          else
+            seen="$(printf '%q' "$SEEN") (${#SEEN} characters), which is not \`true\`"
+          fi
+          echo "PAGES_ENABLED seen as: $seen"
+          {
+            echo 'The site was built but NOT deployed: the repository variable PAGES_ENABLED is not `true`.'
+            echo
+            echo "PAGES_ENABLED seen as: $seen"
+            echo
+            echo 'Enable Pages (Settings > Pages > Source: GitHub Actions), then set the variable (Settings > Secrets and variables > Actions > Variables tab > Repository variables > PAGES_ENABLED = true). A secret, or a variable on an environment, is not visible here.'
+          } >> "$GITHUB_STEP_SUMMARY"
 
   deploy:
     needs: build
