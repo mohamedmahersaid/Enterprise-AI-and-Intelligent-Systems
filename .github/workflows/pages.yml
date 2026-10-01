@@ -79,21 +79,44 @@ jobs:
       # this job does not use); anything else is a mistyped value. The value
       # reaches the shell through env, never interpolated into the script, and
       # a repository variable is not confidential.
+      #
+      # When the value is empty it also says which of those it is, from three
+      # checks GitHub evaluates inside the expression: whether any variable is
+      # visible at all, whether one is named exactly PAGES_ENABLED, and whether
+      # one merely resembles it. Only the true/false answers reach the step:
+      # passing toJSON(vars) itself would print every variable's value in this
+      # public log, because the runner echoes a step's evaluated env.
       - name: Note when deployment is skipped
         if: vars.PAGES_ENABLED != 'true'
         env:
           SEEN: ${{ vars.PAGES_ENABLED }}
+          ANY_VARS: ${{ toJSON(vars) != '{}' }}
+          NAME_EXACT: ${{ contains(toJSON(vars), '"PAGES_ENABLED":') }}
+          NAME_NEAR: ${{ contains(toJSON(vars), 'PAGES') || contains(toJSON(vars), 'ENABLED') }}
         run: |
           if [ -z "$SEEN" ]; then
             seen='empty: no repository variable named PAGES_ENABLED is visible to this run'
+            if [ "$ANY_VARS" != true ]; then
+              why='no repository variables at all are visible to this run - the variable was not saved as a repository variable on this repository'
+            elif [ "$NAME_EXACT" = true ]; then
+              why='a variable named PAGES_ENABLED exists but its value is empty'
+            elif [ "$NAME_NEAR" = true ]; then
+              why='a repository variable resembling PAGES_ENABLED exists but its name differs (a typo, hidden space or look-alike character) - delete it and retype the name'
+            else
+              why='repository variables are visible, but none is named like PAGES_ENABLED'
+            fi
           else
             seen="$(printf '%q' "$SEEN") (${#SEEN} characters), which is not \`true\`"
+            why='the variable exists; set its value to exactly true'
           fi
           echo "PAGES_ENABLED seen as: $seen"
+          echo "Diagnosis: $why (any variables visible: $ANY_VARS; exact name: $NAME_EXACT; similar name: $NAME_NEAR)"
           {
             echo 'The site was built but NOT deployed: the repository variable PAGES_ENABLED is not `true`.'
             echo
             echo "PAGES_ENABLED seen as: $seen"
+            echo
+            echo "Diagnosis: $why."
             echo
             echo 'Enable Pages (Settings > Pages > Source: GitHub Actions), then set the variable (Settings > Secrets and variables > Actions > Variables tab > Repository variables > PAGES_ENABLED = true). A secret, or a variable on an environment, is not visible here.'
           } >> "$GITHUB_STEP_SUMMARY"
