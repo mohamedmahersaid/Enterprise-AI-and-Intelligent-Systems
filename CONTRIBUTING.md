@@ -204,6 +204,14 @@ same job runs `pip-audit` over both lockfiles - the pip counterpart of `npm audi
 so a pin with a known vulnerability fails CI until it is bumped and the lockfile
 regenerated.
 
+The npm side runs `node scripts/check-audit.mjs`, which fails on any high or
+critical advisory reported by `npm audit`. The one exception is an advisory with
+no patched release that is reached only through a dev tool handling this
+repository's own input: record it in `data/audit-exceptions.json` with the
+advisory id, package, reason and a `review_by` date. Past that date the gate
+fails again, and an exception the audit no longer reports is annotated so it can
+be removed.
+
 `.venv/` is ignored by git, the linter and the site build. Containment is not a
 sandbox: a script can still read its parent's files and reach the network, so the
 check runs only in CI jobs that hold no deploy token. A script reads credentials
