@@ -1,0 +1,67 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm test)",
+      "Bash(npm run *)",
+      "Bash(npm ci)",
+      "Bash(node scripts/*)",
+      "Bash(node .claude/bin/healthcheck.mjs*)",
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git show*)",
+      "mcp__github__pull_request_read",
+      "mcp__github__get_job_logs",
+      "mcp__github__actions_list",
+      "mcp__github__actions_get",
+      "mcp__github__get_check_run",
+      "mcp__Microsoft_Learn__microsoft_docs_search",
+      "mcp__Microsoft_Learn__microsoft_docs_fetch",
+      "mcp__Microsoft_Learn__microsoft_code_sample_search"
+    ],
+    "ask": [
+      "Bash(git reset --hard*)",
+      "Bash(git clean*)",
+      "Bash(git branch -D*)",
+      "mcp__github__merge_pull_request",
+      "mcp__github__delete_file",
+      "mcp__github__create_repository",
+      "mcp__github__fork_repository"
+    ],
+    "deny": [
+      "Read(./node_modules/**)",
+      "Read(./.venv/**)",
+      "Read(./.git/**)",
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Bash(git push --force*)",
+      "Bash(git push -f*)",
+      "Bash(git push * --force*)",
+      "Bash(npm publish*)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/session-start.sh",
+            "timeout": 600
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/guard-derived.mjs"
+          }
+        ]
+      }
+    ]
+  }
+}

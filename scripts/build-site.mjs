@@ -29,7 +29,10 @@ const OUT = 'site';
 const MERMAID_DIST = join('node_modules', 'mermaid', 'dist');
 const MERMAID_VERSION = JSON.parse(readFileSync(join('node_modules', 'mermaid', 'package.json'), 'utf8')).version;
 const MERMAID_DIR = `assets/mermaid-${MERMAID_VERSION}`;
-const SKIP_DIRS = new Set(['node_modules', '.git', '.github', '.venv', OUT]);
+// .claude/ and the root CLAUDE.md configure the Claude Code agent working on
+// this repository; they are tooling, not reading, so they are never pages.
+const SKIP_DIRS = new Set(['node_modules', '.git', '.github', '.venv', '.claude', OUT]);
+const SKIP_ROOT_FILES = new Set(['CLAUDE.md']);
 
 // ---------------------------------------------------------------------------
 // markdown
@@ -204,7 +207,7 @@ function treeDirOf(branches) {
 
 function markdownFiles(dir, found = []) {
   for (const entry of readdirSync(dir)) {
-    if (SKIP_DIRS.has(entry)) continue;
+    if (SKIP_DIRS.has(entry) || (dir === '.' && SKIP_ROOT_FILES.has(entry))) continue;
     const full = join(dir, entry);
     if (statSync(full).isDirectory()) markdownFiles(full, found);
     else if (entry.endsWith('.md')) found.push(full);
