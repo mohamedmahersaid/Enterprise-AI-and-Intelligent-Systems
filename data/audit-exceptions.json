@@ -1,0 +1,15 @@
+{
+  "$comment": [
+    "Reviewed exceptions to the npm audit gate (scripts/check-audit.mjs, run by .github/workflows/validate.yml). The gate fails on every high or critical advisory except one listed here.",
+    "An entry is justified only when no patched release exists and the vulnerable code is reached solely through a dev tool handling this repository's own input. Each names the advisory, the package, the reason and a review_by date; past that date the gate fails again until someone re-checks for a fix. Remove an entry as soon as a fixed release can be installed."
+  ],
+  "exceptions": [
+    {
+      "advisory": "GHSA-vfj7-8cjw-p6xm",
+      "package": "braces",
+      "reason": "No patched release: the advisory covers braces <=3.0.3 and 3.0.3 is the latest published version (checked 2026-10-04). Reached only via markdownlint-cli2 -> globby -> fast-glob -> micromatch, expanding the repository's own glob patterns (**/*.md and the ignore list), never outside input; a stack-exhaustion DoS here can only crash a local lint run.",
+      "review_by": "2026-11-04",
+      "source": "https://github.com/advisories/GHSA-vfj7-8cjw-p6xm"
+    }
+  ]
+}

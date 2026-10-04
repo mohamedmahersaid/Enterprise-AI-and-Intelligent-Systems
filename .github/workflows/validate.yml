@@ -43,8 +43,11 @@ jobs:
 
       # Fails on a high or critical advisory in the toolchain. Two high-severity
       # advisories once sat in these logs unnoticed because nothing failed on them.
+      # scripts/check-audit.mjs wraps `npm audit --json`: same threshold, except
+      # advisories with no patched release recorded in data/audit-exceptions.json
+      # with a reason and a review_by date (expired = failing again).
       - name: Audit dependencies
-        run: npm audit --audit-level=high
+        run: node scripts/check-audit.mjs
 
       # The leaf scripts' lightweight dependencies, pinned and hash-checked, in a
       # venv so the runner's system Python is left alone.
